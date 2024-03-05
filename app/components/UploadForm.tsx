@@ -10,13 +10,13 @@ function UploadForm() {
 
       <label>
         {/* Here we use our boolean to change the label text */}
-        {isUploading ? <p>Uploading image...</p> : <p>Select an image</p>}
+        {isUploading ? <p>Uploading...</p> : <p>Select a file</p>}
 
         <input
           name="file"
           type="file"
           // We hide the input so we can use our own label as a trigger
-          style={{ display: "none" }}
+          // style={{ display: "none" }}
           onChange={(event) => submit(event.currentTarget.files)}
         />
       </label>

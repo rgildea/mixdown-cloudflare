@@ -6,6 +6,8 @@ export type BucketConfig = {
   binding: R2Bucket;
 }
 
+const publicPath = "/public";
+
 
 export type StorageBucketConfig = { default: BucketConfig } & Record<string, BucketConfig>;
 
@@ -25,4 +27,30 @@ class Storage {
 export function storage(bucketName: string, config: StorageBucketConfig) {
   const bucket = config[bucketName] || config.default;
   return new Storage(bucket);
+}
+
+
+
+
+export async function servePublicPathFromStorage(bucket: R2Bucket, path: string) {
+  const notFoundResponse = new Response("Not found", { status: 404 });
+
+
+  const key = path
+    .replace(publicPath, "")
+    .replace(/^\//, "");
+
+  const object = await bucket.get(key);
+
+  if (!object) {
+    return notFoundResponse;
+  }
+
+  return new Response(object.body, {
+    headers: {
+      // TODO: Infer content type from file extension
+      // 'Content-Type': file.type,
+      "cache-control": "public, max-age=31536000, immutable",
+    },
+  });
 }

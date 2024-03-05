@@ -1,18 +1,25 @@
 import {
   ActionFunction,
   json,
-  unstable_parseMultipartFormData,
   type LoaderFunction,
   type MetaFunction,
+  type ActionFunctionArgs,
+  unstable_parseMultipartFormData,
 } from "@remix-run/cloudflare";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+}
+  from "@remix-run/react";
+import { createR2UploadHandler } from "app/utils/R2UploadHandler";
+
 import UploadForm from "app/components/UploadForm";
 import "app/styles/global.css";
 
-import { createR2UploadHandler } from "app/utils/R2UploadHandler";
-
 const acceptedContentTypes = [
   "audio/x-aiff",
+  "audio/aiff",
   "audio/LPCM",
   "audio/mpeg",
   "audio/wav",
@@ -20,34 +27,25 @@ const acceptedContentTypes = [
 
 
 
+
 export const loader: LoaderFunction = async ({ context }) => {
-  const files = await context.cloudflare.env.TEST_BUCKET1.list();
-  return json({ status: 200, body: { files } });
+  const files: R2Objects = await context.cloudflare.env.TEST_BUCKET1.list();
+  const file = files.objects[0];
+  const realFile = context.cloudflare.env.TEST_BUCKET1.get(file.key);
+  return json({ status: 200, body: { realFile }, headers: { "content-type": "application/json" } });
 };
 
-export const action: ActionFunction = async ({ request, context }) => {
-  const uploadHandler = createR2UploadHandler({
+export const action: ActionFunction = async ({ context, request }: ActionFunctionArgs) => {
+  const formData = await unstable_parseMultipartFormData(request, createR2UploadHandler({
     context,
-    filter: async (file) => {
-      return new Promise((resolve) => {
-        console.log("checking file", file.contentType, file.name, file.filename)
-        if (acceptedContentTypes.includes(file.contentType)) {
-          resolve(true);
-        } else {
-          console.log("rejected file", file)
-          resolve(false);
-        }
-      });
-    }
-  });
+    filter: ({ contentType }) => acceptedContentTypes.includes(contentType)
+  }));
 
-  const formData = await unstable_parseMultipartFormData(
-    request,
-    uploadHandler
-  );
-
+  console.log("Made it!");
   console.log(formData);
 
+  const r2Bucket = context.cloudflare.env.TEST_BUCKET1.put("test.txt", formData.get("file"));
+  console.log(r2Bucket)
   return json({ status: 200, body: { formData } });
 }
 
