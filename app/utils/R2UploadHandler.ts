@@ -16,7 +16,7 @@ export type CreateUploadHandlerParams = {
   maxPartSize?: number;
 };
 
-export async function uploadStreamtoR2(r2Bucket: R2Bucket, data: AsyncIterable<Uint8Array>, filename: string) {
+export async function uploadStreamtoR2(r2Bucket: R2Bucket, data: AsyncIterable<Uint8Array>, filename: string, contentType: string) {
 
   const dataArray = [];
   for await (const chunk of data) {
@@ -31,7 +31,9 @@ export async function uploadStreamtoR2(r2Bucket: R2Bucket, data: AsyncIterable<U
     offset += chunk.length;
   }
 
-  const r2Object = await r2Bucket.put(filename, accumulatedData.buffer);
+
+  const r2Object = await r2Bucket.put(filename, accumulatedData.buffer, { httpMetadata: { contentType } });
+
   if (r2Object == null || r2Object.key === undefined) {
     throw new Error(`Failed to upload file ${filename}`);
   }
@@ -51,7 +53,7 @@ export function createR2UploadHandler({ context, filter }: CreateUploadHandlerPa
       return undefined;
     }
     const r2Bucket = context.cloudflare.env.TEST_BUCKET1;
-    const uploadedFileLocation = await uploadStreamtoR2(r2Bucket, data, filename!);
+    const uploadedFileLocation = await uploadStreamtoR2(r2Bucket, data, filename!, contentType);
     return uploadedFileLocation;
 
   }

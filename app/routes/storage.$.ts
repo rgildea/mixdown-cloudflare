@@ -1,9 +1,13 @@
-// app/routes/storage.$.ts
-
 import { servePublicPathFromStorage } from "app/utils/StorageUtils";
 
-export async function loader({ request, context }) {
-  const { pathname } = new URL(request.url);
-  return servePublicPathFromStorage(context.env.TEST_BUCKET1, [pathname, request.params.id].join('/'));
-}
+export async function loader({ params, context }) {
+  const env = context.cloudflare.env;
+  const filePath = params["*"];
 
+  let path = (env.PATH_PREFIX || "") + filePath;
+  if (path.startsWith("/")) {
+    path = path.slice(1);
+  }
+  console.log("Path", path);
+  return servePublicPathFromStorage(env, path);
+}

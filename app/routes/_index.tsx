@@ -7,8 +7,9 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/cloudflare";
 import {
-  Form,
+  NavLink,
   useActionData,
+  useFetcher,
   useLoaderData,
 }
   from "@remix-run/react";
@@ -30,23 +31,33 @@ const acceptedContentTypes = [
 
 export const loader: LoaderFunction = async ({ context }) => {
   const files: R2Objects = await context.cloudflare.env.TEST_BUCKET1.list();
-  const file = files.objects[0];
-  const realFile = context.cloudflare.env.TEST_BUCKET1.get(file.key);
-  return json({ status: 200, body: { realFile }, headers: { "content-type": "application/json" } });
+  if (!files) {
+    return json({ status: 500, body: { error: "Failed to list files" } });
+  }
+
+  return json({ objects: files.objects });
+
+  // return json({ status: 200, body: { files: files.objects.map(file => [file.key, file.size]) } });
 };
 
 export const action: ActionFunction = async ({ context, request }: ActionFunctionArgs) => {
+  const storage = context.cloudflare.env.TEST_BUCKET1;
   const formData = await unstable_parseMultipartFormData(request, createR2UploadHandler({
     context,
     filter: ({ contentType }) => acceptedContentTypes.includes(contentType)
   }));
 
-  console.log("Made it!");
-  console.log(formData);
+  let object: R2Object | undefined;
 
-  const r2Bucket = context.cloudflare.env.TEST_BUCKET1.put("test.txt", formData.get("file"));
-  console.log(r2Bucket)
-  return json({ status: 200, body: { formData } });
+  try {
+    object = await storage.put("test.txt", formData.get("file"));
+  } catch (e) {
+    console.error(e);
+    return json({ status: 500, body: { error: "Failed to upload file" } });
+  }
+
+
+  return json({ status: 200, body: object.key });
 }
 
 
@@ -61,15 +72,29 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const data = useLoaderData<typeof loader>()
-  const actionData = useActionData<typeof action>()
+  const loader = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const fetcher = useFetcher();
+
+  const objects: R2Object[] = loader.objects;
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix!</h1>
-      <pre>
-        <code>{JSON.stringify(data, null, 2)}</code>
-      </pre>
+    <div className="container" style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
+      <h1>Welcome to Mixdown!</h1>
+
+      <ul>
+        {objects.map(file => (
+          <li key={file.key} >
+            <NavLink
+              to={`/storage/${file.key}`}
+              reloadDocument
+            >
+              {file.key} - {file.size} - {file.httpMetadata?.contentType}
+            </NavLink>
+          </li>
+        ))}
+
+      </ul>
       <pre>
         <code>{JSON.stringify(actionData, null, 2)}</code>
       </pre>
@@ -77,11 +102,10 @@ export default function Index() {
       <div>
         <div className="container">
           <h1 className="text-center">Drag and Drop Test</h1>
-          <Form method="post" encType="multipart/form-data">
+          <fetcher.Form method="post" encType="multipart/form-data">
             <UploadForm />
-            <input type="hidden" name="thing" value="stuff" />
-            <button name="intent" value="upload" type="submit" className="btn">Submit</button>
-          </Form>
+            {/* <button name="intent" value="upload" type="submit" className="btn">Submit</button> */}
+          </fetcher.Form>
         </div>
       </div>
 

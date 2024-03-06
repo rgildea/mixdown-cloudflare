@@ -3,7 +3,7 @@ import { useFileUpload } from "app/hooks/useFileUpload";
 
 function UploadForm() {
   const { submit, isUploading, allFiles } = useFileUpload();
-
+  console.log(allFiles)
   return (
     <main>
       <h1>Upload a file</h1>
@@ -16,8 +16,9 @@ function UploadForm() {
           name="file"
           type="file"
           // We hide the input so we can use our own label as a trigger
-          // style={{ display: "none" }}
+          style={{ display: "none" }}
           onChange={(event) => submit(event.currentTarget.files)}
+          multiple
         />
       </label>
 
@@ -25,11 +26,9 @@ function UploadForm() {
         {/* We map over our files and display them */}
         {allFiles.map((file) => (
           <li key={file.name}>
-            <p>{file.name}</p>
+            <p>{file.name}: {file.url}</p>
           </li>
         ))}
-
-
       </ul>
     </main>
   );

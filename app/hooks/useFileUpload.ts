@@ -20,12 +20,14 @@ export function useFileUpload() {
       return { name, url };
     });
 
-  const allFiles = data?.files || [];
-  uploadingFiles;
+  const allFiles = (data?.files ? data.files.map(file => {
+    return { name: file.name, url: "" }
+  }) : [])
+    .concat(uploadingFiles ?? []);
 
   return {
     submit(files: FileList | null) {
-      if (!files) return;
+      if (!files || !files.length) return;
       const formData = new FormData();
       for (const file of files) formData.append("file", file);
       submit(formData, { method: "POST", encType: "multipart/form-data" });
