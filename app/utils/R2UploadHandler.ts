@@ -37,7 +37,6 @@ export async function uploadStreamtoR2(r2Bucket: R2Bucket, data: AsyncIterable<U
     throw new Error(`Failed to upload file ${filename}`);
   }
 
-  console.log("Size is", r2Object.size);
   return r2Object.key;
 }
 

@@ -7,15 +7,14 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/cloudflare";
 import {
-  NavLink,
   useActionData,
-  useFetcher,
   useLoaderData,
 }
   from "@remix-run/react";
 import { createR2UploadHandler } from "app/utils/R2UploadHandler";
 
 import UploadForm from "app/components/UploadForm";
+import FileList from "app/components/FileList";
 import "app/styles/global.css";
 
 const acceptedContentTypes = [
@@ -35,7 +34,6 @@ export const loader: LoaderFunction = async ({ context }) => {
     return json({ status: 500, body: { error: "Failed to list files" } });
   }
 
-
   return json({ files: files.objects });
 };
 
@@ -45,8 +43,7 @@ export const action: ActionFunction = async ({ context, request }: ActionFunctio
     bucket: storage,
     filter: ({ contentType }) => acceptedContentTypes.includes(contentType)
   }));
-  console.log(formData)
-  return json({ status: 200, body: "ok" });
+  return json({ status: 200, key: formData.get("file") });
 }
 
 
@@ -63,37 +60,13 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const loader = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const fetcher = useFetcher({ key: "delete" });
-
-  const objects: R2Object[] = loader.files;
   return (
 
     <div className="container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <h1>Welcome to Mixdown!</h1>
       <div style={{ flex: 1, display: "flex", flexDirection: "row" }}></div>
-      {objects.map(file => (
-        <div key={file.key} style={{ display: "flex", justifyContent: "space-around" }}>
-          <NavLink
-            to={`/storage/${file.key}`}
-            reloadDocument
-            className="link"
-          >
-            {file.key} - {file.size}
-          </NavLink>
-          &nbsp;
-          <fetcher.Form
-            method="DELETE"
-            action={`/storage/${file.key}`}
-          >
-            <button
-              type="submit"
-              className="btn">Delete</button>
-          </fetcher.Form>
-        </div>
-      ))}
-
-
-
+      <h2>Files</h2>
+      <FileList files={loader.files} />
       <pre>
         <code>{JSON.stringify(actionData, null, 2)}</code>
       </pre>

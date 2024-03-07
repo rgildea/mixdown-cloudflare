@@ -4,7 +4,6 @@ import { useFileUpload } from "~/hooks/useFileUpload";
 
 function UploadForm() {
   const { fetcher, submit, isUploading, allFiles } = useFileUpload();
-  console.log(allFiles)
   return (
     <fetcher.Form method="post" encType="multipart/form-data">
       <main>
