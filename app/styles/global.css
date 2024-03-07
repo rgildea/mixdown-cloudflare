@@ -21,3 +21,16 @@
   background-color: blue;
   color: aliceblue;
 }
+
+.li {
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  list-style: none;
+}
+
+.link {
+  text-decoration: none;
+  color: orange;
+  font-weight: bold;
+}

@@ -27,6 +27,18 @@ const publicPath = "/storage";
 //   return new Storage(bucket);
 // }
 
+export async function deleteObject(env, path: string) {
+  console.log(env)
+  const bucket = env.TEST_BUCKET1;
+  const key = path
+    .replace(publicPath, "")
+    .replace(/^\//, "");
+
+  console.log("DELETING", key);
+  await bucket.delete(key);
+  return new Response("Deleted {key}");
+}
+
 function hasBody(file: R2ObjectBody | null): file is R2ObjectBody {
   return file.body !== undefined;
 }

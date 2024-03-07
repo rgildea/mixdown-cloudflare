@@ -79,22 +79,35 @@ export default function Index() {
   const objects: R2Object[] = loader.objects;
 
   return (
-    <div className="container" style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
+
+    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <h1>Welcome to Mixdown!</h1>
+      <div style={{ flex: 1, display: "flex", flexDirection: "row" }}></div>
+      {objects.map(file => (
+        <div key={file.key} style={{ display: "flex", justifyContent: "space-around" }}>
+          <NavLink
+            to={`/storage/${file.key}`}
+            reloadDocument
+            className="link"
+          >
+            {file.key} - {file.size}
+          </NavLink>
+          &nbsp;
+          <fetcher.Form
+            method="DELETE"
+            action={`/storage/${file.key}`}
+          >
+            <button
+              name="intent"
+              value="delete"
+              type="submit"
+              className="btn">Delete</button>
+          </fetcher.Form>
+        </div>
+      ))}
 
-      <ul>
-        {objects.map(file => (
-          <li key={file.key} >
-            <NavLink
-              to={`/storage/${file.key}`}
-              reloadDocument
-            >
-              {file.key} - {file.size} - {file.httpMetadata?.contentType}
-            </NavLink>
-          </li>
-        ))}
 
-      </ul>
+
       <pre>
         <code>{JSON.stringify(actionData, null, 2)}</code>
       </pre>
@@ -104,11 +117,9 @@ export default function Index() {
           <h1 className="text-center">Drag and Drop Test</h1>
           <fetcher.Form method="post" encType="multipart/form-data">
             <UploadForm />
-            {/* <button name="intent" value="upload" type="submit" className="btn">Submit</button> */}
           </fetcher.Form>
         </div>
       </div>
-
     </div >
   );
 }
