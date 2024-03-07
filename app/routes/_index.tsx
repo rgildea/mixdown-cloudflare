@@ -35,29 +35,18 @@ export const loader: LoaderFunction = async ({ context }) => {
     return json({ status: 500, body: { error: "Failed to list files" } });
   }
 
-  return json({ objects: files.objects });
 
-  // return json({ status: 200, body: { files: files.objects.map(file => [file.key, file.size]) } });
+  return json({ files: files.objects });
 };
 
 export const action: ActionFunction = async ({ context, request }: ActionFunctionArgs) => {
   const storage = context.cloudflare.env.TEST_BUCKET1;
   const formData = await unstable_parseMultipartFormData(request, createR2UploadHandler({
-    context,
+    bucket: storage,
     filter: ({ contentType }) => acceptedContentTypes.includes(contentType)
   }));
-
-  let object: R2Object | undefined;
-
-  try {
-    object = await storage.put("test.txt", formData.get("file"));
-  } catch (e) {
-    console.error(e);
-    return json({ status: 500, body: { error: "Failed to upload file" } });
-  }
-
-
-  return json({ status: 200, body: object.key });
+  console.log(formData)
+  return json({ status: 200, body: "ok" });
 }
 
 
@@ -74,10 +63,9 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const loader = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher({ key: "delete" });
 
-  const objects: R2Object[] = loader.objects;
-
+  const objects: R2Object[] = loader.files;
   return (
 
     <div className="container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -98,8 +86,6 @@ export default function Index() {
             action={`/storage/${file.key}`}
           >
             <button
-              name="intent"
-              value="delete"
               type="submit"
               className="btn">Delete</button>
           </fetcher.Form>
@@ -115,9 +101,7 @@ export default function Index() {
       <div>
         <div className="container">
           <h1 className="text-center">Drag and Drop Test</h1>
-          <fetcher.Form method="post" encType="multipart/form-data">
-            <UploadForm />
-          </fetcher.Form>
+          <UploadForm />
         </div>
       </div>
     </div >

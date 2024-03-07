@@ -28,7 +28,6 @@ const publicPath = "/storage";
 // }
 
 export async function deleteObject(env, path: string) {
-  console.log(env)
   const bucket = env.TEST_BUCKET1;
   const key = path
     .replace(publicPath, "")

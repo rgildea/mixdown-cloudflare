@@ -1,12 +1,11 @@
 import { useFetcher } from "@remix-run/react";
-import { action } from "~/routes/_index";
 
 export function useFileUpload() {
-  const useFetcherResult = useFetcher<typeof action>();
-  const submit = useFetcherResult.submit;
-  const data = useFetcherResult.data as { files?: [File] };
-  const state = useFetcherResult.state;
-  const formData = useFetcherResult.formData;
+  const fetcher = useFetcher();
+  const submit = fetcher.submit;
+  const data = fetcher.data as { files?: [File] };
+  const state = fetcher.state;
+  const formData = fetcher.formData;
   const isUploading = state !== "idle";
 
   const uploadingFiles = formData
@@ -26,6 +25,7 @@ export function useFileUpload() {
     .concat(uploadingFiles ?? []);
 
   return {
+    fetcher,
     submit(files: FileList | null) {
       if (!files || !files.length) return;
       const formData = new FormData();

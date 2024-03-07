@@ -2,18 +2,16 @@ import { servePublicPathFromStorage, deleteObject } from "app/utils/StorageUtils
 
 export async function loader({ params, context }) {
   const env = context.cloudflare.env;
-  const path = getSanitizedPath(env, params["*"]);
-  console.log("Path", path);
-
+  const path = getFullPath(context.cloudflare.env.PATH_PREFIX, params["*"]);
   return servePublicPathFromStorage(env, path);
 }
 
-
 export const action = async ({ params, request, context }) => {
   const env = context.cloudflare.env;
-  const path = getSanitizedPath(env, params["*"]);
-  console.log("Path", path);
-
+  let path;
+  if (params["*"]) {
+    path = getFullPath(env.PATH_PREFIX, params["*"]);
+  }
   switch (request.method) {
     case "POST": {
       /* handle "POST" */
@@ -34,8 +32,8 @@ export const action = async ({ params, request, context }) => {
   }
 };
 
-function getSanitizedPath(env, filePath: string) {
-  let path = (env.PATH_PREFIX || "") + filePath;
+function getFullPath(prefix, filePath: string) {
+  let path = (prefix || "") + filePath;
   if (path.startsWith("/")) {
     path = path.slice(1);
   }

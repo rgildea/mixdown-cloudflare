@@ -1,36 +1,36 @@
 // import { useDropzone } from "react-dropzone";
-import { useFileUpload } from "app/hooks/useFileUpload";
+import { useFileUpload } from "~/hooks/useFileUpload";
+
 
 function UploadForm() {
-  const { submit, isUploading, allFiles } = useFileUpload();
+  const { fetcher, submit, isUploading, allFiles } = useFileUpload();
   console.log(allFiles)
   return (
-    <main>
-      <h1>Upload a file</h1>
+    <fetcher.Form method="post" encType="multipart/form-data">
+      <main>
+        <h1>Upload a file</h1>
+        <label>
+          {isUploading ? <h1>Uploading...</h1> : <p>Select a file</p>}
+          <input
+            name="file"
+            type="file"
+            // We hide the input so we can use our own label as a trigger
+            style={{ display: "none" }}
+            onChange={(event) => submit(event.currentTarget.files)}
+            multiple
+          />
+        </label>
+        <ul>
+          {/* We map over our files and display them */}
+          {allFiles.map((file) => (
+            <li key={file.name}>
+              <p>{file.name}: {file.url}</p>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </fetcher.Form>
 
-      <label>
-        {/* Here we use our boolean to change the label text */}
-        {isUploading ? <p>Uploading...</p> : <p>Select a file</p>}
-
-        <input
-          name="file"
-          type="file"
-          // We hide the input so we can use our own label as a trigger
-          style={{ display: "none" }}
-          onChange={(event) => submit(event.currentTarget.files)}
-          multiple
-        />
-      </label>
-
-      <ul>
-        {/* We map over our files and display them */}
-        {allFiles.map((file) => (
-          <li key={file.name}>
-            <p>{file.name}: {file.url}</p>
-          </li>
-        ))}
-      </ul>
-    </main>
   );
 }
 

@@ -1,4 +1,3 @@
-import { AppLoadContext } from "@remix-run/cloudflare";
 import type { UploadHandler, UploadHandlerPart } from "@remix-run/cloudflare";
 
 
@@ -11,7 +10,7 @@ export type R2UploadHandlerFilterArgs = {
 };
 
 export type CreateUploadHandlerParams = {
-  context: AppLoadContext;
+  bucket: R2Bucket;
   filter?: (args: R2UploadHandlerFilterArgs) => boolean | Promise<boolean>;
   maxPartSize?: number;
 };
@@ -43,7 +42,7 @@ export async function uploadStreamtoR2(r2Bucket: R2Bucket, data: AsyncIterable<U
 }
 
 
-export function createR2UploadHandler({ context, filter }: CreateUploadHandlerParams): UploadHandler {
+export function createR2UploadHandler({ bucket, filter }: CreateUploadHandlerParams): UploadHandler {
   return async ({ name, filename, contentType, data }: UploadHandlerPart) => {
     if (!filename) {
       return undefined;
@@ -52,9 +51,7 @@ export function createR2UploadHandler({ context, filter }: CreateUploadHandlerPa
     if (filter && !(await filter({ filename, contentType, name }))) {
       return undefined;
     }
-    const r2Bucket = context.cloudflare.env.TEST_BUCKET1;
-    const uploadedFileLocation = await uploadStreamtoR2(r2Bucket, data, filename!, contentType);
+    const uploadedFileLocation = await uploadStreamtoR2(bucket, data, filename!, contentType);
     return uploadedFileLocation;
-
   }
 }
