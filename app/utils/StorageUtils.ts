@@ -1,79 +1,55 @@
 export type R2Input = Parameters<R2Bucket["put"]>[1];
-// import type { R2PutOptions } from "@cloudflare/workers-types";
 export type BucketConfig = {
   bucketName: string;
   binding: R2Bucket;
 }
 
-const publicPath = "/storage";
+export function getKeyFromFileName(fileName: string) {
+  return encodeURIComponent(fileName);
+}
 
-// export type StorageBucketConfig = { default: BucketConfig } & Record<string, BucketConfig>;
+export function getFileNameFromKey(key: string) {
+  return decodeURIComponent(key);
+}
 
-// class Storage {
-//   constructor(public bucket: BucketConfig) { }
-
-//   async putRandom(input: R2Input, options: R2PutOptions & { extension: string | undefined; }) {
-//     const key = crypto.randomUUID() + (options.extension ? `.${options.extension}` : "");
-//     return this.put(key, input);
-//   }
-
-//   async put(...args: Parameters<R2Bucket["put"]>) {
-//     return this.bucket.binding.put(...args);
-//   }
-// }
-
-// export function storage(bucketName: string, config: StorageBucketConfig) {
-//   const bucket = config[bucketName] || config.default;
-//   return new Storage(bucket);
-// }
-
-export async function deleteObject(env, path: string) {
-  const bucket = env.TEST_BUCKET1;
-  const key = path
-    .replace(publicPath, "")
-    .replace(/^\//, "");
-
+export async function deleteObject(env, key: string) {
+  const bucket = env.STORAGE_BUCKET;
   console.log("DELETING", key);
   await bucket.delete(key);
   return new Response("Deleted {key}");
 }
 
-function hasBody(file: R2ObjectBody | null): file is R2ObjectBody {
-  return file.body !== undefined;
-}
-
-export async function servePublicPathFromStorage(env, path: string) {
-  const bucket = env.TEST_BUCKET1;
+export async function servePublicPathFromStorage(env, key: string) {
+  const bucket = env.STORAGE_BUCKET;
   const notFoundResponse = new Response("Not found", { status: 404 });
-  const key = path
-    .replace(publicPath, "")
-    .replace(/^\//, "");
+  console.log("SERVING", key);
+  const object: R2ObjectBody | null = await bucket.get(key);
 
-  const file = await bucket.get(key);
-
-  if (!file) {
-    console.log("Not found", key);
+  if (!object) {
+    console.log("File not found for key:", key);
     return notFoundResponse;
   }
 
-  console.log("Serving", key, file.size, "bytes")
+  console.log("Serving", key, object.size, "bytes")
+  console.log("HTTP Metadata", object.httpMetadata)
+  console.log("Custom Metadata", object.customMetadata)
 
-  const response = new Response(hasBody(file) && file.size !== 0 ? file.body : null, {
-    status: 200,
-    headers: {
-      "accept-ranges": "bytes",
-      "access-control-allow-origin": env.ALLOWED_ORIGINS || "",
-      etag: file.httpEtag,
-      "cache-control": env.CACHE_CONTROL ?? file.httpMetadata?.cacheControl,
-      expires: file.httpMetadata?.cacheExpiry?.toUTCString() ?? "",
-      "last-modified": file.uploaded.toUTCString(),
-      "content-encoding": file.httpMetadata?.contentEncoding ?? "",
-      "content-type": file.httpMetadata?.contentType ?? "application/octet-stream",
-      "content-language": file.httpMetadata?.contentLanguage ?? "",
-      "content-disposition": file.httpMetadata?.contentDisposition ?? "",
-      "content-length": (file.size).toString(),
-    },
-  });
+  const headers = extractHeaders(object.httpMetadata);
+  headers.set('etag', object.httpEtag);
+  headers.delete('httpEtag')
 
+  const response = new Response(object.body, { headers: headers });
   return response;
+}
+
+export function extractHeaders(httpMetadata: R2HTTPMetadata) {
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(httpMetadata)) {
+    headers.set(getHTTPHeaderName(key), value);
+  }
+  return headers;
+}
+
+function getHTTPHeaderName(key: string) {
+  return key.replace(/([A-Z])/g, "-$1").toLowerCase();
 }

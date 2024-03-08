@@ -6,10 +6,14 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [remixCloudflareDevProxy({
-    persist: { path: "./tmp/data" }
-  }), remix(), tsconfigPaths()],
+  plugins: [
+    remixCloudflareDevProxy({ persist: { path: "./tmp/data" } }),
+    remix(),
+    tsconfigPaths()
+  ],
+  ssr: { noExternal: ["react-h5-audio-player"] },
   server: {
+    port: 8080,
     fs: {
       // Restrict files that could be served by Vite's dev server.  Accessing
       // files outside this directory list that aren't imported from an allowed

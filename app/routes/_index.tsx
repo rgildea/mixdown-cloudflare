@@ -6,11 +6,7 @@ import {
   type ActionFunctionArgs,
   unstable_parseMultipartFormData,
 } from "@remix-run/cloudflare";
-import {
-  useActionData,
-  useLoaderData,
-}
-  from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { createR2UploadHandler } from "app/utils/R2UploadHandler";
 import { useState } from "react";
 import UploadForm from "app/components/UploadForm";
@@ -28,16 +24,31 @@ const acceptedContentTypes = [
 ];
 
 export const loader: LoaderFunction = async ({ context }) => {
-  const files: R2Objects = await context.cloudflare.env.TEST_BUCKET1.list();
-  if (!files) {
+  const bucket = context.cloudflare.env.STORAGE_BUCKET;
+  const listOptions: R2ListOptions = {
+    include: ["customMetadata"]
+  };
+
+  const objects: R2Objects = await bucket.list(listOptions);
+  objects.objects.forEach((object: R2Object) => {
+    console.log(`${object.key} 
+      ${object.size} 
+      ${object.customMetadata.filename}`)
+  });
+
+  // files.objects.forEach(async (file) => {
+  //   await bucket.delete(file.key);
+  // });
+
+  if (!objects) {
     return json({ status: 500, body: { error: "Failed to list files" } });
   }
 
-  return json({ files: files.objects });
+  return json({ files: objects.objects });
 };
 
 export const action: ActionFunction = async ({ context, request }: ActionFunctionArgs) => {
-  const storage = context.cloudflare.env.TEST_BUCKET1;
+  const storage = context.cloudflare.env.STORAGE_BUCKET;
   const formData = await unstable_parseMultipartFormData(request, createR2UploadHandler({
     bucket: storage,
     filter: ({ contentType }) => acceptedContentTypes.includes(contentType)
@@ -58,27 +69,15 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const loader = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const [currentFileURL, setCurrentFileURL] = useState<string>(`/storage/${loader.files[0]?.key}`);
+  const [currentFileURL, setCurrentFileURL] = useState<string>();
 
   return (
-    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className="container">
       <h1>Welcome to Mixdown!</h1>
-      <div style={{ flex: 1, display: "flex", flexDirection: "row" }}></div>
-      <h2>Files</h2>
+      <h2 >Files</h2>
       <FileList files={loader.files} setURL={setCurrentFileURL} />
-      <pre>
-        <code>{JSON.stringify(actionData, null, 2)}</code>
-      </pre>
-
-      <div>
-        <div className="container">
-          <h1 className="text-center">Drag and Drop Test</h1>
-          <UploadForm />
-        </div>
-      </div>
-
+      <UploadForm />
       <MixdownPlayer url={currentFileURL} />
-    </div >
+    </div>
   );
 }

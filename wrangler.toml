@@ -1,5 +1,6 @@
 name = "remix-cloudflare-template-test"
 compatibility_date = "2024-02-23"
+compatibility_flags = [ "r2_list_honor_include" ]
 
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
@@ -18,7 +19,7 @@ CACHE_CONTROL = "no-store"
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://devwraelopers.cloudflare.com/r2/api/workers/workers-api-usage/
 [[r2_buckets]]
-binding = "TEST_BUCKET1"
+binding = "STORAGE_BUCKET"
 bucket_name = "	remix-cloudflare-template-test-bucket1"
 
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
