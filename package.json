@@ -23,7 +23,8 @@
     "pnpm": "^8.15.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-dropzone": "^14.2.3"
+    "react-dropzone": "^14.2.3",
+    "react-h5-audio-player": "^3.9.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230518.0",

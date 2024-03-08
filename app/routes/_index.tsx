@@ -12,10 +12,12 @@ import {
 }
   from "@remix-run/react";
 import { createR2UploadHandler } from "app/utils/R2UploadHandler";
-
+import { useState } from "react";
 import UploadForm from "app/components/UploadForm";
 import FileList from "app/components/FileList";
+import 'react-h5-audio-player/lib/styles.css';
 import "app/styles/global.css";
+import MixdownPlayer from "~/components/MixdownPlayer";
 
 const acceptedContentTypes = [
   "audio/x-aiff",
@@ -24,9 +26,6 @@ const acceptedContentTypes = [
   "audio/mpeg",
   "audio/wav",
 ];
-
-
-
 
 export const loader: LoaderFunction = async ({ context }) => {
   const files: R2Objects = await context.cloudflare.env.TEST_BUCKET1.list();
@@ -49,10 +48,10 @@ export const action: ActionFunction = async ({ context, request }: ActionFunctio
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
+    { title: "Mixdown Music Player Demo" },
     {
       name: "description",
-      content: "Welcome to Remix! Using Vite and Cloudflare!",
+      content: "Welcome to Mixdown Music Player Demo!",
     },
   ];
 };
@@ -60,13 +59,14 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const loader = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  return (
+  const [currentFileURL, setCurrentFileURL] = useState<string>(`/storage/${loader.files[0]?.key}`);
 
+  return (
     <div className="container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <h1>Welcome to Mixdown!</h1>
       <div style={{ flex: 1, display: "flex", flexDirection: "row" }}></div>
       <h2>Files</h2>
-      <FileList files={loader.files} />
+      <FileList files={loader.files} setURL={setCurrentFileURL} />
       <pre>
         <code>{JSON.stringify(actionData, null, 2)}</code>
       </pre>
@@ -77,6 +77,8 @@ export default function Index() {
           <UploadForm />
         </div>
       </div>
+
+      <MixdownPlayer url={currentFileURL} />
     </div >
   );
 }

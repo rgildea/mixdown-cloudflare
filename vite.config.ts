@@ -17,7 +17,7 @@ export default defineConfig({
       // If you're comfortable with Vite's dev server making any file within the
       // project root available, you can remove this option.  See more:
       // https://vitejs.dev/config/server-options.html#server-fs-allow
-      allow: ["app"],
+      allow: ["app", "node_modules"],
     },
   },
 });
