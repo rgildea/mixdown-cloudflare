@@ -1,5 +1,6 @@
 import { servePublicPathFromStorage, deleteObject } from "app/utils/StorageUtils";
-import { publicPath } from "build/server";
+
+const publicPath = "/storage/";
 
 export async function loader({ params, context }) {
   const env = context.cloudflare.env;
