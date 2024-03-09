@@ -1,6 +1,5 @@
 name = "remix-cloudflare-template-test"
 compatibility_date = "2024-02-23"
-compatibility_flags = [ "r2_list_honor_include" ]
 
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
