@@ -1,63 +1,73 @@
-import type { UploadHandler, UploadHandlerPart } from "@remix-run/cloudflare";
-import { v4 as uuidv4 } from "uuid";
+import type { UploadHandler, UploadHandlerPart } from '@remix-run/cloudflare'
+import { v4 as uuidv4 } from 'uuid'
 
-export type R2Input = Parameters<R2Bucket["put"]>[1];
+export type R2Input = Parameters<R2Bucket['put']>[1]
 
 export type R2UploadHandlerFilterArgs = {
-  filename: string;
-  contentType: string;
-  name: string;
-};
-
-export type CreateUploadHandlerParams = {
-  bucket: R2Bucket;
-  filter?: (args: R2UploadHandlerFilterArgs) => boolean | Promise<boolean>;
-  maxPartSize?: number;
-};
-
-export async function uploadToR2(r2Bucket: R2Bucket, data: AsyncIterable<Uint8Array>, filename: string, contentType: string) {
-  const dataArray = [];
-  for await (const chunk of data) {
-    dataArray.push(chunk);
-  }
-
-  const accumulatedData = new Uint8Array(dataArray.reduce((acc, chunk) => acc + chunk.length, 0));
-  let offset = 0;
-  for (const chunk of dataArray) {
-    accumulatedData.set(chunk, offset);
-    offset += chunk.length;
-  }
-  const key = uuidv4();
-
-  const options: R2PutOptions = {
-    httpMetadata: {
-      contentType,
-    },
-    customMetadata: {
-      filename,
-    }
-  };
-
-  console.log("Uploading", key, accumulatedData.length, "bytes", options);
-  const r2Object = await r2Bucket.put(key, accumulatedData.buffer, options);
-
-  if (r2Object == null || r2Object.key === undefined) {
-    throw new Error(`Failed to upload file ${key}`);
-  }
-
-  return r2Object.key;
+	filename: string
+	contentType: string
+	name: string
 }
 
-export function createR2UploadHandler({ bucket, filter }: CreateUploadHandlerParams): UploadHandler {
-  return async ({ name, filename, contentType, data }: UploadHandlerPart) => {
-    if (!filename) {
-      return undefined;
-    }
+export type CreateUploadHandlerParams = {
+	bucket: R2Bucket
+	filter?: (args: R2UploadHandlerFilterArgs) => boolean | Promise<boolean>
+	maxPartSize?: number
+}
 
-    if (filter && !(await filter({ filename, contentType, name }))) {
-      return undefined;
-    }
+export async function uploadToR2(
+	r2Bucket: R2Bucket,
+	data: AsyncIterable<Uint8Array>,
+	filename: string,
+	contentType: string,
+) {
+	const dataArray = []
+	for await (const chunk of data) {
+		dataArray.push(chunk)
+	}
 
-    return await uploadToR2(bucket, data, filename, contentType);
-  }
+	const accumulatedData = new Uint8Array(
+		dataArray.reduce((acc, chunk) => acc + chunk.length, 0),
+	)
+	let offset = 0
+	for (const chunk of dataArray) {
+		accumulatedData.set(chunk, offset)
+		offset += chunk.length
+	}
+	const key = uuidv4()
+
+	const options: R2PutOptions = {
+		httpMetadata: {
+			contentType,
+		},
+		customMetadata: {
+			filename,
+		},
+	}
+
+	console.log('Uploading', key, accumulatedData.length, 'bytes', options)
+	const r2Object = await r2Bucket.put(key, accumulatedData.buffer, options)
+
+	if (r2Object == null || r2Object.key === undefined) {
+		throw new Error(`Failed to upload file ${key}`)
+	}
+
+	return r2Object.key
+}
+
+export function createR2UploadHandler({
+	bucket,
+	filter,
+}: CreateUploadHandlerParams): UploadHandler {
+	return async ({ name, filename, contentType, data }: UploadHandlerPart) => {
+		if (!filename) {
+			return undefined
+		}
+
+		if (filter && !(await filter({ filename, contentType, name }))) {
+			return undefined
+		}
+
+		return await uploadToR2(bucket, data, filename, contentType)
+	}
 }
