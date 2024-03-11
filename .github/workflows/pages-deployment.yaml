@@ -60,16 +60,15 @@ jobs:
     name: 🚀 Deploy to Cloudflare Pages
     steps:
       - name: ⬇️ Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🏗 Build
         run: npm install && npm run build
 
       - name: 🚀 Publish
-        uses: cloudflare/pages-action@1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: mixdown-player-manual-deploy # e.g. 'my-project'
-          directory: ./build/client # e.g. 'dist'
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --directory=./build/client
+          

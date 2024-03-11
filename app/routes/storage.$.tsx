@@ -43,3 +43,11 @@ export const action = async ({ params, request, context }) => {
 function getKeyFromPath(path: string) {
 	return path.replace(publicPath, '').replace(/^\//, '')
 }
+
+export default function StorageRoute() {
+	return (
+		<div>
+			<h1>Unknown Route</h1>
+		</div>
+	)
+}
