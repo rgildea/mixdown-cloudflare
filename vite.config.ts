@@ -4,11 +4,12 @@ import {
 } from '@remix-run/dev'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import remixConfig from './remix.config'
 
 export default defineConfig({
 	plugins: [
 		remixCloudflareDevProxy({ persist: { path: './tmp/data' } }),
-		remix(),
+		remix(remixConfig),
 		tsconfigPaths(),
 	],
 	ssr: { noExternal: ['react-h5-audio-player'] },

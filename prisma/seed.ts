@@ -8,8 +8,8 @@ const userData: Prisma.UserCreateInput[] = [
 		password: {
 			create: {
 				hash: await bcrypt.hash('ryanrox', 10),
-			}
-		}
+			},
+		},
 	},
 ]
 

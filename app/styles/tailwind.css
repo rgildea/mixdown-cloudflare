@@ -1,3 +1,109 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* help me visualize the colors */
+.root {
+	.foreground-destructive {
+		color: hsl(345 82.7% 40.8%);
+	}
+	.background {
+		color: hsl(0 0 100%);
+	}
+	.foreground {
+		color: hsl(222.2 84% 16.9%);
+	}
+	.muted {
+		color: hsl(210 40% 93%);
+		.foreground {
+			color: hsl(215.4 16.3% 30%);
+		}
+	}
+	.popover {
+		color: hsl(0 0% 100%);
+		.foreground {
+			color: hsl(222.2 84% 4.9%);
+		}
+	}
+	.card {
+		color: hsl(0 0% 100%);
+		.foreground {
+			color: hsl(222.2 84% 4.9%);
+		}
+	}
+	.border {
+		color: hsl(214.3 31.8% 91.4%);
+	}
+	.input {
+		color: hsl(214.3 31.8% 91.4%);
+		.invalid {
+			color: hsl(0 84.2% 60.2%);
+		}
+	}
+	.primary {
+		color: hsl(222.2 47.4% 11.2%);
+		.foreground {
+			color: hsl(210 40% 98%);
+		}
+	}
+	.secondary {
+		color: hsl(210 20% 83%);
+		.foreground {
+			color: hsl(222.2 47.4% 11.2%);
+		}
+	}
+	.accent {
+		color: hsl(210 40% 90%);
+		.foreground {
+			color: hsl(222.2 47.4% 11.2%);
+		}
+	}
+	.ring {
+		color: hsl(215 20.2% 65.1%);
+	}
+	.destructive {
+		color: hsl(0 70% 50%);
+		.foreground {
+			color: hsl(210 40% 98%);
+		}
+	}
+}
+
+@layer base {
+	:root {
+		/* prefixed with foreground because it should look good on the background */
+		--foreground-destructive: 345 82.7% 40.8%;
+
+		--background: 0 0% 100%;
+		--foreground: 222.2 84% 4.9%;
+
+		--muted: 210 40% 93%;
+		--muted-foreground: 215.4 16.3% 30%;
+
+		--popover: 0 0% 100%;
+		--popover-foreground: 222.2 84% 4.9%;
+
+		--card: 0 0% 100%;
+		--card-foreground: 222.2 84% 4.9%;
+
+		--border: 214.3 31.8% 91.4%;
+		--input: 214.3 31.8% 91.4%;
+		--input-invalid: 0 84.2% 60.2%;
+
+		--primary: 222.2 47.4% 11.2%;
+		--primary-foreground: 210 40% 98%;
+
+		--secondary: 210 20% 83%;
+		--secondary-foreground: 222.2 47.4% 11.2%;
+
+		--accent: 210 40% 90%;
+		--accent-foreground: 222.2 47.4% 11.2%;
+
+		--destructive: 0 70% 50%;
+		--destructive-foreground: 210 40% 98%;
+
+		--ring: 215 20.2% 65.1%;
+
+		--radius: 0.5rem;
+	}
+}
