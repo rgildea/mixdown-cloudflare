@@ -1,10 +1,8 @@
 node_modules
-
 /build
 /public/build
 /server-build
 .env
-
 /prisma/migrations
-
 package-lock.json
+supabase/.temp
