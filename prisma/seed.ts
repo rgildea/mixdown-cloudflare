@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 
 const userData: Prisma.UserCreateInput[] = [
 	{
-		username: 'ryan',
+		email: 'ryangildea@gmail.com',
 		password: {
 			create: {
 				hash: await bcrypt.hash('ryanrox', 10),
