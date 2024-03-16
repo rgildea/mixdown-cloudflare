@@ -1,26 +1,30 @@
 name = "mixdown-player-manual-deploy"
 compatibility_date = "2024-02-23"
 
+compatibility_flags = [ "nodejs_compat" ]
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
 [vars]
 # MY_VARIABLE = "production_value"
-CACHE_CONTROL = "no-store"
+ENVIRONMENT_NAME="development"
 DATABASE_URL = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiNTkyNTk5Y2ItZmRhYS00YjNmLWJlY2MtOTU3NTQ4YWE4NzUzIiwidGVuYW50X2lkIjoiYTZmZDliNWM0MTE4ZDNmNTEwNWM0NmU2Mzg2YjlkMzY0MDVlZTUwZDI4N2NhODRlOGZhMmFhNDczY2FlYWNmNiIsImludGVybmFsX3NlY3JldCI6IjNiZmQxOTA1LWRlNDMtNGVlOS05YzJhLTMwYWNmZWNhNjEzMCJ9.1FTpj2pIFxrGIpbJ9SxGBi_TcM_TZG6FHIpaoKvr-B8"
+COOKIE_SECRET = "C-IS-FOR-COOKIE"
+RESEND_API_KEY = "re_669j4rhA_PN6UPYgQGsbCgwg3aiKCbEhe"
+MOCKS = false
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "ca33d362bc8c498db97e65a6c4d1c8a6"
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://devwraelopers.cloudflare.com/r2/api/workers/workers-api-usage/
 [[r2_buckets]]
 binding = "STORAGE_BUCKET"
-bucket_name = "remix-cloudflare-template-test-bucket1"
+bucket_name = "mixdown-sources-dev"
 
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
 # Docs: https://developers.cloudflare.com/queues/get-started

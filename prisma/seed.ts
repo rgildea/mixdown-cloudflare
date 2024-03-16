@@ -15,6 +15,45 @@ const userData: Prisma.UserCreateInput[] = [
 
 async function main() {
 	console.log(`Start seeding ...`)
+
+	console.time('🔑 Created permissions...')
+	const entities = ['user', 'track']
+	const actions = ['create', 'read', 'update', 'delete']
+	const accesses = ['own', 'any'] as const
+	for (const entity of entities) {
+		for (const action of actions) {
+			for (const access of accesses) {
+				await prisma.permission.create({ data: { entity, action, access } })
+			}
+		}
+	}
+	console.timeEnd('🔑 Created permissions...')
+
+	console.time('👑 Created roles...')
+	await prisma.role.create({
+		data: {
+			name: 'admin',
+			permissions: {
+				connect: await prisma.permission.findMany({
+					select: { id: true },
+					where: { access: 'any' },
+				}),
+			},
+		},
+	})
+	await prisma.role.create({
+		data: {
+			name: 'user',
+			permissions: {
+				connect: await prisma.permission.findMany({
+					select: { id: true },
+					where: { access: 'own' },
+				}),
+			},
+		},
+	})
+	console.timeEnd('👑 Created roles...')
+
 	for (const u of userData) {
 		const user = await prisma.user.create({
 			data: u,

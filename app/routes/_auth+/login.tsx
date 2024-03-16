@@ -1,93 +1,87 @@
-import { Button } from '~/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
-
-import { SubmissionResult, getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { CheckboxField } from '#app/components/forms'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '#app/components/ui/card'
+import { StatusButton } from '#app/components/ui/status-button'
+import { login, requireAnonymous } from '#app/utils/auth.server'
+import { useIsPending } from '#app/utils/misc'
+import { handleNewSession } from '#app/utils/session.server'
+import { EmailSchema, PasswordSchema } from '#app/utils/user-validation'
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { ActionFunctionArgs, json } from '@remix-run/cloudflare'
-import { Form, useActionData } from '@remix-run/react'
+import { Form, Link, useActionData, useSearchParams } from '@remix-run/react'
 import { z } from 'zod'
-import { login } from '~/utils/session.server'
-import { EmailSchema, PasswordSchema } from '~/utils/user-validation'
 
 const LoginFormSchema = z.object(
 	{
 		email: EmailSchema,
 		password: PasswordSchema,
+		redirectTo: z.string().optional(),
+		remember: z.boolean().optional(),
 	},
 	{ required_error: 'Please fill in the required field' },
 )
 
-export async function action({ context: { db }, request }: ActionFunctionArgs) {
+export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
+	console.log('entering action')
+	await requireAnonymous(storageContext, request)
 	const formData = await request.formData()
-	// const submission = await parseWithZod(formData, { schema: LoginFormSchema });
 	const submission = await parseWithZod(formData, {
 		schema: intent =>
-			LoginFormSchema.transform(async data => {
+			LoginFormSchema.transform(async (data, ctx) => {
 				if (intent !== null) return { ...data, session: null }
+				const session = await login({ db: storageContext.db, email: data.email, password: data.password })
+				if (!session) {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: 'Invalid username or password',
+					})
+					return z.NEVER
+				}
 
-				// const session = await login(data)
-				// if (!session) {
-				// 	ctx.addIssue({
-				// 		code: z.ZodIssueCode.custom,
-				// 		message: 'Invalid username or password',
-				// 	})
-				// 	return z.NEVER
-				// }
-
-				return { ...data, session: null }
+				return { ...data, session }
 			}),
 		async: true,
 	})
 
-	if (submission.status !== 'success') {
+	// console.log(submission)
+	if (submission.status !== 'success' || !submission.value.session) {
 		return json(
 			{ result: submission.reply({ hideFields: ['password'] }) },
 			{ status: submission.status === 'error' ? 400 : 200 },
 		)
 	}
-
-	// // log the user in
-	const user = await login({ db, email: submission.value.email, password: submission.value.password })
-	// Return a form error if the message is not sent
-	if (!user) {
-		return json(
-			{
-				result: submission.reply({
-					hideFields: ['password'],
-					formErrors: ['Login failed. Please check your details and try again.'],
-				}),
-			},
-			{ status: 400 },
-		)
-	}
-
-	return json({ result: submission.reply({ hideFields: ['password'] }) }, { status: 200 })
+	const { session, remember, redirectTo } = submission.value
+	// console.log('created session', session)
+	// console.log('about to handle new session')
+	return handleNewSession({
+		storageContext,
+		request,
+		session,
+		remember: remember ?? false,
+		redirectTo,
+	})
 }
 
 export default function LoginPage() {
 	const actionData = useActionData<typeof action>()
-	// The useForm hook will return all the metadata we need to render the form
-	// and focus on the first invalid field when the form is submitted
-
-	console.log('actionData', actionData)
-
+	const isPending = useIsPending()
+	const [searchParams] = useSearchParams()
+	const redirectTo = searchParams.get('redirectTo')
 	const [form, fields] = useForm({
 		id: 'login-form',
 		constraint: getZodConstraint(LoginFormSchema),
-		defaultValue: null,
-		lastResult: actionData?.result as SubmissionResult<string[]>, // Fix: Cast actionData?.result to SubmissionResult<string[]>
+		defaultValue: { redirectTo },
+		lastResult: actionData?.result,
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: LoginFormSchema })
 		},
 		shouldRevalidate: 'onBlur',
-		// Validate field once user leaves the field
-		shouldValidate: 'onBlur',
 	})
 
 	return (
 		<div className="container h-full min-h-screen bg-slate-50">
 			<Card className="mx-auto  w-full max-w-md text-card-foreground ">
-				<Form method="post" {...getFormProps(form)}>
+				<Form method="post" {...getFormProps(form)} onSubmit={form.onSubmit}>
 					<CardHeader>
 						<CardTitle className="text-4xl font-extrabold">Welcome Back!</CardTitle>
 						<CardDescription>Please enter your login details.</CardDescription>
@@ -120,11 +114,33 @@ export default function LoginPage() {
 								{fields.password.errors}
 							</div>
 						</div>
+						<div className="flex justify-between">
+							<CheckboxField
+								labelProps={{
+									htmlFor: fields.remember.id,
+									children: 'Remember me',
+								}}
+								buttonProps={getInputProps(fields.remember, {
+									type: 'checkbox',
+								})}
+								errors={fields.remember.errors}
+							/>
+							<div>
+								<Link to="/forgot-password" className="text-body-xs font-semibold">
+									Forgot password?
+								</Link>
+							</div>
+						</div>
 					</CardContent>
 					<CardFooter>
-						<Button type="submit" variant="outline">
-							Submit
-						</Button>
+						<StatusButton
+							className="w-full"
+							status={isPending ? 'pending' : form.status ?? 'idle'}
+							type="submit"
+							disabled={isPending}
+						>
+							Log in
+						</StatusButton>
 					</CardFooter>
 				</Form>
 			</Card>

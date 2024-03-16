@@ -26,9 +26,7 @@ export async function uploadToR2(
 		dataArray.push(chunk)
 	}
 
-	const accumulatedData = new Uint8Array(
-		dataArray.reduce((acc, chunk) => acc + chunk.length, 0),
-	)
+	const accumulatedData = new Uint8Array(dataArray.reduce((acc, chunk) => acc + chunk.length, 0))
 	let offset = 0
 	for (const chunk of dataArray) {
 		accumulatedData.set(chunk, offset)
@@ -55,10 +53,7 @@ export async function uploadToR2(
 	return r2Object.key
 }
 
-export function createR2UploadHandler({
-	bucket,
-	filter,
-}: CreateUploadHandlerParams): UploadHandler {
+export function createR2UploadHandler({ bucket, filter }: CreateUploadHandlerParams): UploadHandler {
 	return async ({ name, filename, contentType, data }: UploadHandlerPart) => {
 		if (!filename) {
 			return undefined

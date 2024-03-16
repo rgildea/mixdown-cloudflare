@@ -1,8 +1,7 @@
 # Welcome to Remix + Vite!
 
-📖 See the [Remix docs](https://remix.run/docs) and the
-[Remix Vite docs](https://remix.run/docs/en/main/future/vite) for details on
-supported features.
+📖 See the [Remix docs](https://remix.run/docs) and the [Remix Vite docs](https://remix.run/docs/en/main/future/vite)
+for details on supported features.
 
 ## Typegen
 
@@ -32,9 +31,8 @@ npm run start
 ## Deployment
 
 > [!WARNING]  
-> Cloudflare does _not_ use `wrangler.toml` to configure deployment bindings.
-> You **MUST** [configure deployment bindings manually in the Cloudflare
-> dashboard][bindings].
+> Cloudflare does _not_ use `wrangler.toml` to configure deployment bindings. You **MUST** [configure deployment
+> bindings manually in the Cloudflare dashboard][bindings].
 
 First, build your app for production:
 

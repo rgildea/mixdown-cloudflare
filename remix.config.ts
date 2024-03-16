@@ -7,12 +7,7 @@ export default {
 	serverModuleFormat: 'esm',
 	routes: async defineRoutes => {
 		return flatRoutes('routes', defineRoutes, {
-			ignoredRouteFiles: [
-				'.*',
-				'**/*.css',
-				'**/*.test.{js,jsx,ts,tsx}',
-				'**/__*.*',
-			],
+			ignoredRouteFiles: ['.*', '**/*.css', '**/*.test.{js,jsx,ts,tsx}', '**/__*.*'],
 		})
 	},
 } as VitePluginConfig

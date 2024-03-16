@@ -12,29 +12,20 @@ export function getFileNameFromKey(key: string) {
 	return decodeURIComponent(key)
 }
 
-export async function deleteObject(env, key: string) {
-	const bucket = env.STORAGE_BUCKET
-	console.log('DELETING', key)
+export async function deleteObject(bucket: R2Bucket, key: string) {
 	await bucket.delete(key)
 	return new Response('Deleted {key}')
 }
 
-export async function servePublicPathFromStorage(env, key: string) {
-	const bucket = env.STORAGE_BUCKET
+export async function servePublicPathFromStorage(bucket: R2Bucket, key: string) {
 	const notFoundResponse = new Response('Not found', { status: 404 })
-	console.log('SERVING', key)
 	const object: R2ObjectBody | null = await bucket.get(key)
 
 	if (!object) {
-		console.log('File not found for key:', key)
 		return notFoundResponse
 	}
 
-	console.log('Serving', key, object.size, 'bytes')
-	console.log('HTTP Metadata', object.httpMetadata)
-	console.log('Custom Metadata', object.customMetadata)
-
-	const headers = extractHeaders(object.httpMetadata)
+	const headers = object.httpMetadata ? extractHeaders(object.httpMetadata) : new Headers()
 	headers.set('etag', object.httpEtag)
 	headers.delete('httpEtag')
 
