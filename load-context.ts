@@ -55,9 +55,6 @@ export const getLoadContext: GetLoadContext = ({ context }) => {
 		connectionSessionStorage,
 	}
 
-	// console.log('load context', { storageContext })
-	// console.log('context.cloudflare.env', context.cloudflare.env)
-	// console.log('typeof ENVIRONMENT_NAME', typeof ENVIRONMENT_NAME)
 	return {
 		cloudflare: context.cloudflare,
 		storageContext,

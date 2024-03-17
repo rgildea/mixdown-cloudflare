@@ -66,7 +66,6 @@ export async function requireAnonymous(storageContext: StorageContext, request: 
 export async function login({ db, email, password }: { db: PrismaClient; email: User['email']; password: string }) {
 	const user = await verifyUserPassword(db, { email }, password)
 	if (!user) {
-		console.log("user doesn't exist")
 		return null
 	}
 	const session = await db.session.create({

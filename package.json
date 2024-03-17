@@ -59,8 +59,7 @@
     "remix-utils": "^7.5.0",
     "tailwind-merge": "^2.2.1",
     "tsx": "^4.7.1",
-    "uuid": "^9.0.1",
-    "vite-plugin-svg-sprite": "^0.5.1"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230518.0",

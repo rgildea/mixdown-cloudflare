@@ -1,6 +1,6 @@
 import { LoaderFunctionArgs } from '@remix-run/cloudflare'
 import { json, useLoaderData } from '@remix-run/react'
-console.log('Hello from dbdemo.tsx')
+
 export async function loader({
 	context: {
 		storageContext: { db },

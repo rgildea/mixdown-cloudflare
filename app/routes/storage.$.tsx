@@ -5,7 +5,6 @@ const publicPath = '/storage/'
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
 	const env = context.cloudflare.env
-	console.log('GET: ', params)
 	const key = params['*']
 
 	if (!key) {
