@@ -1,5 +1,5 @@
 {
-  "name": "remix-cloudflare-template-test",
+  "name": "mixdown-cloudflare",
   "private": true,
   "sideEffects": false,
   "type": "module",
