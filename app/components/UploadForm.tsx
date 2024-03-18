@@ -1,4 +1,4 @@
-import { useFileUpload } from '~/hooks/useFileUpload'
+import { useFileUpload } from '#app/hooks/useFileUpload'
 
 function UploadForm() {
 	const { fetcher, submit, isUploading, allFiles } = useFileUpload()

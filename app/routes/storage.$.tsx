@@ -1,41 +1,34 @@
-import {
-	servePublicPathFromStorage,
-	deleteObject,
-} from 'app/utils/StorageUtils'
+import { servePublicPathFromStorage, deleteObject } from '#app/utils/StorageUtils'
+import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/cloudflare'
 
 const publicPath = '/storage/'
 
-export async function loader({ params, context }) {
+export async function loader({ params, context }: LoaderFunctionArgs) {
 	const env = context.cloudflare.env
-	console.log('GET: ', params)
 	const key = params['*']
 
-	return servePublicPathFromStorage(env, key)
+	if (!key) {
+		return new Response('Not found', { status: 404 })
+	}
+
+	return servePublicPathFromStorage(env.STORAGE_BUCKET, key)
 }
 
-export const action = async ({ params, request, context }) => {
-	const env = context.cloudflare.env
-	let key
-	if (params['*']) {
-		key = getKeyFromPath(params['*'])
-	}
+export async function action({ params, request, context }: ActionFunctionArgs) {
+	const bucket = context.cloudflare.env.STORAGE_BUCKET
+	const key = getKeyFromPath(params['*'] as string)
 	switch (request.method) {
 		case 'POST': {
-			/* handle "POST" */
 			return new Response('Not implemented', { status: 501 })
 		}
 		case 'PUT': {
-			/* handle "PUT" */
 			return new Response('Not implemented', { status: 501 })
 		}
 		case 'PATCH': {
-			/* handle "PATCH" */
 			return new Response('Not implemented', { status: 501 })
 		}
 		case 'DELETE': {
-			/* handle "DELETE" */
-			console.log('DELETING', key)
-			return deleteObject(env, key)
+			return deleteObject(bucket, key)
 		}
 	}
 }
