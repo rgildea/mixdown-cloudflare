@@ -1,4 +1,5 @@
-import { renderAsync } from '@react-email/components'
+import { renderAsync } from '@react-email/render'
+
 import { type ReactElement } from 'react'
 import { z } from 'zod'
 

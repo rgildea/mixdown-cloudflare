@@ -9,7 +9,10 @@ import { prepareVerification, requireRecentVerification } from '#app/utils/verif
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import * as E from '@react-email/components'
+import { Html } from '@react-email/html'
+import { Container } from '@react-email/container'
+import { Text } from '@react-email/text'
+import { Link } from '@react-email/link'
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
 import { z } from 'zod'
@@ -106,46 +109,46 @@ export async function action({
 
 export function EmailChangeEmail({ verifyUrl, otp }: { verifyUrl: string; otp: string }) {
 	return (
-		<E.Html lang="en" dir="ltr">
-			<E.Container>
+		<Html lang="en" dir="ltr">
+			<Container>
 				<h1>
-					<E.Text>MixDown! Email Change</E.Text>
+					<Text>MixDown! Email Change</Text>
 				</h1>
 				<p>
-					<E.Text>
+					<Text>
 						Here&apos;s your verification code: <strong>{otp}</strong>
-					</E.Text>
+					</Text>
 				</p>
 				<p>
-					<E.Text>Or click the link:</E.Text>
+					<Text>Or click the link:</Text>
 				</p>
-				<E.Link href={verifyUrl}>{verifyUrl}</E.Link>
-			</E.Container>
-		</E.Html>
+				<Link href={verifyUrl}>{verifyUrl}</Link>
+			</Container>
+		</Html>
 	)
 }
 
 export function EmailChangeNoticeEmail({ userId }: { userId: string }) {
 	return (
-		<E.Html lang="en" dir="ltr">
-			<E.Container>
+		<Html lang="en" dir="ltr">
+			<Container>
 				<h1>
-					<E.Text>Your MixDown! email has been changed</E.Text>
+					<Text>Your MixDown! email has been changed</Text>
 				</h1>
 				<p>
-					<E.Text>We&apos;re writing to let you know that your MixDown! email has been changed.</E.Text>
+					<Text>We&apos;re writing to let you know that your MixDown! email has been changed.</Text>
 				</p>
 				<p>
-					<E.Text>
+					<Text>
 						If you changed your email address, then you can safely ignore this. But if you did not change your email
 						address, then please contact support immediately.
-					</E.Text>
+					</Text>
 				</p>
 				<p>
-					<E.Text>Your Account ID: {userId}</E.Text>
+					<Text>Your Account ID: {userId}</Text>
 				</p>
-			</E.Container>
-		</E.Html>
+			</Container>
+		</Html>
 	)
 }
 

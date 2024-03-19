@@ -1,6 +1,9 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import * as E from '@react-email/components'
+import { Html } from '@react-email/html'
+import { Container } from '@react-email/container'
+import { Text } from '@react-email/text'
+import { Link } from '@react-email/link'
 import { json, redirect, type ActionFunctionArgs, type MetaFunction } from '@remix-run/cloudflare'
 import { Form, useActionData, useSearchParams } from '@remix-run/react'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
@@ -84,22 +87,22 @@ export async function action({
 
 export function SignupEmail({ onboardingUrl, otp }: { onboardingUrl: string; otp: string }) {
 	return (
-		<E.Html lang="en" dir="ltr">
-			<E.Container>
+		<Html lang="en" dir="ltr">
+			<Container>
 				<h1>
-					<E.Text>Welcome to MixDown!!</E.Text>
+					<Text>Welcome to MixDown!!</Text>
 				</h1>
 				<p>
-					<E.Text>
+					<Text>
 						Here&apos;s your verification code: <strong>{otp}</strong>
-					</E.Text>
+					</Text>
 				</p>
 				<p>
-					<E.Text>Or click the link to get started:</E.Text>
+					<Text>Or click the link to get started:</Text>
 				</p>
-				<E.Link href={onboardingUrl}>{onboardingUrl}</E.Link>
-			</E.Container>
-		</E.Html>
+				<Link href={onboardingUrl}>{onboardingUrl}</Link>
+			</Container>
+		</Html>
 	)
 }
 
