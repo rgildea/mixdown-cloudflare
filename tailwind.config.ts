@@ -1,4 +1,4 @@
-import { marketingPreset } from '#app/routes/_marketing+/tailwind-preset.ts'
+import { marketingPreset } from './app/routes/_marketing+/tailwind-preset.ts'
 import { type Config } from 'tailwindcss'
 import animatePlugin from 'tailwindcss-animate'
 import radixPlugin from 'tailwindcss-radix'
