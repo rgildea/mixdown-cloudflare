@@ -3,7 +3,10 @@ import defaultTheme from 'tailwindcss/defaultTheme.js'
 
 export const extendedTheme = {
 	fontFamily: {
-		sans: [...defaultTheme.fontFamily.sans],
+		logo: ['var(--font-logo)'],
+		pixer: ['var(--font-pixer)'],
+		nourd: ['var(--font-nourd)'],
+		sans: ['var(--font-nourd)', ...defaultTheme.fontFamily.sans],
 	},
 	fontWeight: {
 		black: '900',
@@ -11,9 +14,6 @@ export const extendedTheme = {
 	backgroundImage: {
 		newgradient:
 			'radial-gradient(241.49% 92.92% at 85.26% 77.98%, rgb(255, 255, 255) 63%, rgb(178, 255, 227) 81.25%, rgb(254, 255, 189) 95.64%)',
-	},
-	caretColor: {
-		default: 'hsl(var(--ring))',
 	},
 	colors: {
 		border: 'hsl(var(--border))',

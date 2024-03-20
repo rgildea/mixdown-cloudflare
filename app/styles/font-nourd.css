@@ -1,0 +1,54 @@
+@font-face {
+    font-family: 'Nourd';
+    src: url('/fonts/Nourd/Nourd-Medium.woff2') format('woff2'),
+        url('/fonts/Nourd/Nourd-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nourd';
+    src: url('/fonts/Nourd/Nourd-Heavy.woff2') format('woff2'),
+        url('/fonts/Nourd/Nourd-Heavy.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nourd';
+    src: url('/fonts/Nourd/Nourd-SemiBold.woff2') format('woff2'),
+        url('/fonts/Nourd/Nourd-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nourd';
+    src: url('/fonts/Nourd/Nourd-Regular.woff2') format('woff2'),
+        url('/fonts/Nourd/Nourd-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nourd';
+    src: url('/fonts/Nourd/Nourd-Light.woff2') format('woff2'),
+        url('/fonts/Nourd/Nourd-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nourd';
+    src: url('/fonts/Nourd/Nourd-Bold.woff2') format('woff2'),
+        url('/fonts/Nourd/Nourd-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+

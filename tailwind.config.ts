@@ -1,9 +1,12 @@
-import type { Config } from 'tailwindcss'
-import { extendedTheme } from './app/utils/extended-theme'
+import { marketingPreset } from '#app/routes/_marketing+/tailwind-preset.ts'
+import { type Config } from 'tailwindcss'
 import animatePlugin from 'tailwindcss-animate'
+import radixPlugin from 'tailwindcss-radix'
+import { extendedTheme } from './app/utils/extended-theme.ts'
 
 export default {
 	content: ['./app/**/*.{ts,tsx,jsx,js}'],
+	darkMode: 'class',
 	theme: {
 		container: {
 			center: true,
@@ -14,5 +17,6 @@ export default {
 		},
 		extend: extendedTheme,
 	},
-	plugins: [animatePlugin],
+	presets: [marketingPreset],
+	plugins: [animatePlugin, radixPlugin],
 } satisfies Config

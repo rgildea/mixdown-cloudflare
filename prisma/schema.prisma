@@ -19,16 +19,31 @@ model User {
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
   email       String       @unique
+  username    String       @unique @default("")
   name        String?
   password    Password?
   // tracks     Track[]
   roles       Role[]
   sessions    Session[]
   connections Connection[]
+  image       UserImage?
 }
 
 model Password {
   hash   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+model UserImage {
+  id          String  @id @default(cuid())
+  altText     String?
+  contentType String
+  blob        Bytes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @unique
 }

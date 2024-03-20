@@ -1,7 +1,6 @@
 import FileList from '#app/components/FileList'
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import UploadForm from '#app/components/UploadForm'
-import '#app/styles/global.css'
 import { createR2UploadHandler } from '#app/utils/R2UploadHandler'
 import {
 	ActionFunction,
