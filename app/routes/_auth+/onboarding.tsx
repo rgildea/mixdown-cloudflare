@@ -15,7 +15,7 @@ import { Form, useActionData, useLoaderData, useSearchParams } from '@remix-run/
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
-// import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { EmailSchema, NameSchema, PasswordAndConfirmPasswordSchema } from '#app/utils/user-validation.ts'
@@ -49,11 +49,19 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 	return json({ email })
 }
 
-export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
+export async function action({
+	context: {
+		storageContext,
+		cloudflare: {
+			env: { HONEYPOT_SECRET },
+		},
+	},
+	request,
+}: ActionFunctionArgs) {
 	const { db, authSessionStorage, verificationSessionStorage, toastSessionStorage } = storageContext
 	const email = await requireOnboardingEmail(storageContext, request)
 	const formData = await request.formData()
-	// checkHoneypot(formData)
+	checkHoneypot(formData, HONEYPOT_SECRET)
 	const submission = await parseWithZod(formData, {
 		schema: intent =>
 			SignupFormSchema.superRefine(async (data, ctx) => {

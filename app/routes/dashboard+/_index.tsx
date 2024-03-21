@@ -53,7 +53,7 @@ export default function Index() {
 	const [currentFileURL, setCurrentFileURL] = useState<string>()
 
 	return (
-		<div className="container min-w-fit ">
+		<div className="w-1/2">
 			<h1>Welcome to Mixdown!</h1>
 			<h2>Files</h2>
 			<FileList

@@ -1,26 +1,25 @@
-import { Submission, getFormProps, getInputProps, useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { type ActionFunctionArgs } from '@remix-run/cloudflare'
-import { Form, json, useActionData, useSearchParams } from '@remix-run/react'
-// import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 import { Spacer } from '#app/components/spacer.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
-// import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-// import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { StorageContext } from '#app/utils/auth.server'
 import { useIsPending } from '#app/utils/misc.tsx'
-
+import { Submission, getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { type ActionFunctionArgs } from '@remix-run/cloudflare'
+import { Form, json, useActionData, useSearchParams } from '@remix-run/react'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { z } from 'zod'
+
+import { checkHoneypot } from '#app/utils/honeypot.server'
 import {
-	isCodeValid,
-	handleResetPasswordVerification,
-	handleOnboardingVerification,
 	handleChangeEmailVerification,
 	handleLoginTwoFactorVerification,
+	handleOnboardingVerification,
+	handleResetPasswordVerification,
+	isCodeValid,
 } from '#app/utils/verification.server'
+import { URLSearchParams } from '@cloudflare/workers-types'
+import { z } from 'zod'
 
 export const codeQueryParam = 'code'
 export const targetQueryParam = 'target'
@@ -41,13 +40,15 @@ export async function action({
 	context: {
 		storageContext,
 		cloudflare: {
-			env: { RESEND_API_KEY, MOCKS },
+			env: { RESEND_API_KEY, MOCKS, HONEYPOT_SECRET },
 		},
 	},
 	request,
 }: ActionFunctionArgs) {
 	const body: URLSearchParams | FormData = await request.formData()
-	// checkHoneypot(formData)
+	if (body instanceof FormData) {
+		checkHoneypot(body ?? undefined, HONEYPOT_SECRET)
+	}
 	return validateRequest(storageContext, RESEND_API_KEY, MOCKS, request, body)
 }
 

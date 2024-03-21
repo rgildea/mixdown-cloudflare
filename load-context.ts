@@ -21,6 +21,7 @@ interface Env {
 	DATABASE_URL: string
 	RESEND_API_KEY: string
 	MOCKS: boolean
+	HONEYPOT_SECRET: string
 	STORAGE_BUCKET: R2Bucket
 	SESSIONS: KVNamespace
 }

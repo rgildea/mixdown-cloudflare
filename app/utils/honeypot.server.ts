@@ -1,13 +1,23 @@
 import { Honeypot, SpamError } from 'remix-utils/honeypot/server'
 
-export const honeypot = new Honeypot({
-	validFromFieldName: undefined, //process.env.TESTING ? null : undefined,
-	encryptionSeed: process.env.HONEYPOT_SECRET,
-})
+let honeypot: Honeypot
 
-export function checkHoneypot(formData: FormData) {
+export function createHoneypot(HONEYPOT_SECRET: string): Honeypot {
+	honeypot = new Honeypot({
+		validFromFieldName: undefined, //process.env.TESTING ? null : undefined,
+		encryptionSeed: HONEYPOT_SECRET,
+	})
+	return honeypot
+}
+
+export function getHoneypot(HONEYPOT_SECRET: string): Honeypot {
+	honeypot !== undefined ? honeypot : createHoneypot(HONEYPOT_SECRET)
+	return honeypot
+}
+
+export function checkHoneypot(formData: FormData, HONEYPOT_SECRET: string) {
 	try {
-		honeypot.check(formData)
+		getHoneypot(HONEYPOT_SECRET).check(formData)
 	} catch (error) {
 		if (error instanceof SpamError) {
 			throw new Response('Form not submitted properly', { status: 400 })

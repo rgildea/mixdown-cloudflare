@@ -42,7 +42,6 @@ import { Icon } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
 import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
-import { honeypot } from './utils/honeypot.server.ts'
 import { Theme, getTheme, setTheme } from './utils/theme.server.ts'
 import { useForm, getFormProps } from '@conform-to/react'
 import { useRef } from 'react'
@@ -53,6 +52,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 } from './components/ui/dropdown-menu.tsx'
+import { getHoneypot } from './utils/honeypot.server.ts'
 
 export const links: LinksFunction = () => {
 	return [
@@ -90,7 +90,15 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ name: 'description', content: `The best way to share your mixes` },
 	]
 }
-export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
+export async function loader({
+	request,
+	context: {
+		storageContext,
+		cloudflare: {
+			env: { HONEYPOT_SECRET },
+		},
+	},
+}: LoaderFunctionArgs) {
 	const timings = makeTimings('root loader')
 	const userId = await time(() => getUserId(storageContext, request), {
 		timings,
@@ -133,7 +141,8 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		})
 	}
 	const { toast, headers: toastHeaders } = await getToast(storageContext.toastSessionStorage, request)
-	const honeyProps = honeypot.getInputProps()
+
+	const honeyProps = getHoneypot(HONEYPOT_SECRET).getInputProps()
 
 	return json(
 		{
@@ -228,7 +237,7 @@ function App() {
 
 	return (
 		<Document nonce={nonce} theme={theme} env={{}}>
-			<div className="flex h-screen flex-col justify-between">
+			<div className="justify-top flex h-screen flex-col">
 				<header className="container py-6">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<Logo />
@@ -246,7 +255,7 @@ function App() {
 					</nav>
 				</header>
 
-				<div className="flex-1">
+				<div className="container flex h-screen flex-col items-center">
 					<Outlet />
 				</div>
 

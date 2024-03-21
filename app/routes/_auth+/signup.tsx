@@ -13,7 +13,7 @@ import { ErrorList, Field } from '#app/components/forms.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { ProviderConnectionForm, providerNames } from '#app/utils/connections.tsx'
 import { sendEmail } from '#app/utils/email.server.ts'
-// import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { EmailSchema } from '#app/utils/user-validation.ts'
 import { prepareVerification } from '#app/utils/verification.server.ts'
@@ -26,14 +26,14 @@ export async function action({
 	context: {
 		storageContext,
 		cloudflare: {
-			env: { RESEND_API_KEY, MOCKS },
+			env: { RESEND_API_KEY, MOCKS, HONEYPOT_SECRET },
 		},
 	},
 	request,
 }: ActionFunctionArgs) {
 	const formData = await request.formData()
 	const { db } = storageContext
-	// checkHoneypot(formData)
+	checkHoneypot(formData, HONEYPOT_SECRET)
 
 	const submission = await parseWithZod(formData, {
 		schema: SignupSchema.superRefine(async (data, ctx) => {
