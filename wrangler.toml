@@ -6,12 +6,9 @@ compatibility_flags = [ "nodejs_compat" ]
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
 [vars]
-# MY_VARIABLE = "production_value"
 ENVIRONMENT_NAME="development"
-DATABASE_URL = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiNTkyNTk5Y2ItZmRhYS00YjNmLWJlY2MtOTU3NTQ4YWE4NzUzIiwidGVuYW50X2lkIjoiYTZmZDliNWM0MTE4ZDNmNTEwNWM0NmU2Mzg2YjlkMzY0MDVlZTUwZDI4N2NhODRlOGZhMmFhNDczY2FlYWNmNiIsImludGVybmFsX3NlY3JldCI6IjNiZmQxOTA1LWRlNDMtNGVlOS05YzJhLTMwYWNmZWNhNjEzMCJ9.1FTpj2pIFxrGIpbJ9SxGBi_TcM_TZG6FHIpaoKvr-B8"
 COOKIE_SECRET = "C-IS-FOR-COOKIE"
 HONEYPOT_SECRET = "POOH-LIKES-HONEY"
-RESEND_API_KEY = "re_669j4rhA_PN6UPYgQGsbCgwg3aiKCbEhe"
 MOCKS = false
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
