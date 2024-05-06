@@ -1,8 +1,21 @@
+import { getUserId } from '#app/utils/auth.server'
+import { LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
 import { type MetaFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
 
 export const meta: MetaFunction = () => [{ title: 'MixDown' }]
 
+export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
+	const user = await getUserId(storageContext, request)
+	if (user) {
+		throw redirect('dashboard')
+	}
+	return json({})
+}
+
 export default function Index() {
+	const data = useLoaderData()
+	data
 	return (
 		<main className="font-poppins grid h-full place-items-center">
 			<div className="grid place-items-center px-4 py-16 xl:gap-24">

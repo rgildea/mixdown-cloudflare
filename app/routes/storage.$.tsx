@@ -6,7 +6,6 @@ const publicPath = '/storage/'
 export async function loader({ params, context }: LoaderFunctionArgs) {
 	const env = context.cloudflare.env
 	const key = params['*']
-	console.log('key', key)
 	if (!key) {
 		return new Response('Not found', { status: 404 })
 	}

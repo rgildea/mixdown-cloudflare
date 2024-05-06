@@ -63,7 +63,6 @@ export async function action({
 		type: 'onboarding',
 		target: email,
 	})
-	console.log('verification prepared: ', verifyUrl.toString(), redirectTo.toString(), otp)
 
 	const response = await sendEmail(RESEND_API_KEY, MOCKS, {
 		to: email,

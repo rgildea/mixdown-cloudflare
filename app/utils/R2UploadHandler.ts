@@ -43,7 +43,6 @@ export async function uploadToR2(
 		},
 	}
 
-	console.log('Uploading', key, accumulatedData.length, 'bytes', options)
 	const r2Object = await r2Bucket.put(key, accumulatedData.buffer, options)
 
 	if (r2Object == null || r2Object.key === undefined) {

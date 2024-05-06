@@ -22,7 +22,6 @@ const LoginFormSchema = z.object(
 )
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
-	console.log('entering action')
 	await requireAnonymous(storageContext, request)
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -43,7 +42,6 @@ export async function action({ context: { storageContext }, request }: ActionFun
 		async: true,
 	})
 
-	// console.log(submission)
 	if (submission.status !== 'success' || !submission.value.session) {
 		return json(
 			{ result: submission.reply({ hideFields: ['password'] }) },
@@ -51,14 +49,12 @@ export async function action({ context: { storageContext }, request }: ActionFun
 		)
 	}
 	const { session, remember, redirectTo } = submission.value
-	// console.log('created session', session)
-	// console.log('about to handle new session')
 	return handleNewSession({
 		storageContext,
 		request,
 		session,
 		remember: remember ?? false,
-		redirectTo,
+		redirectTo: redirectTo || '/dashboard',
 	})
 }
 

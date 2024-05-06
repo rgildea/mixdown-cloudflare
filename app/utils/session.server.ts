@@ -108,7 +108,6 @@ export async function handleNewSession(
 	responseInit?: ResponseInit,
 ) {
 	const { db, authSessionStorage, verificationSessionStorage } = storageContext
-	console.log('handling new session')
 	const verification = await db.verification.findUnique({
 		select: { id: true },
 		where: {
@@ -118,7 +117,6 @@ export async function handleNewSession(
 	const userHasTwoFactor = Boolean(verification)
 
 	if (userHasTwoFactor) {
-		console.log(`user ${session.userId} has two factor enabled, redirecting to verification page`)
 		const verifySession = await verificationSessionStorage.getSession()
 		verifySession.set(unverifiedSessionIdKey, session.id)
 		verifySession.set(rememberKey, remember)
@@ -140,7 +138,6 @@ export async function handleNewSession(
 			),
 		)
 	} else {
-		console.log(`user ${session.userId} doesn't have two factor enabled, logging in`)
 		const authSession = await authSessionStorage.getSession(request.headers.get('cookie'))
 		authSession.set(sessionKey, session.id)
 

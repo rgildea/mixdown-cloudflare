@@ -68,7 +68,7 @@ export async function sendEmail(
 			data: parsedData,
 		} as const
 	} else {
-		console.log('Error sending email:', data)
+		console.error('Error sending email:', data)
 		const parseResult = resendErrorSchema.safeParse(data)
 		if (parseResult.success) {
 			return {

@@ -43,15 +43,19 @@ export async function getUserId({ db, authSessionStorage }: StorageContext, requ
 export async function requireUserId(
 	storageContext: StorageContext,
 	request: Request,
-	{ redirectTo }: { redirectTo?: string | null } = {},
+	{ redirectTo, redirectToLogin = true }: { redirectTo?: string | null; redirectToLogin?: boolean } = {},
 ) {
 	const userId = await getUserId(storageContext, request)
 	if (!userId) {
 		const requestUrl = new URL(request.url)
 		redirectTo = redirectTo === null ? null : redirectTo ?? `${requestUrl.pathname}${requestUrl.search}`
-		const loginParams = redirectTo ? new URLSearchParams({ redirectTo }) : null
-		const loginRedirect = ['/login', loginParams?.toString()].filter(Boolean).join('?')
-		throw redirect(loginRedirect)
+		if (redirectToLogin) {
+			const loginParams = redirectTo ? new URLSearchParams({ redirectTo }) : null
+			const loginRedirect = ['/login', loginParams?.toString()].filter(Boolean).join('?')
+			throw redirect(loginRedirect)
+		} else {
+			throw redirect(redirectTo || '/')
+		}
 	}
 	return userId
 }

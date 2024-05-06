@@ -24,9 +24,7 @@ export async function servePublicPathFromStorage(bucket: R2Bucket, key: string) 
 	if (!object) {
 		return notFoundResponse
 	}
-	console.log('object size', object.size)
 	const headers = object.httpMetadata ? extractHeaders(object.httpMetadata) : new Headers()
-	console.log('headers', headers)
 	headers.set('etag', object.httpEtag)
 	headers.delete('httpEtag')
 

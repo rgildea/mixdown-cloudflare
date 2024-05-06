@@ -39,7 +39,6 @@ async function requireOnboardingEmail(storageContext: StorageContext, request: R
 	const verifySession = await storageContext.verificationSessionStorage.getSession(request.headers.get('cookie'))
 	const email = verifySession.get(onboardingEmailSessionKey)
 	if (typeof email !== 'string' || !email) {
-		console.log("No onboarding email found, redirecting to '/signup'")
 		throw redirect('/signup')
 	}
 	return email

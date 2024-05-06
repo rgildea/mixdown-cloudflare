@@ -2,6 +2,7 @@ import FileList from '#app/components/FileList'
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import UploadForm from '#app/components/UploadForm'
 import { createR2UploadHandler } from '#app/utils/R2UploadHandler'
+import { requireUserId } from '#app/utils/auth.server'
 import {
 	ActionFunction,
 	LoaderFunctionArgs,
@@ -16,7 +17,10 @@ import 'react-h5-audio-player/lib/styles.css'
 
 const acceptedContentTypes = ['audio/x-aiff', 'audio/aiff', 'audio/LPCM', 'audio/mpeg', 'audio/wav']
 
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ context, request }: LoaderFunctionArgs) {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const userId = await requireUserId(context.storageContext, request)
+
 	const bucket = context.cloudflare.env.STORAGE_BUCKET
 	const listOptions: R2ListOptions = {
 		include: ['customMetadata'],
