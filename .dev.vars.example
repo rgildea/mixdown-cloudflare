@@ -1,0 +1,4 @@
+# DB connections
+DATABASE_URL=<the prisma accelerate connection pool url>
+DIRECT_URL=<prisma accelerate direct url>
+RESEND_API_KEY=<Resend API key for sending transactional emails>
