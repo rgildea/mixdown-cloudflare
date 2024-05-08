@@ -22,11 +22,11 @@ model User {
   username    String       @unique @default("")
   name        String?
   password    Password?
-  // tracks     Track[]
   roles       Role[]
   sessions    Session[]
   connections Connection[]
   image       UserImage?
+  tracks      Track[]
 }
 
 model Password {
@@ -134,29 +134,36 @@ model Connection {
   @@unique([providerName, providerId])
 }
 
-// model Track {
-//   id         String         @id @default(uuid())
-//   created_at DateTime       @default(now())
-//   updated_at DateTime       @updatedAt
-//   owner      User           @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   ownerId    String
-//   title      String?
-//   versions   TrackVersion[]
-// }
+model Track {
+  id         String         @id @default(uuid())
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  creator    User           @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  creatorId  String
+  title      String?
+  versions   TrackVersion[]
+}
 
-// model TrackVersion {
-//   id         String     @id @default(uuid())
-//   created_at DateTime   @default(now())
-//   updated_at DateTime   @updatedAt
-//   track      Track      @relation(fields: [trackId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   trackId    String
-//   AudioFile  AudioFile?
-// }
+model TrackVersion {
+  id         String     @id @default(uuid())
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  track      Track      @relation(fields: [trackId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  trackId    String
+  title      String
+  AudioFile  AudioFile?
+}
 
-// model AudioFile {
-//   id             String       @id @default(uuid())
-//   created_at     DateTime     @default(now())
-//   updated_at     DateTime     @updatedAt
-//   version        TrackVersion @relation(fields: [trackVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   trackVersionId String       @unique
-// }
+model AudioFile {
+  id             String       @id @default(uuid())
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  version        TrackVersion @relation(fields: [trackVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  trackVersionId String       @unique
+  fileKey        String       @unique
+  fileName       String
+  fileSize       Int
+  mimeType       String
+  url            String
+  duration       Int?
+}
