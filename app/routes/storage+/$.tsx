@@ -1,33 +1,57 @@
-import { servePublicPathFromStorage, deleteObject } from '#app/utils/StorageUtils'
-import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/cloudflare'
+import { deleteObject, extractHeaders } from '#app/utils/StorageUtils'
+import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/cloudflare'
 
 const publicPath = '/storage/'
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
+	const notFoundResponse = new Response('Not found', { status: 404 })
+
 	const env = context.cloudflare.env
 	const key = params['*']
 	if (!key) {
 		return new Response('Not found', { status: 404 })
 	}
 
-	return servePublicPathFromStorage(env.STORAGE_BUCKET, key)
+	// const response = await servePublicPathFromStorage(env.STORAGE_BUCKET, key)
+	const object: R2ObjectBody | null = await env.STORAGE_BUCKET.get(key)
+	if (!object) {
+		return notFoundResponse
+	}
+
+	const headers = object.httpMetadata ? extractHeaders(object.httpMetadata) : new Headers()
+	const customMetadata = object.customMetadata || {}
+
+	headers.set('etag', object.httpEtag)
+	headers.delete('httpEtag')
+	headers.set('filename', customMetadata.filename || 'unknown')
+	headers.set('Content-Length', object.size.toString())
+	headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream')
+	headers
+	const response = new Response(object.body, { headers, status: 200, statusText: 'OK' })
+
+	return response
 }
 
 export async function action({ params, request, context }: ActionFunctionArgs) {
+	const NotImplementedResponse = new Response('Not implemented', { status: 501 })
 	const bucket = context.cloudflare.env.STORAGE_BUCKET
 	const key = getKeyFromPath(params['*'] as string)
 	switch (request.method) {
-		case 'POST': {
-			return new Response('Not implemented', { status: 501 })
-		}
-		case 'PUT': {
-			return new Response('Not implemented', { status: 501 })
-		}
+		case 'POST': // intentional fallthrough
+		case 'PUT': // intentional fallthrough
 		case 'PATCH': {
-			return new Response('Not implemented', { status: 501 })
+			return NotImplementedResponse
 		}
+
 		case 'DELETE': {
-			return deleteObject(bucket, key)
+			try {
+				await deleteObject(bucket, key)
+			} catch (err) {
+				console.error(err)
+				throw new Response('Failed to delete object', { status: 500 })
+			}
+
+			return redirect('/dashboard')
 		}
 	}
 }

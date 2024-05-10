@@ -1,5 +1,5 @@
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { useFetcher } from '@remix-run/react'
+import { Form } from '@remix-run/react'
 
 interface FileListProps {
 	files?: { key: string; filename: string }[]
@@ -7,7 +7,7 @@ interface FileListProps {
 }
 
 function FileList({ files, setURL }: FileListProps) {
-	const fetcher = useFetcher({ key: 'delete' })
+	// const fetcher = useFetcher({ key: 'delete' })
 
 	return (
 		<div
@@ -21,7 +21,7 @@ function FileList({ files, setURL }: FileListProps) {
 			{files &&
 				files.map((file, index) => {
 					return (
-						<fetcher.Form key={file.key} method="DELETE" action={`/storage/${file.key}`}>
+						<Form key={file.key} method="DELETE" action={`/storage/${file.key}`}>
 							<div
 								style={{
 									display: 'flex',
@@ -32,20 +32,32 @@ function FileList({ files, setURL }: FileListProps) {
 									padding: '20px',
 									margin: '2px',
 								}}
-								onClick={() => setURL(`/storage/${file.key}`)}
+								onClick={() => {
+									setURL(`/storage/${file.key}`)
+								}}
 								role="button"
 								onKeyDown={e => e.key === 'Enter' && setURL(`/storage/${file.key}`)}
 								tabIndex={index + 1}
 							>
 								<div style={{ flex: 10 }}>
+									<InlineIcon icon="akar-icons:play"></InlineIcon>
 									<span>{file.filename}</span>
 								</div>
 
-								<button style={{}} className="btn" type="submit" onSubmit={e => e.preventDefault()}>
+								<button
+									className="btn text-button"
+									type="submit"
+									onClick={e => {
+										e.stopPropagation()
+									}}
+									onSubmit={e => {
+										e.preventDefault()
+									}}
+								>
 									<InlineIcon icon="akar-icons:cross" />
 								</button>
 							</div>
-						</fetcher.Form>
+						</Form>
 					)
 				})}
 		</div>
