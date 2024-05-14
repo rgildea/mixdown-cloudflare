@@ -5,10 +5,46 @@ const prisma = new PrismaClient()
 const userData: Prisma.UserCreateInput[] = [
 	{
 		email: 'ryangildea@gmail.com',
+		username: 'ryangildea',
 		password: {
 			create: {
 				hash: await bcrypt.hash('ryanrox', 10),
 			},
+		},
+		tracks: {
+			create: [
+				{
+					title: 'Test Track',
+					versions: {
+						create: [
+							{
+								title: 'Test Version',
+								audioFile: {
+									create: {
+										fileKey: 'testfilekey',
+										fileName: 'testfile.mp3',
+										fileSize: 123456,
+										contentType: 'audio/mpeg',
+										url: 'https://example.com/testfile.mp3',
+									},
+								},
+							},
+							{
+								title: 'Updated Test Version',
+								audioFile: {
+									create: {
+										fileKey: 'testfileupdatedkey',
+										fileName: 'testfileupdated.mp3',
+										fileSize: 123456,
+										contentType: 'audio/mpeg',
+										url: 'https://example.com/testfileupdated.mp3',
+									},
+								},
+							},
+						],
+					},
+				},
+			],
 		},
 	},
 ]
@@ -16,6 +52,14 @@ const userData: Prisma.UserCreateInput[] = [
 async function main() {
 	console.log(`Start seeding ...`)
 
+	prisma.track.deleteMany({ where: {} })
+	prisma.user.deleteMany({ where: {} })
+	prisma.role.deleteMany({ where: {} })
+	prisma.permission.deleteMany({ where: {} })
+	prisma.verification.deleteMany({ where: {} })
+	prisma.session.deleteMany({ where: {} })
+
+	console.time('🗑️ Deleted all data...')
 	console.time('🔑 Created permissions...')
 	const entities = ['user', 'track']
 	const actions = ['create', 'read', 'update', 'delete']
@@ -54,12 +98,14 @@ async function main() {
 	})
 	console.timeEnd('👑 Created roles...')
 
+	console.time('🔑 Created users...')
 	for (const u of userData) {
 		const user = await prisma.user.create({
 			data: u,
 		})
 		console.log(`Created user with id: ${user.id}`)
 	}
+	console.timeEnd('🔑 Created users...')
 	console.log(`Seeding finished.`)
 }
 

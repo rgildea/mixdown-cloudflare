@@ -9,6 +9,7 @@ import {
 } from './session.server'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { combineHeaders } from './misc'
+import { Prisma } from '@prisma/client'
 
 export type StorageContext = {
 	db: PrismaClient
@@ -38,6 +39,52 @@ export async function getUserId({ db, authSessionStorage }: StorageContext, requ
 		})
 	}
 	return session.user.id
+}
+
+const trackVersionWithAudioFile = Prisma.validator<Prisma.TrackVersionDefaultArgs>()({
+	select: {
+		id: true,
+		version: true,
+		title: true,
+		audioFile: true,
+	},
+})
+
+const tracksWithVersions = Prisma.validator<Prisma.TrackDefaultArgs>()({
+	select: {
+		id: true,
+		title: true,
+		versions: {
+			select: trackVersionWithAudioFile.select,
+			orderBy: { version: 'desc' },
+		},
+	},
+})
+
+const userWithTracks = Prisma.validator<Prisma.UserDefaultArgs>()({
+	select: { id: true, email: true, name: true, tracks: tracksWithVersions },
+})
+
+export type UserWithTracks = Prisma.UserGetPayload<typeof userWithTracks>
+
+export async function getUserWithTracks(storageContext: StorageContext, request: Request) {
+	const userId = await getUserId(storageContext, request)
+	const { db } = storageContext
+	if (!userId) return null
+
+	const user = await db.user.findUnique({
+		select: {
+			id: true,
+			email: true,
+			name: true,
+			tracks: {
+				select: tracksWithVersions.select,
+				orderBy: { created_at: 'desc' },
+			},
+		},
+		where: { id: userId },
+	})
+	return user
 }
 
 export async function requireUserId(

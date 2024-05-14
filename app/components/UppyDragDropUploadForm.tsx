@@ -48,7 +48,7 @@ function makeUppy(
 			console.log('Added files', data)
 		})
 		.on('upload-success', (file, response) => {
-			console.log('upload complete', file?.name, response.uploadURL)
+			console.log('upload success', file?.name, response)
 			if (file) {
 				onSuccess(file, response)
 			} else {

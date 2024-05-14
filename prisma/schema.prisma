@@ -149,21 +149,24 @@ model TrackVersion {
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
   track      Track      @relation(fields: [trackId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  version    Int        @default(autoincrement())
   trackId    String
   title      String
-  AudioFile  AudioFile?
+  audioFile  AudioFile?
+
+  @@unique([id, version])
 }
 
 model AudioFile {
-  id             String       @id @default(uuid())
-  created_at     DateTime     @default(now())
-  updated_at     DateTime     @updatedAt
-  version        TrackVersion @relation(fields: [trackVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  trackVersionId String       @unique
-  fileKey        String       @unique
+  id             String        @id @default(uuid())
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+  version        TrackVersion? @relation(fields: [trackVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  trackVersionId String?       @unique
+  fileKey        String        @unique
   fileName       String
   fileSize       Int
-  mimeType       String
+  contentType    String
   url            String
   duration       Int?
 }

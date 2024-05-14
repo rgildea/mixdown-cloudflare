@@ -12,6 +12,7 @@ export type R2UploadHandlerFilterArgs = {
 export type CreateUploadHandlerParams = {
 	bucket: R2Bucket
 	filter?: (args: R2UploadHandlerFilterArgs) => boolean | Promise<boolean>
+	onSuccess?: (r2Object: R2Object) => void
 	maxPartSize?: number
 }
 
@@ -49,11 +50,13 @@ export async function uploadToR2(
 		throw new Error(`Failed to upload file ${key}`)
 	}
 
-	return r2Object.key
+	// console.log('Uploaded file to R2 bucket', r2Object)
+
+	return r2Object
 }
 
-export function createR2UploadHandler({ bucket, filter }: CreateUploadHandlerParams): UploadHandler {
-	return async ({ name, filename, contentType, data }: UploadHandlerPart) => {
+export function createR2UploadHandler({ bucket, filter, onSuccess }: CreateUploadHandlerParams) {
+	return (async ({ name, filename, contentType, data }: UploadHandlerPart) => {
 		if (!filename) {
 			return undefined
 		}
@@ -62,6 +65,11 @@ export function createR2UploadHandler({ bucket, filter }: CreateUploadHandlerPar
 			return undefined
 		}
 
-		return await uploadToR2(bucket, data, filename, contentType)
-	}
+		const r2Object = await uploadToR2(bucket, data, filename, contentType)
+		if (onSuccess) {
+			console.log('calling onSuccess')
+			onSuccess(r2Object)
+		}
+		return r2Object.key
+	}) satisfies UploadHandler
 }
