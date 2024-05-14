@@ -108,6 +108,7 @@ CREATE TABLE "TrackVersion" (
     "id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "version" SERIAL NOT NULL,
     "trackId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
 
@@ -119,11 +120,11 @@ CREATE TABLE "AudioFile" (
     "id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "trackVersionId" TEXT NOT NULL,
+    "trackVersionId" TEXT,
     "fileKey" TEXT NOT NULL,
     "fileName" TEXT NOT NULL,
     "fileSize" INTEGER NOT NULL,
-    "mimeType" TEXT NOT NULL,
+    "contentType" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "duration" INTEGER,
 
@@ -168,6 +169,9 @@ CREATE UNIQUE INDEX "Verification_target_type_key" ON "Verification"("target", "
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Connection_providerName_providerId_key" ON "Connection"("providerName", "providerId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TrackVersion_id_version_key" ON "TrackVersion"("id", "version");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AudioFile_trackVersionId_key" ON "AudioFile"("trackVersionId");
