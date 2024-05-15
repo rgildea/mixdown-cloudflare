@@ -13,34 +13,37 @@ const createAudioFileRecord = async (
 	contentType: string,
 	fileSize: number,
 ) => {
-	console.log('createAudioFileRecord was called')
-	const result = db.audioFile.create({
-		data: {
-			contentType: contentType,
-			fileKey: key,
-			fileName: filename,
-			fileSize: fileSize,
-			url: `/storage/${key}`,
-			version: {
-				create: {
-					title: `filename version 1}`,
-					version: 1,
-					track: {
-						create: {
-							title: filename,
-							creator: {
-								connect: {
-									id: userId,
+	try {
+		const result = db.audioFile.create({
+			data: {
+				contentType: contentType,
+				fileKey: key,
+				fileName: filename,
+				fileSize: fileSize,
+				url: `/storage/${key}`,
+				version: {
+					create: {
+						title: `filename version 1}`,
+						version: 1,
+						track: {
+							create: {
+								title: filename,
+								creator: {
+									connect: {
+										id: userId,
+									},
 								},
 							},
 						},
 					},
 				},
 			},
-		},
-	})
-	console.log('createAudioFileRecord result:', result)
-	return result
+		})
+		return result
+	} catch (error) {
+		console.error(error)
+		throw new Error('Failed to create audio file record')
+	}
 }
 
 export const action: ActionFunction = (async ({ context, request }: ActionFunctionArgs) => {
@@ -52,21 +55,23 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 		bucket: bucket,
 		filter: ({ contentType }) => acceptedContentTypes.includes(contentType),
 		onSuccess: async r2Object => {
-			console.log('onSuccess called!')
-			const result = await createAudioFileRecord(
-				db,
-				userId,
-				r2Object.key,
-				r2Object.customMetadata?.filename || 'unknown',
-				r2Object.httpMetadata?.contentType || 'application/octet-stream',
-				r2Object.size,
-			)
-			console.log('-----------Save to DB Result:', result)
+			try {
+				await createAudioFileRecord(
+					db,
+					userId,
+					r2Object.key,
+					r2Object.customMetadata?.filename || 'unknown',
+					r2Object.httpMetadata?.contentType || 'application/octet-stream',
+					r2Object.size,
+				)
+			} catch (err) {
+				console.error(err)
+				throw new Error('Failed to create audio file record')
+			}
 		},
 	})
 
 	const formData = await unstable_parseMultipartFormData(request, r2UploadHandler)
-
 	if (!formData || !formData.get('file')) {
 		throw new Error('Error uploading file to R2 bucket')
 	}
@@ -75,6 +80,5 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 	if (!fileKey) {
 		throw new Error('Error uploading file to R2 bucket')
 	}
-	console.log('Uploaded file to R2 bucket', fileKey)
 	return json({ fileKey })
 }) satisfies ActionFunction

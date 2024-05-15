@@ -5,9 +5,10 @@ import { Form } from '@remix-run/react'
 interface TrackListProps {
 	tracks: TrackWithVersions[]
 	setURL: (url: string) => void
+	onTrackDeleted: (track: TrackWithVersions) => void
 }
 
-function TrackList({ tracks, setURL }: TrackListProps) {
+function TrackList({ tracks, setURL, onTrackDeleted }: TrackListProps) {
 	return (
 		<div
 			style={{
@@ -35,6 +36,7 @@ function TrackList({ tracks, setURL }: TrackListProps) {
 										margin: '2px',
 									}}
 									onClick={() => {
+										console.log('clicked', trackUrl)
 										setURL(trackUrl)
 									}}
 									role="button"
@@ -51,6 +53,7 @@ function TrackList({ tracks, setURL }: TrackListProps) {
 										type="submit"
 										onClick={e => {
 											e.stopPropagation()
+											onTrackDeleted(track)
 										}}
 										onSubmit={e => {
 											e.preventDefault()

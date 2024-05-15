@@ -4,15 +4,18 @@ import 'react-h5-audio-player/lib/styles.css'
 export default function MixdownPlayer(props: { url?: string }) {
 	return (
 		<>
-			{props.url && <p>Playing: {props.url}</p>}
-			<AudioPlayer
-				autoPlay={false}
-				onPlay={() => console.log('onPlay')}
-				showDownloadProgress={true}
-				showFilledProgress={true}
-				showJumpControls={false}
-				src={props.url}
-			/>
+			{props.url && (
+				<>
+					<AudioPlayer
+						autoPlay={false}
+						showDownloadProgress={true}
+						showFilledProgress={true}
+						showJumpControls={false}
+						showFilledVolume={true}
+						src={props.url}
+					/>
+				</>
+			)}
 		</>
 	)
 }

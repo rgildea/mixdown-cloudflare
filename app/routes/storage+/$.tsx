@@ -1,4 +1,5 @@
 import { deleteObject, extractHeaders } from '#app/utils/StorageUtils'
+import { deleteTrackByAudioFile } from '#app/utils/track.server'
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/cloudflare'
 
 const publicPath = '/storage/'
@@ -45,6 +46,7 @@ export async function action({ params, request, context }: ActionFunctionArgs) {
 
 		case 'DELETE': {
 			try {
+				await deleteTrackByAudioFile(context.storageContext, key)
 				await deleteObject(bucket, key)
 			} catch (err) {
 				console.error(err)

@@ -50,8 +50,6 @@ export async function uploadToR2(
 		throw new Error(`Failed to upload file ${key}`)
 	}
 
-	// console.log('Uploaded file to R2 bucket', r2Object)
-
 	return r2Object
 }
 
@@ -67,7 +65,6 @@ export function createR2UploadHandler({ bucket, filter, onSuccess }: CreateUploa
 
 		const r2Object = await uploadToR2(bucket, data, filename, contentType)
 		if (onSuccess) {
-			console.log('calling onSuccess')
 			onSuccess(r2Object)
 		}
 		return r2Object.key

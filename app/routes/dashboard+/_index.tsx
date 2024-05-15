@@ -1,8 +1,9 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
+import { Card, CardContent, CardDescription, CardTitle } from '#app/components/ui/card'
 import { requireUserId } from '#app/utils/auth.server'
-import { getUserTracksWithVersionInfo } from '#app/utils/track.server'
+import { TrackWithVersions, getUserTracksWithVersionInfo } from '#app/utils/track.server'
 import { LoaderFunction, LoaderFunctionArgs, json, type MetaFunction } from '@remix-run/cloudflare'
 import { useLoaderData, useRevalidator } from '@remix-run/react'
 import { useState } from 'react'
@@ -33,18 +34,35 @@ export default function Index() {
 
 	return (
 		tracks && (
-			<div className="w-1/2">
-				<h1>Welcome to Mixdown!</h1>
-				<h2>Files</h2>
-				<MixdownPlayer url={currentFileURL} />
-				<TrackList tracks={tracks} setURL={setCurrentFileURL} />
-				<UppyDragDropUploadForm
-					onSuccess={() => {
-						revalidator.revalidate()
-					}}
-					endpoint={uploadEndpoint}
-				/>
-			</div>
+			<Card className="w-1/2 p-6">
+				<CardTitle>My Tracks</CardTitle>
+				<CardDescription className="mb-4">Upload your tracks and listen to them here!</CardDescription>
+				<CardContent className="mb-4">
+					<p className="text-sm text-gray-500">Note: Only the latest version of each track is shown here.</p>
+					<MixdownPlayer url={currentFileURL} />
+					<TrackList
+						tracks={tracks}
+						setURL={setCurrentFileURL}
+						onTrackDeleted={track => {
+							if (getLatestVersionUrl(track) === currentFileURL) {
+								setCurrentFileURL(undefined)
+							}
+						}}
+					/>
+					<UppyDragDropUploadForm
+						className="mt-4"
+						onSuccess={() => {
+							revalidator.revalidate()
+						}}
+						endpoint={uploadEndpoint}
+					/>
+				</CardContent>
+			</Card>
 		)
 	)
+}
+
+const getLatestVersionUrl = (track: TrackWithVersions) => {
+	const audioFile = track.versions[0]?.audioFile
+	return audioFile?.url
 }
