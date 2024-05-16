@@ -1,6 +1,6 @@
 import { createR2UploadHandler } from '#app/utils/R2UploadHandler'
 import { ActionFunction, ActionFunctionArgs, json, unstable_parseMultipartFormData } from '@remix-run/cloudflare'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client/edge'
 import { requireUserId } from '#app/utils/auth.server'
 
 const acceptedContentTypes = ['audio/x-aiff', 'audio/aiff', 'audio/LPCM', 'audio/mpeg', 'audio/wav']
@@ -14,12 +14,13 @@ const createAudioFileRecord = async (
 	fileSize: number,
 ) => {
 	try {
+		console.log(`createAudioFileRecord for ${filename} called`)
 		const result = db.audioFile.create({
 			data: {
-				contentType: contentType,
+				contentType,
 				fileKey: key,
 				fileName: filename,
-				fileSize: fileSize,
+				fileSize,
 				url: `/storage/${key}`,
 				version: {
 					create: {
@@ -39,6 +40,8 @@ const createAudioFileRecord = async (
 				},
 			},
 		})
+		console.log('Audio file record created')
+		console.log('Result:', result)
 		return result
 	} catch (error) {
 		console.error(error)
@@ -55,6 +58,8 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 		bucket: bucket,
 		filter: ({ contentType }) => acceptedContentTypes.includes(contentType),
 		onSuccess: async r2Object => {
+			console.log('R2 upload success', r2Object.key)
+			console.log('Creating audio file record')
 			try {
 				await createAudioFileRecord(
 					db,
@@ -64,6 +69,7 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 					r2Object.httpMetadata?.contentType || 'application/octet-stream',
 					r2Object.size,
 				)
+				console.log('Audio file record created successfully')
 			} catch (err) {
 				console.error(err)
 				throw new Error('Failed to create audio file record')

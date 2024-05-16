@@ -1,15 +1,14 @@
-import { Connection, Password, PrismaClient, User } from '@prisma/client/edge'
+import { Connection, Password, Prisma, PrismaClient, User } from '@prisma/client/edge'
 import { redirect } from '@remix-run/cloudflare'
 import bcrypt from 'bcryptjs'
+import { safeRedirect } from 'remix-utils/safe-redirect'
+import { combineHeaders } from './misc'
 import {
 	createAuthSessionStorage,
 	createConnectionSessionStorage,
 	createToastSessionStorage,
 	createVerificationSessionStorage,
 } from './session.server'
-import { safeRedirect } from 'remix-utils/safe-redirect'
-import { combineHeaders } from './misc'
-import { Prisma } from '@prisma/client'
 
 export type StorageContext = {
 	db: PrismaClient
