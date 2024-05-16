@@ -7,7 +7,7 @@ export const prisma = (databaseUrl: string) => {
 	// the dev server to see your changes.
 
 	// Feel free to change this log threshold to something that makes sense for you
-	const logThreshold = 20
+	const logThreshold = 0 // ms
 
 	const client = new PrismaClient({
 		datasources: { db: { url: databaseUrl } },
@@ -18,6 +18,7 @@ export const prisma = (databaseUrl: string) => {
 		],
 	})
 	client.$on('query', async e => {
+		// console.info('prisma:que444ry', e.query, e.params)
 		if (e.duration < logThreshold) return
 		const color =
 			e.duration < logThreshold * 1.1

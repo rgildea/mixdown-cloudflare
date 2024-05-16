@@ -15,7 +15,7 @@ const createAudioFileRecord = async (
 ) => {
 	try {
 		console.log(`createAudioFileRecord for ${filename} called`)
-		const result = db.audioFile.create({
+		const result = await db.audioFile.create({
 			data: {
 				contentType,
 				fileKey: key,
@@ -78,6 +78,7 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 	})
 
 	const formData = await unstable_parseMultipartFormData(request, r2UploadHandler)
+	console.log('formData:', formData)
 	if (!formData || !formData.get('file')) {
 		throw new Error('Error uploading file to R2 bucket')
 	}
