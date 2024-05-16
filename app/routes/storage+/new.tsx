@@ -79,6 +79,7 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 
 	const formData = await unstable_parseMultipartFormData(request, r2UploadHandler)
 	console.log('formData:', formData)
+	console.log('formData.get("file"):', formData?.get('file'))
 	if (!formData || !formData.get('file')) {
 		throw new Error('Error uploading file to R2 bucket')
 	}
