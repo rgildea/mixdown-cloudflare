@@ -60,20 +60,21 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 		onSuccess: async r2Object => {
 			console.log('R2 upload success', r2Object.key)
 			console.log('Creating audio file record')
-			try {
-				await createAudioFileRecord(
-					db,
-					userId,
-					r2Object.key,
-					r2Object.customMetadata?.filename || 'unknown',
-					r2Object.httpMetadata?.contentType || 'application/octet-stream',
-					r2Object.size,
-				)
-				console.log('Audio file record created successfully')
-			} catch (err) {
-				console.error(err)
-				throw new Error('Failed to create audio file record')
-			}
+			// try {
+			const result = await createAudioFileRecord(
+				db,
+				userId,
+				r2Object.key,
+				r2Object.customMetadata?.filename || 'unknown',
+				r2Object.httpMetadata?.contentType || 'application/octet-stream',
+				r2Object.size,
+			)
+			console.log('Result:', result)
+			console.log('Audio file record created successfully')
+			// } catch (err) {
+			// 	console.error(err)
+			// 	throw new Error('Failed to create audio file record')
+			// }
 		},
 	})
 
