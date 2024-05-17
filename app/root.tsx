@@ -317,15 +317,15 @@ function UserDropdown() {
 			</DropdownMenuTrigger>
 			<DropdownMenuPortal>
 				<DropdownMenuContent sideOffset={8} align="start">
-					<DropdownMenuItem asChild>
+					{/* <DropdownMenuItem asChild>
 						<Link prefetch="intent" to={`/users/${user.username}`}>
 							<Icon className="text-body-md" name="avatar">
 								Profile
 							</Icon>
 						</Link>
-					</DropdownMenuItem>
+					</DropdownMenuItem> */}
 					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}/tracks`}>
+						<Link prefetch="intent" to={`/tracks`}>
 							<Icon className="text-body-md" name="pencil-2">
 								Tracks
 							</Icon>

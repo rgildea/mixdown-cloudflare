@@ -53,7 +53,7 @@ export async function action({ params, request, context }: ActionFunctionArgs) {
 				throw new Response('Failed to delete object', { status: 500 })
 			}
 
-			return redirect('/dashboard')
+			return redirect('../')
 		}
 	}
 }

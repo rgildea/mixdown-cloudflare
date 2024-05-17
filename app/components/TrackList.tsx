@@ -34,6 +34,7 @@ function TrackList({ tracks, setURL, onTrackDeleted }: TrackListProps) {
 										cursor: 'pointer',
 										padding: '20px',
 										margin: '2px',
+										backgroundColor: 'silver',
 									}}
 									onClick={() => {
 										console.log('clicked', trackUrl)

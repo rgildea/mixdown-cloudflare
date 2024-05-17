@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client/edge'
+import { Prisma, PrismaClient } from '@prisma/client/edge'
 import { StorageContext } from './auth.server'
 
 const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({
@@ -43,8 +43,23 @@ export async function getUserTracksWithVersionInfo(storageContext: StorageContex
 	const { db } = storageContext
 	if (!userId) return null
 
-	const tracks = await db.track.findMany({
+	const tracks: TrackWithVersions[] = await db.track.findMany({
 		select: trackWithVersionsSelect,
+		where: { creatorId: userId },
+		orderBy: { created_at: 'desc' },
+	})
+	return tracks
+}
+
+export async function getUserTracksWithoutVersions(storageContext: StorageContext, userId: string) {
+	const { db } = storageContext
+	if (!userId) return null
+
+	const tracks = await db.track.findMany({
+		select: {
+			id: true,
+			title: true,
+		},
 		where: { creatorId: userId },
 		orderBy: { created_at: 'desc' },
 	})
@@ -123,5 +138,49 @@ export async function deleteTrackById(storageContext: StorageContext, trackId: s
 	} catch (error) {
 		console.error(error)
 		throw new Error('Failed to delete track')
+	}
+}
+
+export const createAudioFileRecord = async (
+	db: PrismaClient,
+	userId: string,
+	key: string,
+	filename: string,
+	contentType: string,
+	fileSize: number,
+) => {
+	try {
+		console.log(`createAudioFileRecord for ${filename} called`)
+		const result = await db.audioFile.create({
+			data: {
+				contentType,
+				fileKey: key,
+				fileName: filename,
+				fileSize,
+				url: `/storage/${key}`,
+				version: {
+					create: {
+						title: `filename version 1}`,
+						version: 1,
+						track: {
+							create: {
+								title: filename,
+								creator: {
+									connect: {
+										id: userId,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+		console.log('Audio file record created')
+		console.log('Result:', result)
+		return result
+	} catch (error) {
+		console.error(error)
+		throw new Error('Failed to create audio file record')
 	}
 }
