@@ -55,7 +55,7 @@
 	.accent {
 		color: hsl(210 40% 90%);
 		.foreground {
-			color: hsl(222.2 47.4% 11.2%);
+			color: hsl(222, 47%, 11%);
 		}
 	}
 	.ring {

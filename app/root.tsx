@@ -237,7 +237,7 @@ function App() {
 
 	return (
 		<Document nonce={nonce} theme={theme} env={{}}>
-			<div className="justify-top flex h-screen flex-col">
+			<div className="justify-top flex min-h-dvh flex-col">
 				<header className="container py-6">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<Logo />
@@ -255,7 +255,7 @@ function App() {
 					</nav>
 				</header>
 
-				<div className="container flex h-screen flex-col items-center">
+				<div className="container flex min-h-dvh flex-col items-center">
 					<Outlet />
 				</div>
 

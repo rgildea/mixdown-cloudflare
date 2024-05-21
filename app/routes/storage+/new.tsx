@@ -10,40 +10,34 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 	const db = context.storageContext.db
 	const storageContext = context.storageContext
 	const userId = await requireUserId(storageContext, request)
+
 	const r2UploadHandler = createR2UploadHandler({
 		bucket: bucket,
 		filter: ({ contentType }) => acceptedContentTypes.includes(contentType),
-		onSuccess: async r2Object => {
-			console.log('R2 upload success', r2Object.key)
-			console.log('Creating audio file record')
-			// try {
-			const result = await createAudioFileRecord(
-				db,
-				userId,
-				r2Object.key,
-				r2Object.customMetadata?.filename || 'unknown',
-				r2Object.httpMetadata?.contentType || 'application/octet-stream',
-				r2Object.size,
-			)
-			console.log('Result:', result)
-			console.log('Audio file record created successfully')
-			// } catch (err) {
-			// 	console.error(err)
-			// 	throw new Error('Failed to create audio file record')
-			// }
-		},
 	})
 
 	const formData = await unstable_parseMultipartFormData(request, r2UploadHandler)
-	console.log('formData:', formData)
-	console.log('formData.get("file"):', formData?.get('file'))
+
 	if (!formData || !formData.get('file')) {
 		throw new Error('Error uploading file to R2 bucket')
 	}
-
-	const fileKey = formData?.get('file')?.toString()
-	if (!fileKey) {
+	const resp = formData?.get('file')?.toString()
+	if (!resp || typeof resp !== 'string') {
 		throw new Error('Error uploading file to R2 bucket')
 	}
-	return json({ fileKey })
+	// TODO write zod validator for this
+	const uploadResult: { key: string; filename: string; contentType: string; size: number } = JSON.parse(resp) as any
+
+	const result = await createAudioFileRecord(
+		db,
+		userId,
+		uploadResult.key,
+		uploadResult.filename || 'unknown',
+		uploadResult.contentType || 'application/octet-stream',
+		uploadResult.size,
+	)
+
+	console.info('Audio file record created successfully')
+	console.log(result)
+	return json({ result, ids: result }, { status: 200 })
 }) satisfies ActionFunction

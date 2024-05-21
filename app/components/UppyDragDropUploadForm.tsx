@@ -18,7 +18,7 @@ export default function UppyDragDropUploadForm({ endpoint, onSuccess, className 
 	const [uppy] = useState(() => makeUppy(endpoint, onSuccess))
 
 	return (
-		<>
+		<div className="pt-4">
 			<StatusBar uppy={uppy} hideAfterFinish={false} showProgressDetails={true} />
 			<DragDrop
 				uppy={uppy}
@@ -30,7 +30,7 @@ export default function UppyDragDropUploadForm({ endpoint, onSuccess, className 
 					},
 				}}
 			/>
-		</>
+		</div>
 	)
 }
 function makeUppy(
@@ -48,16 +48,16 @@ function makeUppy(
 			// 	target: document?.body,
 			// })
 			.on('file-added', file => {
-				console.log('Added file', file)
+				console.info('Added file', file)
 			})
 			.on('file-added', file => {
-				console.log('Added file', file)
+				console.info('Added file', file)
 			})
 			.on('upload', data => {
-				console.log('Added files', data)
+				console.info('Added files', data)
 			})
 			.on('upload-success', (file, response) => {
-				console.log('upload success', file?.name, response)
+				console.info('upload success', file?.name, response)
 				if (file) {
 					onSuccess(file, response)
 				} else {
@@ -69,19 +69,19 @@ function makeUppy(
 			})
 			.on('progress', progress => {
 				// progress: integer (total progress percentage)
-				console.log(progress)
+				console.info(progress)
 			})
 			.on('complete', result => {
-				console.log('complete', result)
+				console.info('complete', result)
 			})
 			.on('error', error => {
 				console.error('error', error)
 			})
 			.on('cancel-all', () => {
-				console.log('cancel all')
+				console.info('cancel all')
 			})
 			.on('reset-progress', () => {
-				console.log('progress was reset')
+				console.info('progress was reset')
 			})
 	}
 

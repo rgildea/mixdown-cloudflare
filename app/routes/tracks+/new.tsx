@@ -1,4 +1,4 @@
-import NewTrackForm from '#app/components/NewTrackForm'
+import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
 import ModalDialog from '#app/components/ui/modal-dialog'
 import { requireUserId } from '#app/utils/auth.server'
 import { checkHoneypot } from '#app/utils/honeypot.server'
@@ -9,6 +9,7 @@ import { useNavigate } from '@remix-run/react'
 import { AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import z from 'zod'
+const uploadEndpoint = '/storage/new'
 
 const redirectTo = '/tracks'
 const title = z.string({ required_error: 'Title is required' }).min(3).max(100)
@@ -27,7 +28,6 @@ export const action: ActionFunction = async ({
 	},
 	request,
 }: ActionFunctionArgs) => {
-	console.log('action')
 	const userId = await requireUserId(storageContext, request)
 	const formData = await request.formData()
 	checkHoneypot(formData, HONEYPOT_SECRET)
@@ -44,7 +44,6 @@ export const action: ActionFunction = async ({
 	let track = null
 
 	try {
-		console.log('Creating track')
 		track = await createTrack(storageContext, userId, title)
 	} catch (err) {
 		console.error(err)
@@ -64,12 +63,10 @@ export default function NewTrackRoute() {
 	const navigate = useNavigate()
 
 	function handleDismiss() {
-		console.log('handleDismiss')
 		setModalOpen(false)
 	}
 
 	function handleExitComplete() {
-		console.log('handleExitComplete')
 		navigate('..')
 	}
 
@@ -77,11 +74,14 @@ export default function NewTrackRoute() {
 		isModalOpen && (
 			<AnimatePresence onExitComplete={handleExitComplete}>
 				<ModalDialog title="New Track" isModalOpen={isModalOpen} setModalOpen={setModalOpen} onDismiss={handleDismiss}>
-					<NewTrackForm
-						setModalOpen={setModalOpen}
-						onSubmit={() => {
-							console.log('onSubmit callback called')
+					<UppyDragDropUploadForm
+						className="mt-4 pt-4"
+						onSuccess={(file, resp) => {
+							console.log('response is', resp)
+							const trackId: string = resp.body?.ids.version.track.id
+							navigate(`/tracks/${trackId}/edit`)
 						}}
+						endpoint={uploadEndpoint}
 					/>
 				</ModalDialog>
 			</AnimatePresence>

@@ -1,4 +1,4 @@
-import type { UploadHandler, UploadHandlerPart } from '@remix-run/cloudflare'
+import { type UploadHandler, type UploadHandlerPart } from '@remix-run/cloudflare'
 import { v4 as uuidv4 } from 'uuid'
 
 export type R2Input = Parameters<R2Bucket['put']>[1]
@@ -67,6 +67,7 @@ export function createR2UploadHandler({ bucket, filter, onSuccess }: CreateUploa
 		if (onSuccess) {
 			onSuccess(r2Object)
 		}
-		return r2Object.key
+
+		return JSON.stringify({ key: r2Object.key, filename, contentType, size: r2Object.size })
 	}) satisfies UploadHandler
 }

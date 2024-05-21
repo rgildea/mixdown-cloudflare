@@ -4,7 +4,7 @@ import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
 import { Card, CardContent, CardDescription, CardTitle } from '#app/components/ui/card'
 import { requireUserId } from '#app/utils/auth.server'
 import { TrackWithVersions, getUserTracksWithVersionInfo } from '#app/utils/track.server'
-import { LoaderFunction, LoaderFunctionArgs, json, type MetaFunction } from '@remix-run/cloudflare'
+import { LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
 import { useLoaderData, useRevalidator } from '@remix-run/react'
 import { useState } from 'react'
 import 'react-h5-audio-player/lib/styles.css'
@@ -14,16 +14,6 @@ export const loader = (async ({ context: { storageContext }, request }: LoaderFu
 	const tracks = await getUserTracksWithVersionInfo(storageContext, userId)
 	return json({ tracks })
 }) satisfies LoaderFunction
-
-export const meta: MetaFunction = (() => {
-	return [
-		{ title: 'Mixdown Music Player Demo' },
-		{
-			name: 'description',
-			content: 'Welcome to Mixdown Music Player Demo!',
-		},
-	]
-}) satisfies MetaFunction
 
 export default function Index() {
 	const { tracks } = useLoaderData<typeof loader>()

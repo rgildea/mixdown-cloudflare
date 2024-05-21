@@ -1,9 +1,13 @@
+import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
-import { Card, CardContent, CardTitle } from '#app/components/ui/card'
+import { Button } from '#app/components/ui/button'
+import { Card, CardContent, CardDescription, CardTitle } from '#app/components/ui/card'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { requireUserId } from '#app/utils/auth.server'
 import { TrackWithVersions, getUserTracksWithVersionInfo } from '#app/utils/track.server'
 import { ActionFunction, LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
-import { Link, Outlet, useLoaderData } from '@remix-run/react'
+import { Link, Outlet, useLoaderData, useRevalidator } from '@remix-run/react'
+import { useState } from 'react'
 
 export const loader: LoaderFunction = async ({ context, request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(context.storageContext, request)
@@ -21,36 +25,41 @@ export const action: ActionFunction = async () => {
 	return json({}, { status: 200 })
 }
 
+const getLatestVersionUrl = (track: TrackWithVersions) => {
+	const audioFile = track.versions[0]?.audioFile
+	return audioFile?.url
+}
 export default function Route() {
 	const { tracks } = useLoaderData<typeof loader>() as { tracks: TrackWithVersions[] }
+	const revalidator = useRevalidator()
 
+	const [currentFileURL, setCurrentFileURL] = useState<string>()
 	return (
 		<>
 			<Outlet />
-			<Card className="rounded-xl border-y-2">
+			<Card className="w-3/4 p-6">
+				<MixdownPlayer url={currentFileURL} />
 				<CardTitle>Track List</CardTitle>
-				<CardContent>
-					<Link to="/tracks/new" className="text-purple-600 underline hover:text-purple-700">
-						New Track
-					</Link>
-					<TrackList
-						setURL={() => {
-							console.log('setURL')
-						}}
-						onTrackDeleted={() => {
-							console.log('track deleted')
-						}}
-						tracks={tracks}
-					/>
+				<CardDescription className="text-sm text-gray-500">
+					Note: Only the latest version of each track is shown here.
+				</CardDescription>
 
-					{/* {tracks.map(track => (
-						<div key={track.id} className="my-2 flex flex-col content-between bg-neutral-400 px-2">
-							<p className="text-sm text-gray-500">ID: {track.id}</p>
-							<p className="text-sm text-gray-500">Name: {track.title}</p>
-							<p className="text-sm text-gray-500">Url: {track.versions[0]?.audioFile?.url}</p>
-							<p className="text-sm text-gray-500">Version: ({track.versions.length})</p>
-						</div>
-					))} */}
+				<CardContent>
+					<Button asChild variant="outline" size="icon">
+						<Link to="/tracks/new">
+							<InlineIcon icon="akar-icons:plus" />
+						</Link>
+					</Button>
+					<TrackList
+						tracks={tracks}
+						setURL={setCurrentFileURL}
+						onTrackDeleted={track => {
+							if (getLatestVersionUrl(track) === currentFileURL) {
+								setCurrentFileURL(undefined)
+								revalidator.revalidate()
+							}
+						}}
+					/>
 				</CardContent>
 			</Card>
 		</>

@@ -15,7 +15,6 @@ export default function ModalDialog(
 	const { title, isDisabled, onDismiss, isModalOpen, setModalOpen } = props
 
 	function handleDismissClicked() {
-		console.log('handleDismissClicked')
 		onDismiss()
 	}
 
@@ -32,7 +31,7 @@ export default function ModalDialog(
 					/>
 				</div>
 			</Dialog.Overlay>
-			<Dialog.Content className="z-50 rounded bg-background p-10 text-popover-foreground">
+			<Dialog.Content className="z-50 rounded bg-popover p-10 text-popover-foreground">
 				<motion.div
 					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}

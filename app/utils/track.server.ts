@@ -101,13 +101,19 @@ export async function getTrackByAudioFile(storageContext: StorageContext, audioF
 	// }
 	return track
 }
+export class TrackNotFoundError extends Error {
+	constructor(message: string) {
+		super(message)
+		this.name = 'NotFoundError'
+	}
+}
 
 export async function deleteTrackByAudioFile(storageContext: StorageContext, audioFileKey: string) {
 	const { db } = storageContext
 	const track = await getTrackByAudioFile(storageContext, audioFileKey)
 
 	if (!track) {
-		throw new Error('Track not found')
+		throw new TrackNotFoundError('Track not found')
 	}
 
 	try {
@@ -150,7 +156,6 @@ export const createAudioFileRecord = async (
 	fileSize: number,
 ) => {
 	try {
-		console.log(`createAudioFileRecord for ${filename} called`)
 		const result = await db.audioFile.create({
 			data: {
 				contentType,
@@ -160,8 +165,7 @@ export const createAudioFileRecord = async (
 				url: `/storage/${key}`,
 				version: {
 					create: {
-						title: `filename version 1}`,
-						version: 1,
+						title: `version of ${filename}`,
 						track: {
 							create: {
 								title: filename,
@@ -175,9 +179,21 @@ export const createAudioFileRecord = async (
 					},
 				},
 			},
+			select: {
+				id: true, // id of the audioFile
+				version: {
+					select: {
+						id: true, // id of the version
+						track: {
+							select: {
+								id: true, // id of the track
+							},
+						},
+					},
+				},
+			},
 		})
-		console.log('Audio file record created')
-		console.log('Result:', result)
+
 		return result
 	} catch (error) {
 		console.error(error)

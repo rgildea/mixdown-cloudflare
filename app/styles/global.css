@@ -11,7 +11,7 @@
 	border-radius: 12px;
 }
 
-.btn {
+/* .btn {
 	border: none;
 	text-align: center;
 	background-color: darkgray;
@@ -20,11 +20,11 @@
 	font-weight: bold;
 	transition-duration: 0.3s;
 	padding: 10px;
-}
-
+} */
+/* 
 .btn:hover {
 	background-color: orange;
-}
+} */
 
 .li {
 	text-decoration: none;
