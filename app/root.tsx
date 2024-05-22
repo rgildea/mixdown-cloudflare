@@ -237,7 +237,7 @@ function App() {
 
 	return (
 		<Document nonce={nonce} theme={theme} env={{}}>
-			<div className="justify-top flex min-h-dvh flex-col">
+			<div className="justify-top flex min-h-dvh flex-col font-normal">
 				<header className="container py-6">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<Logo />
@@ -272,7 +272,7 @@ function App() {
 
 function Logo() {
 	return (
-		<Link to="/" className="group grid leading-snug">
+		<Link to="/" className="group grid font-nourd leading-snug">
 			<div className="font-light transition group-hover:-translate-x-1">
 				<Icon className="text-body-md" name="mixdown-initials">
 					Mixdown
@@ -299,7 +299,7 @@ function UserDropdown() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button asChild variant="secondary">
+				<Button asChild variant="ghost">
 					<Link
 						to={`/users/${user.username}`}
 						// this is for progressive enhancement

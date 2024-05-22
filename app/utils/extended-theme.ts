@@ -1,15 +1,14 @@
 import { type Config } from 'tailwindcss'
-import defaultTheme from 'tailwindcss/defaultTheme.js'
+import defaultTheme from 'tailwindcss/defaultTheme'
 
 export const extendedTheme = {
 	fontFamily: {
-		logo: ['var(--font-logo)'],
-		pixer: ['var(--font-pixer)'],
-		nourd: ['var(--font-nourd)'],
-		sans: ['var(--font-nourd)', ...defaultTheme.fontFamily.sans],
+		nourd: ['var(--font-nourd)', ...defaultTheme.fontFamily.sans],
+		// sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
 	},
 	fontWeight: {
 		black: '900',
+		normal: '200',
 	},
 	backgroundImage: {
 		newgradient:
@@ -102,6 +101,6 @@ export const extendedTheme = {
 		/** 18px size / 24px high / semibold */
 		caption: ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
 		/** 12px size / 16px high / bold */
-		button: ['0.75rem', { lineHeight: '1rem', fontWeight: '700' }],
+		button: ['1rem', { lineHeight: '1rem', fontWeight: '800' }],
 	},
 } satisfies Config['theme']

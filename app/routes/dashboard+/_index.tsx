@@ -1,58 +1,67 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
-import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
+import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardDescription, CardTitle } from '#app/components/ui/card'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { requireUserId } from '#app/utils/auth.server'
 import { TrackWithVersions, getUserTracksWithVersionInfo } from '#app/utils/track.server'
-import { LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
-import { useLoaderData, useRevalidator } from '@remix-run/react'
+import { ActionFunction, LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
+import { Link, Outlet, useLoaderData, useRevalidator } from '@remix-run/react'
 import { useState } from 'react'
-import 'react-h5-audio-player/lib/styles.css'
 
-export const loader = (async ({ context: { storageContext }, request }: LoaderFunctionArgs) => {
-	const userId = await requireUserId(storageContext, request)
-	const tracks = await getUserTracksWithVersionInfo(storageContext, userId)
-	return json({ tracks })
-}) satisfies LoaderFunction
+export const loader: LoaderFunction = async ({ context, request }: LoaderFunctionArgs) => {
+	const userId = await requireUserId(context.storageContext, request)
+	try {
+		const tracks = await getUserTracksWithVersionInfo(context.storageContext, userId)
 
-export default function Index() {
-	const { tracks } = useLoaderData<typeof loader>()
+		return json({ tracks })
+	} catch (err) {
+		console.error(err)
+		throw new Response('Failed to list objects', { status: 500 })
+	}
+}
 
-	const [currentFileURL, setCurrentFileURL] = useState<string>()
-	const uploadEndpoint = '/storage/new'
+export const action: ActionFunction = async () => {
+	return json({}, { status: 200 })
+}
+
+const getLatestVersionUrl = (track: TrackWithVersions) => {
+	const audioFile = track.versions[0]?.audioFile
+	return audioFile?.url
+}
+export default function Route() {
+	const { tracks } = useLoaderData<typeof loader>() as { tracks: TrackWithVersions[] }
 	const revalidator = useRevalidator()
 
+	const [currentFileURL, setCurrentFileURL] = useState<string>()
 	return (
-		tracks && (
-			<Card className="w-1/2 p-6">
-				<CardTitle>My Tracks</CardTitle>
-				<CardDescription className="mb-4">Upload your tracks and listen to them here!</CardDescription>
-				<CardContent className="mb-4">
-					<p className="text-sm text-gray-500">Note: Only the latest version of each track is shown here.</p>
-					<MixdownPlayer url={currentFileURL} />
+		<>
+			<Outlet />
+			<Card className="m-0 h-full w-full p-0 sm:m-4 sm:min-h-dvh sm:w-3/4 sm:p-6">
+				<MixdownPlayer url={currentFileURL} />
+				<CardTitle className="text-l text-primary">Track List</CardTitle>
+				<CardDescription className="text-sm text-secondary">
+					Note: Only the latest version of each track is shown here.
+				</CardDescription>
+
+				<CardContent className=" sm:max-width-full text-md">
+					<Button asChild className="m-1" variant="outline" size="icon">
+						<Link to="/tracks/new">
+							<InlineIcon icon="akar-icons:plus" />
+						</Link>
+					</Button>
 					<TrackList
 						tracks={tracks}
 						setURL={setCurrentFileURL}
 						onTrackDeleted={track => {
 							if (getLatestVersionUrl(track) === currentFileURL) {
 								setCurrentFileURL(undefined)
+								revalidator.revalidate()
 							}
 						}}
 					/>
-					<UppyDragDropUploadForm
-						className="mt-4"
-						onSuccess={() => {
-							revalidator.revalidate()
-						}}
-						endpoint={uploadEndpoint}
-					/>
 				</CardContent>
 			</Card>
-		)
+		</>
 	)
-}
-
-const getLatestVersionUrl = (track: TrackWithVersions) => {
-	const audioFile = track.versions[0]?.audioFile
-	return audioFile?.url
 }

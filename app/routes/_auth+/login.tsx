@@ -76,7 +76,7 @@ export default function LoginPage() {
 
 	return (
 		<div className="container h-full min-h-screen">
-			<Card className="mx-auto  w-full max-w-md text-card-foreground ">
+			<Card className="mx-auto w-full max-w-md text-card-foreground ">
 				<Form method="post" {...getFormProps(form)} onSubmit={form.onSubmit}>
 					<CardHeader>
 						<CardTitle className="text-4xl font-extrabold">Welcome Back!</CardTitle>
@@ -91,7 +91,7 @@ export default function LoginPage() {
 						</div>
 						<div>
 							<input
-								className="text-md w-full border-b-2 focus-visible:placeholder-transparent focus-visible:outline-none"
+								className="text-md w-full border-b-2 bg-background focus-visible:placeholder-transparent focus-visible:outline-none"
 								defaultValue={fields.email.initialValue?.toString()}
 								placeholder="Email Address"
 								{...getInputProps(fields.email, { type: 'email' })}
@@ -102,7 +102,7 @@ export default function LoginPage() {
 						</div>
 						<div>
 							<input
-								className="text-md w-full border-b-2 focus-visible:placeholder-transparent focus-visible:outline-none"
+								className="text-md w-full border-b-2 bg-background focus-visible:placeholder-transparent focus-visible:outline-none"
 								placeholder="Password"
 								{...getInputProps(fields.password, { type: 'password' })}
 							/>

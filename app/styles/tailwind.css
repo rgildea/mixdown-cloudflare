@@ -5,61 +5,61 @@
 /* help me visualize the colors */
 .root {
 	.foreground-destructive {
-		color: hsl(345 82.7% 40.8%);
+		color: hsl(345, 83%, 41%);
 	}
 	.background {
-		color: hsl(0 0 100%);
+		color: hsl(180, 9%, 93%);
 	}
 	.foreground {
-		color: hsl(222.2 84% 16.9%);
+		color: hsl(214, 76%, 19%);
 	}
 	.muted {
-		color: hsl(210 40% 93%);
+		color: hsl(15, 40%, 60%);
 		.foreground {
-			color: hsl(215.4 16.3% 30%);
+			color: hsl(0 0% 50%);
 		}
 	}
 	.popover {
-		color: hsl(0 0% 100%);
+		color: hsl(180, 9%, 93%);
 		.foreground {
-			color: hsl(222.2 84% 4.9%);
+			color: hsl(0 0% 50%);
 		}
 	}
 	.card {
-		color: hsl(0 0% 100%);
+		color: hsl(180, 9%, 93%);
 		.foreground {
-			color: hsl(222.2 84% 4.9%);
+			color: hsl(214, 76%, 19%);
 		}
 	}
 	.border {
-		color: hsl(214.3 31.8% 91.4%);
+		color: hsl(0, 0%, 50%);
 	}
 	.input {
-		color: hsl(214.3 31.8% 91.4%);
+		color: hsl(214 76.8% 19.19%);
 		.invalid {
 			color: hsl(0 84.2% 60.2%);
 		}
 	}
 	.primary {
-		color: hsl(222.2 47.4% 11.2%);
+		color: hsl(15, 97%, 60%);
 		.foreground {
-			color: hsl(210 40% 98%);
+			color: hsl(180, 9%, 93%);
 		}
 	}
 	.secondary {
-		color: hsl(210 20% 83%);
+		color: hsl(214, 76%, 19%);
 		.foreground {
-			color: hsl(222.2 47.4% 11.2%);
+			color: hsl(180, 9%, 93%);
 		}
 	}
 	.accent {
-		color: hsl(210 40% 90%);
+		color: hsl(15, 97%, 60%);
 		.foreground {
-			color: hsl(222, 47%, 11%);
+			color: hsl(214, 76%, 19%);
 		}
 	}
 	.ring {
-		color: hsl(215 20.2% 65.1%);
+		color: hsl(214, 76%, 19%);
 	}
 	.destructive {
 		color: hsl(0 70% 50%);
@@ -76,39 +76,40 @@
 		--font-logo: 'League Spartan';
 		--font-pixer: 'Pixer';
 		--font-nourd: 'Nourd';
+		/* --font-sans: 'Nourd'; */
 
 		/* prefixed with foreground because it should look good on the background */
-		--foreground-destructive: 345 82.7% 40.8%;
+		--foreground-destructive: 345 83% 41%;
 
-		--background: 0 0% 100%;
-		--foreground: 222.2 84% 4.9%;
+		--background: 180 9% 93%;
+		--foreground: 0 0 50%%;
 
-		--muted: 210 40% 93%;
-		--muted-foreground: 215.4 16.3% 30%;
+		--muted: 15 40% 60%;
+		--muted-foreground: 0 0% 50%;
 
-		--popover: 0 0% 100%;
-		--popover-foreground: 222.2 84% 4.9%;
+		--popover: 180 9% 93%;
+		--popover-foreground: 0 0% 50%;
 
-		--card: 0 0% 100%;
-		--card-foreground: 222.2 84% 4.9%;
+		--card: 180 9% 93%;
+		--card-foreground: 214 76% 19$;
 
-		--border: 214.3 31.8% 91.4%;
-		--input: 214.3 31.8% 91.4%;
+		--border: 0 0% 50%;
+		--input: 214 76% 19%;
 		--input-invalid: 0 84.2% 60.2%;
 
-		--primary: 222.2 47.4% 11.2%;
-		--primary-foreground: 210 40% 98%;
+		--primary: 15 97% 60%;
+		--primary-foreground: 180 9% 93%;
 
-		--secondary: 210 20% 83%;
-		--secondary-foreground: 222.2 47.4% 11.2%;
+		--secondary: 214 76% 19%;
+		--secondary-foreground: 180 9% 93%;
 
-		--accent: 210 40% 90%;
-		--accent-foreground: 222.2 47.4% 11.2%;
+		--accent: 15 97% 60%;
+		--accent-foreground: 214 76% 19%;
 
 		--destructive: 0 70% 50%;
 		--destructive-foreground: 210 40% 98%;
 
-		--ring: 215 20.2% 65.1%;
+		--ring: 15 97% 60%;
 
 		--radius: 0.5rem;
 	}
@@ -126,25 +127,25 @@
 		--popover: 222.2 84% 4.9%;
 		--popover-foreground: 210 40% 98%;
 
-		--card: 222.2 84% 4.9%;
-		--card-foreground: 210 40% 98%;
+		/* --card: 180 9% 93%;
+		--card-foreground: 210 40% 98%; */
 
-		--border: 217.2 32.6% 17.5%;
-		--input: 217.2 32.6% 17.5%;
+		--border: 0 0% 50%;
+		--input: 214 76% 19%;
 		--input-invalid: 0 62.8% 30.6%;
 
-		--primary: 210 40% 98%;
-		--primary-foreground: 222.2 47.4% 11.2%;
+		--primary: 210 40% 98 %;
+		--primary-foreground: 214 76%, 19%;
 
 		--secondary: 217.2 20% 24%;
 		--secondary-foreground: 210 40% 98%;
 
-		--accent: 217.2 32.6% 10%;
-		--accent-foreground: 210 40% 98%;
+		--accent: 15 97 60%;
+		--accent-foreground: 214 76% 19%;
 
-		--destructive: 0 60% 40%;
-		--destructive-foreground: 0 85.7% 97.3%;
+		--destructive: 0 70% 50%;
+		--destructive-foreground: 210 40% 98%;
 
-		--ring: 217.2 32.6% 60%;
+		--ring: 214 76% 90%;
 	}
 }
