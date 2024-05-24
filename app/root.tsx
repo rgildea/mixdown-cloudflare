@@ -238,7 +238,7 @@ function App() {
 	return (
 		<Document nonce={nonce} theme={theme} env={{}}>
 			<div className="justify-top flex min-h-dvh flex-col font-normal">
-				<header className="container py-6">
+				<header className="container mx-auto mb-6 py-6">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<Logo />
 						<div className="ml-auto hidden max-w-sm flex-1 sm:block">{searchBar}</div>
@@ -259,7 +259,7 @@ function App() {
 					<Outlet />
 				</div>
 
-				<div className="container flex justify-between pb-5">
+				<div className="container mx-auto flex justify-between pt-6">
 					<Logo />
 					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 				</div>
@@ -417,8 +417,8 @@ function ThemeSwitch({ userPreference }: { userPreference?: Theme | null }) {
 		<fetcher.Form method="POST" {...getFormProps(form)}>
 			<input type="hidden" name="theme" value={nextMode} />
 			<div className="flex gap-2">
-				<button type="submit" className="flex h-8 w-8 cursor-pointer items-center justify-center">
-					{modeLabel[mode]}
+				<button type="submit" className="primary flex h-8 w-8 cursor-pointer items-center justify-center">
+					{modeLabel[mode]}YO
 				</button>
 			</div>
 		</fetcher.Form>
