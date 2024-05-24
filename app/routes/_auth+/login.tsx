@@ -76,7 +76,7 @@ export default function LoginPage() {
 
 	return (
 		<div className="container h-full min-h-screen">
-			<Card className="mx-auto w-full max-w-md text-card-foreground">
+			<Card className="mx-auto mt-16 w-full min-w-full  max-w-sm text-card-foreground sm:min-w-[368px]">
 				<Form method="post" {...getFormProps(form)} onSubmit={form.onSubmit}>
 					<CardHeader>
 						<CardTitle className="text-4xl font-extrabold">Welcome Back!</CardTitle>

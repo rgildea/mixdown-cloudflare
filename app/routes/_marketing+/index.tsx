@@ -1,7 +1,8 @@
+import { Button } from '#app/components/ui/button'
 import { getUserId } from '#app/utils/auth.server'
 import { LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
 import { type MetaFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { Link, useLoaderData } from '@remix-run/react'
 
 export const meta: MetaFunction = () => [{ title: 'MixDown' }]
 
@@ -18,8 +19,8 @@ export default function Index() {
 	data
 	return (
 		<main className="font-poppins grid h-full place-items-center">
-			<div className="grid place-items-center px-4 py-16 xl:gap-24">
-				<div className="max-width-xl flex flex-col items-center text-center xl:order-2 xl:items-start xl:text-left">
+			<div className="grid place-items-center justify-end px-4 py-16 xl:gap-24">
+				<div className="max-width-xl mb-6 flex flex-col items-center text-center xl:order-2 xl:items-start xl:text-left">
 					<div className="animate-slide-top [animation-fill-mode:backwards] xl:animate-slide-left xl:[animation-delay:0.5s] xl:[animation-fill-mode:backwards]">
 						<svg
 							className="size-40 text-foreground xl:-mt-4"
@@ -46,6 +47,11 @@ export default function Index() {
 					>
 						Share your mixes with clients, get feedback, get paid.
 					</p>
+					<div className="my-24">
+						<Button asChild variant="default" size="wide">
+							<Link to="/signup">Get Started</Link>
+						</Button>
+					</div>
 				</div>
 			</div>
 		</main>

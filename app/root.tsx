@@ -418,7 +418,7 @@ function ThemeSwitch({ userPreference }: { userPreference?: Theme | null }) {
 			<input type="hidden" name="theme" value={nextMode} />
 			<div className="flex gap-2">
 				<button type="submit" className="primary flex h-8 w-8 cursor-pointer items-center justify-center">
-					{modeLabel[mode]}YO
+					{modeLabel[mode]}
 				</button>
 			</div>
 		</fetcher.Form>

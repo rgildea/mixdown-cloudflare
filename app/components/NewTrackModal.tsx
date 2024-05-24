@@ -19,7 +19,6 @@ export default function NewTrackModal({ isModalOpen, onDismiss }: NewTrackModalP
 
 	return (
 		<>
-			<h1>BADABING!!!</h1>
 			<AnimatePresence onExitComplete={() => onDismiss?.()}>
 				<ModalDialog isDisabled={false} title="New Track" isModalOpen={isModalOpen} handleOpenChange={handleDismiss}>
 					<UppyDragDropUploadForm
