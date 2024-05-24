@@ -11,7 +11,7 @@ export default function MixdownPlayer(props: { url?: string }) {
 						showDownloadProgress={true}
 						showFilledProgress={true}
 						showJumpControls={false}
-						showFilledVolume={true}
+						showFilledVolume={false}
 						src={props.url}
 					/>
 				</>

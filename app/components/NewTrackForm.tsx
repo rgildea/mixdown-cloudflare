@@ -11,9 +11,7 @@ export default function NewTrackForm() {
 		<UppyDragDropUploadForm
 			className="mt-4 pt-4"
 			onSuccess={(file, resp) => {
-				console.log('file uploaded', resp)
-
-				navigate(`/tracks/${resp.trackId}/edit`)
+				navigate(`/tracks/${resp.trackId}?edit`)
 			}}
 			endpoint={uploadEndpoint}
 		/>

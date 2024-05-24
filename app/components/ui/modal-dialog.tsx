@@ -8,18 +8,18 @@ export default function ModalDialog(
 		title?: string
 		isDisabled?: boolean
 		isModalOpen?: boolean
-		setModalOpen?: (isOpen: boolean) => void
-		onDismiss: () => void
+		setIsModalOpen?: (open: boolean) => void
+		handleOpenChange?: () => void
 	}>,
 ) {
-	const { title, isDisabled, onDismiss, isModalOpen, setModalOpen } = props
+	const { title, isDisabled, isModalOpen, setIsModalOpen, handleOpenChange } = props
 
 	function handleDismissClicked() {
-		onDismiss()
+		setIsModalOpen?.(false)
 	}
 
 	return (
-		<Dialog.Root open={isModalOpen} onOpenChange={setModalOpen}>
+		<Dialog.Root open={isModalOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Overlay>
 				<div className="fixed inset-0 z-30">
 					<motion.div

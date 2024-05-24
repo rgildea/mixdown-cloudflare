@@ -8,7 +8,7 @@ export const extendedTheme = {
 	},
 	fontWeight: {
 		black: '900',
-		normal: '200',
+		normal: '300',
 	},
 	backgroundImage: {
 		newgradient:

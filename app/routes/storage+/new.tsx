@@ -38,6 +38,5 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 	)
 
 	console.info('Audio file record created successfully')
-	console.log(result)
 	return json({ result, ids: result }, { status: 200 })
 }) satisfies ActionFunction

@@ -1,15 +1,12 @@
-import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
-import ModalDialog from '#app/components/ui/modal-dialog'
 import { requireUserId } from '#app/utils/auth.server'
 import { checkHoneypot } from '#app/utils/honeypot.server'
 import { createTrack } from '#app/utils/track.server'
 import { parseWithZod } from '@conform-to/zod'
 import { ActionFunction, ActionFunctionArgs, LoaderFunction, json, redirect } from '@remix-run/cloudflare'
-import { useNavigate } from '@remix-run/react'
-import { AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import z from 'zod'
-const uploadEndpoint = '/storage/new'
+import NewTrackModal from '../../components/NewTrackModal'
+export const uploadEndpoint = '/storage/new'
 
 const redirectTo = '/tracks'
 const title = z.string({ required_error: 'Title is required' }).min(3).max(100)
@@ -60,31 +57,5 @@ export const action: ActionFunction = async ({
 export default function NewTrackRoute() {
 	const [isModalOpen, setModalOpen] = useState(true)
 
-	const navigate = useNavigate()
-
-	function handleDismiss() {
-		setModalOpen(false)
-	}
-
-	function handleExitComplete() {
-		navigate('..')
-	}
-
-	return (
-		isModalOpen && (
-			<AnimatePresence onExitComplete={handleExitComplete}>
-				<ModalDialog title="New Track" isModalOpen={isModalOpen} setModalOpen={setModalOpen} onDismiss={handleDismiss}>
-					<UppyDragDropUploadForm
-						className="mt-4 pt-4"
-						onSuccess={(file, resp) => {
-							console.log('response is', resp)
-							const trackId: string = resp.body?.ids.version.track.id
-							navigate(`/tracks/${trackId}/edit`)
-						}}
-						endpoint={uploadEndpoint}
-					/>
-				</ModalDialog>
-			</AnimatePresence>
-		)
-	)
+	return isModalOpen && <NewTrackModal isModalOpen={isModalOpen} setModalOpen={setModalOpen} />
 }

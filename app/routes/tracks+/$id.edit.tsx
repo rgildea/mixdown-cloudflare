@@ -12,7 +12,6 @@ export const action: ActionFunction = async ({
 	},
 }) => {
 	const formData = await request.formData()
-	console.log('formData is', formData)
 	const title = formData.get('title')
 	if (!title || typeof title !== 'string' || !title.trim()) {
 		throw new Error('Title is required')
@@ -31,7 +30,6 @@ export const action: ActionFunction = async ({
 export default function TrackEdit() {
 	const result = useRouteLoaderData<{ track: TrackWithVersions }>('routes/tracks+/$id') as { track: TrackWithVersions }
 	const track = result.track
-	console.log('track is', result.track)
 	return (
 		<Form method="post">
 			<label>

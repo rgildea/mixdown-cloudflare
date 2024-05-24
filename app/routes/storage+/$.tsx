@@ -61,7 +61,7 @@ export async function action({ params, request, context }: ActionFunctionArgs) {
 			try {
 				await deleteObject(bucket, key)
 			} catch (err) {
-				console.log(err)
+				console.error(err)
 				throw new Response(`Failed to delete object from R2 with key ${key}`, { status: 500 })
 			}
 
