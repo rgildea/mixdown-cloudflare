@@ -14,7 +14,7 @@
 		color: hsl(214, 76%, 19%);
 	}
 	.muted {
-		color: hsl(15, 40%, 60%);
+		color: hsl(15, 0%, 80%);
 		.foreground {
 			color: hsl(0 0% 50%);
 		}
@@ -53,7 +53,7 @@
 		}
 	}
 	.accent {
-		color: hsl(0, 100%, 85%);
+		color: hsl(15, 0%, 80%);
 		.foreground {
 			color: hsl(214, 76%, 19%);
 		}
@@ -84,7 +84,7 @@
 		--background: 180 9% 93%;
 		--foreground: 0 0 50%%;
 
-		--muted: 15 40% 60%;
+		--muted: 15 0% 80%;
 		--muted-foreground: 0 0% 50%;
 
 		--popover: 180 9% 93%;
@@ -103,7 +103,7 @@
 		--secondary: 214 76% 19%;
 		--secondary-foreground: 180 9% 93%;
 
-		--accent: 0 100% 85%;
+		--accent: 15 0% 80%;
 		--accent-foreground: 214 76% 19%;
 
 		--destructive: 0 70% 50%;
