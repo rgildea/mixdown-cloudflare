@@ -13,6 +13,7 @@ export default function MixdownPlayer(props: { url?: string }) {
 						showJumpControls={false}
 						showFilledVolume={false}
 						src={props.url}
+						className="max-w-xl"
 					/>
 				</>
 			)}

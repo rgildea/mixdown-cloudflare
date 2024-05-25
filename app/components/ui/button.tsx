@@ -5,11 +5,11 @@ import * as React from 'react'
 import { cn } from '#app/utils/misc.tsx'
 
 const buttonVariants = cva(
-	'inline-flex items-center justify-center rounded-md text-md font-semibold ring-offset-background transition-colors outline-none focus-visible:ring-2 focus-within:ring-2 ring-ring ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+	'inline-flex items-center justify-center rounded-md text-md font-semibold transition-colors outline-none disabled:pointer-events-none disabled:opacity-50',
 	{
 		variants: {
 			variant: {
-				default: 'bg-primary text-primary-foreground color-ring hover:bg-primary/80',
+				default: 'bg-primary text-primary-foreground hover:bg-primary/80',
 				destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/80',
 				outline: 'border border-input bg-background hover:bg_background/80 hover:text-accent-foreground',
 				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',

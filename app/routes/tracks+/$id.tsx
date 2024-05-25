@@ -1,4 +1,5 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
+import { Card } from '#app/components/ui/card'
 import { TrackWithVersions, getTrackWithVersionsByTrackId } from '#app/utils/track.server'
 import { LoaderFunctionArgs, json } from '@remix-run/cloudflare'
 import { Outlet, useLoaderData } from '@remix-run/react'
@@ -31,13 +32,13 @@ export default function TrackRoute() {
 	const [currentFileURL] = useState<string>(url || '')
 
 	return (
-		<>
+		<Card className=" mx-auto justify-center sm:w-3/4">
 			<h1>{track?.title}</h1>
 			<h2>
 				{track?.versions.length} version{track.versions.length > 1 ? 's' : ''}
 			</h2>
 			<MixdownPlayer url={currentFileURL} />
 			<Outlet />
-		</>
+		</Card>
 	)
 }

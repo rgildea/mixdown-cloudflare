@@ -88,7 +88,7 @@ export default function Route() {
 							<div className="font-pixer flex-1 leading-snug">{track.title}</div>
 							<Button variant="ghost" asChild>
 								<NavLink to={`${track.id}?edit`}>
-									<InlineIcon className="size-4" icon="akar-icons:pencil" />
+									<InlineIcon data-tag="allowRowEvents" className="size-4" icon="akar-icons:pencil" />
 								</NavLink>
 							</Button>
 
@@ -117,9 +117,9 @@ export default function Route() {
 	return (
 		<Card className=" sm:w-3/4">
 			{currentTrackId && <MixdownPlayer url={getLatestVersionUrl(currentTrackId, tracks)} />}
-			<CardTitle className="font-md m-4 px-6 text-xl tracking-wider text-accent">
+			<CardTitle className=" px-6t m-4">
 				<div className="flex h-max w-full justify-between">
-					<div className=" text-secondary">Tracks</div>
+					<div className="font-md text-xl tracking-wider text-secondary">Tracks</div>
 					<Button className="bg-secondary text-button text-secondary-foreground" asChild variant="default" size="sm">
 						<Link to="?new=true">
 							<InlineIcon className="m-1 size-6" icon="akar-icons:plus" />
