@@ -53,6 +53,7 @@ import {
 	DropdownMenuItem,
 } from './components/ui/dropdown-menu.tsx'
 import { getHoneypot } from './utils/honeypot.server.ts'
+import MixdownPlayer from './components/MixdownPlayer.tsx'
 
 export const links: LinksFunction = () => {
 	return [
@@ -236,37 +237,39 @@ function App() {
 	useToast(data.toast)
 
 	return (
-		<Document nonce={nonce} theme={theme} env={{}}>
-			<div className="justify-top flex min-h-dvh flex-col font-normal">
-				<header className="container mx-auto mb-6 py-6">
-					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+		<PlayerProvider>
+			<Document nonce={nonce} theme={theme} env={{}}>
+				<div className="justify-top flex min-h-dvh flex-col font-normal">
+					<header className="container mx-auto mb-6 py-6">
+						<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+							<Logo />
+							<div className="ml-auto hidden max-w-sm flex-1 sm:block">{searchBar}</div>
+							<div className="flex items-center gap-10">
+								{user ? (
+									<UserDropdown />
+								) : (
+									<Button asChild variant="default" size="lg">
+										<Link to="/login">Log In</Link>
+									</Button>
+								)}
+							</div>
+							<div className="block w-full sm:hidden">{searchBar}</div>
+						</nav>
+					</header>
+
+					<div className="container flex min-h-dvh flex-col items-center">
+						<Outlet />
+					</div>
+
+					<div className="container mx-auto flex justify-between pt-6">
 						<Logo />
-						<div className="ml-auto hidden max-w-sm flex-1 sm:block">{searchBar}</div>
-						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="lg">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
-						</div>
-						<div className="block w-full sm:hidden">{searchBar}</div>
-					</nav>
-				</header>
-
-				<div className="container flex min-h-dvh flex-col items-center">
-					<Outlet />
+						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+					</div>
 				</div>
-
-				<div className="container mx-auto flex justify-between pt-6">
-					<Logo />
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
-			</div>
-			<EpicToaster closeButton position="top-center" theme={theme} />
-			<EpicProgress />
-		</Document>
+				<EpicToaster closeButton position="top-center" theme={theme} />
+				<EpicProgress />
+			</Document>
+		</PlayerProvider>
 	)
 }
 

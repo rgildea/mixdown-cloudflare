@@ -1,9 +1,9 @@
-import AudioPlayer from 'react-h5-audio-player'
-import 'react-h5-audio-player/lib/styles.css'
+import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
+import '#app/styles/player.css'
 
 export default function MixdownPlayer(props: { url?: string }) {
 	return (
-		<>
+		<div className="fixed inset-x-0 bottom-0 z-50">
 			{props.url && (
 				<>
 					<AudioPlayer
@@ -11,12 +11,15 @@ export default function MixdownPlayer(props: { url?: string }) {
 						showDownloadProgress={true}
 						showFilledProgress={true}
 						showJumpControls={false}
-						showFilledVolume={false}
+						showFilledVolume={true}
+						showSkipControls={false}
+						autoPlayAfterSrcChange={true}
 						src={props.url}
-						className="max-w-xl"
+						customVolumeControls={[]}
+						customProgressBarSection={[RHAP_UI.PROGRESS_BAR, RHAP_UI.CURRENT_TIME, RHAP_UI.DURATION]}
 					/>
 				</>
 			)}
-		</>
+		</div>
 	)
 }

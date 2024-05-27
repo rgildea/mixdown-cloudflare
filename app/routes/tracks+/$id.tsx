@@ -32,7 +32,7 @@ export default function TrackRoute() {
 	const [currentFileURL] = useState<string>(url || '')
 
 	return (
-		<Card className=" mx-auto justify-center sm:w-3/4">
+		<Card className=" mx-auto flex flex-col items-center justify-center sm:w-3/4">
 			<h1>{track?.title}</h1>
 			<h2>
 				{track?.versions.length} version{track.versions.length > 1 ? 's' : ''}

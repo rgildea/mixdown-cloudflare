@@ -134,7 +134,7 @@ export default function Route() {
 					pointerOnHover
 					striped
 					onRowClicked={(track: TrackWithVersions) => {
-						navigate(`${track.id}/edit`)
+						navigate(`${track.id}`)
 					}}
 					columns={cols}
 					data={tracks}
