@@ -9,7 +9,7 @@ export const meta: MetaFunction = () => [{ title: 'MixDown' }]
 export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
 	const user = await getUserId(storageContext, request)
 	if (user) {
-		throw redirect(' tracks')
+		throw redirect(' dashboard')
 	}
 	return json({})
 }
