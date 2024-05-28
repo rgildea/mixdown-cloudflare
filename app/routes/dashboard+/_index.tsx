@@ -47,7 +47,7 @@ export default function Route() {
 					<TrackList
 						tracks={tracks}
 						onRowClicked={(track: TrackWithVersions) => {
-							navigate(`${track.id}`)
+							navigate(`/tracks/${track.id}`)
 						}}
 					/>
 				</CardContent>

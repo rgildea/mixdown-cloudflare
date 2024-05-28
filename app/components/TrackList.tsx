@@ -79,7 +79,7 @@ function TrackList({ tracks, onRowClicked }: TrackListProps) {
 								{track.title}
 							</div>
 							<Button variant="ghost" asChild>
-								<NavLink to={`${track.id}?edit`}>
+								<NavLink to={`/tracks/${track.id}?edit`}>
 									<InlineIcon className="size-4" icon="akar-icons:pencil" />
 								</NavLink>
 							</Button>
@@ -106,8 +106,7 @@ function TrackList({ tracks, onRowClicked }: TrackListProps) {
 			},
 		},
 	]
-	console.log('Datatable is a ', typeof DataTable)
-	console.log('tracks', tracks)
+
 	return (
 		<DataTable
 			highlightOnHover

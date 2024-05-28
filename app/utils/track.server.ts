@@ -147,6 +147,32 @@ export async function deleteTrackById(storageContext: StorageContext, trackId: s
 	}
 }
 
+export async function updateTrack(
+	storageContext: StorageContext,
+	trackId: string,
+	title: string,
+	description: string,
+	creatorId?: string,
+) {
+	const { db } = storageContext
+	try {
+		const where = creatorId ? { id: trackId, creatorId: creatorId } : { id: trackId }
+
+		const updatedTrack = await db.track.update({
+			where,
+			data: {
+				title,
+				description,
+			},
+		})
+
+		return updatedTrack
+	} catch (error) {
+		console.error(error)
+		throw new Error('Failed to update track')
+	}
+}
+
 export const createAudioFileRecord = async (
 	db: PrismaClient,
 	userId: string,
