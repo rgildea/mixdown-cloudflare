@@ -44,7 +44,7 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
 import { Theme, getTheme, setTheme } from './utils/theme.server.ts'
 import { useForm, getFormProps } from '@conform-to/react'
-import { useRef } from 'react'
+import { useReducer, useRef } from 'react'
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -53,7 +53,7 @@ import {
 	DropdownMenuItem,
 } from './components/ui/dropdown-menu.tsx'
 import { getHoneypot } from './utils/honeypot.server.ts'
-import MixdownPlayer from './components/MixdownPlayer.tsx'
+import { PlayerContext, PlayerContextReducer, PlayerDispatchContext } from './contexts/PlayerContext.tsx'
 
 export const links: LinksFunction = () => {
 	return [
@@ -235,41 +235,43 @@ function App() {
 	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" />
 	useToast(data.toast)
-
+	const [currentFileURL, dispatch] = useReducer(PlayerContextReducer, '')
 	return (
-		<PlayerProvider>
-			<Document nonce={nonce} theme={theme} env={{}}>
-				<div className="justify-top flex min-h-dvh flex-col font-normal">
-					<header className="container mx-auto mb-6 py-6">
-						<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+		<PlayerContext.Provider value={currentFileURL}>
+			<PlayerDispatchContext.Provider value={dispatch}>
+				<Document nonce={nonce} theme={theme} env={{}}>
+					<div className="justify-top flex min-h-dvh flex-col font-normal">
+						<header className="container mx-auto mb-6 py-6">
+							<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+								<Logo />
+								<div className="ml-auto hidden max-w-sm flex-1 sm:block">{searchBar}</div>
+								<div className="flex items-center gap-10">
+									{user ? (
+										<UserDropdown />
+									) : (
+										<Button asChild variant="default" size="lg">
+											<Link to="/login">Log In</Link>
+										</Button>
+									)}
+								</div>
+								<div className="block w-full sm:hidden">{searchBar}</div>
+							</nav>
+						</header>
+
+						<div className="container flex min-h-dvh flex-col items-center">
+							<Outlet />
+						</div>
+
+						<div className="container mx-auto flex justify-between pt-6">
 							<Logo />
-							<div className="ml-auto hidden max-w-sm flex-1 sm:block">{searchBar}</div>
-							<div className="flex items-center gap-10">
-								{user ? (
-									<UserDropdown />
-								) : (
-									<Button asChild variant="default" size="lg">
-										<Link to="/login">Log In</Link>
-									</Button>
-								)}
-							</div>
-							<div className="block w-full sm:hidden">{searchBar}</div>
-						</nav>
-					</header>
-
-					<div className="container flex min-h-dvh flex-col items-center">
-						<Outlet />
+							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+						</div>
 					</div>
-
-					<div className="container mx-auto flex justify-between pt-6">
-						<Logo />
-						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-					</div>
-				</div>
-				<EpicToaster closeButton position="top-center" theme={theme} />
-				<EpicProgress />
-			</Document>
-		</PlayerProvider>
+					<EpicToaster closeButton position="top-center" theme={theme} />
+					<EpicProgress />
+				</Document>
+			</PlayerDispatchContext.Provider>
+		</PlayerContext.Provider>
 	)
 }
 

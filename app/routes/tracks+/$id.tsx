@@ -1,9 +1,7 @@
-import MixdownPlayer from '#app/components/MixdownPlayer'
 import { Card } from '#app/components/ui/card'
 import { TrackWithVersions, getTrackWithVersionsByTrackId } from '#app/utils/track.server'
 import { LoaderFunctionArgs, json } from '@remix-run/cloudflare'
 import { Outlet, useLoaderData } from '@remix-run/react'
-import { useState } from 'react'
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 	const notFoundResponse = new Response('Not found', { status: 404 })
@@ -28,16 +26,12 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 export default function TrackRoute() {
 	const { track } = useLoaderData<typeof loader>() as { track: TrackWithVersions }
 
-	const url = track?.versions[0]?.audioFile?.url
-	const [currentFileURL] = useState<string>(url || '')
-
 	return (
 		<Card className=" mx-auto flex flex-col items-center justify-center sm:w-3/4">
 			<h1>{track?.title}</h1>
 			<h2>
-				{track?.versions.length} version{track.versions.length > 1 ? 's' : ''}
+				{track?.versions.length} version{track?.versions.length > 1 ? 's' : ''}
 			</h2>
-			<MixdownPlayer url={currentFileURL} />
 			<Outlet />
 		</Card>
 	)

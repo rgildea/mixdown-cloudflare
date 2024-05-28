@@ -1,4 +1,3 @@
-import MixdownPlayer from '#app/components/MixdownPlayer'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardTitle } from '#app/components/ui/card'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
@@ -6,8 +5,9 @@ import { requireUserId } from '#app/utils/auth.server'
 import { TrackWithVersions, getUserTracksWithVersionInfo } from '#app/utils/track.server'
 import { ActionFunction, LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
 import { Form, Link, NavLink, useLoaderData, useNavigate } from '@remix-run/react'
-import { useState } from 'react'
+import { useContext } from 'react'
 import DataTable from '#app/components/DataTableBase'
+import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 
 export const loader: LoaderFunction = async ({ context, request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(context.storageContext, request)
@@ -33,14 +33,16 @@ const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 export default function Route() {
 	const navigate = useNavigate()
 	const { tracks } = useLoaderData<typeof loader>() as { tracks: TrackWithVersions[] }
+	const dispatch = useContext(PlayerDispatchContext)
 
-	const [currentTrackId, setCurrentTrackId] = useState<string>()
+	const setCurrentTrackId = (trackId: string) => {
+		const url = getLatestVersionUrl(trackId, tracks)
+		console.log('Dispatching play action with url: ', url)
+		dispatch({ type: 'PLAY', url })
+	}
 
 	const customStyles = {
 		rows: {
-			// style: {
-			// 	minHeight: '72px', // override the row height
-			// },
 			stripedStyle: {
 				backgroundColor: 'rgba(252, 103, 54, 0.7)',
 			},
@@ -116,7 +118,6 @@ export default function Route() {
 	]
 	return (
 		<Card className=" sm:w-3/4">
-			{currentTrackId && <MixdownPlayer url={getLatestVersionUrl(currentTrackId, tracks)} />}
 			<CardTitle className=" px-6t m-4">
 				<div className="flex h-max w-full justify-between">
 					<div className="font-md text-xl tracking-wider text-secondary">Tracks</div>

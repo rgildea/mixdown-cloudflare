@@ -7,7 +7,6 @@ import { requireUserId } from '#app/utils/auth.server'
 import { TrackWithVersions, getUserTracksWithVersionInfo } from '#app/utils/track.server'
 import { ActionFunction, LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
 import { Link, Outlet, useLoaderData, useRevalidator } from '@remix-run/react'
-import { useState } from 'react'
 
 export const loader: LoaderFunction = async ({ context, request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(context.storageContext, request)
@@ -33,12 +32,11 @@ export default function Route() {
 	const { tracks } = useLoaderData<typeof loader>() as { tracks: TrackWithVersions[] }
 	const revalidator = useRevalidator()
 
-	const [currentFileURL, setCurrentFileURL] = useState<string>()
 	return (
 		<>
 			<Outlet />
 			<Card className="m-0 h-full w-full p-0 sm:m-4 sm:min-h-dvh sm:w-3/4 sm:p-6">
-				<MixdownPlayer url={currentFileURL} />
+				<MixdownPlayer />
 				<CardTitle className="text-l text-primary">Track List</CardTitle>
 				<CardDescription className="text-sm text-secondary">
 					Note: Only the latest version of each track is shown here.

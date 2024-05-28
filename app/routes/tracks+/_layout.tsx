@@ -1,3 +1,4 @@
+import MixdownPlayer from '#app/components/MixdownPlayer'
 import NewTrackModal from '#app/components/NewTrackModal'
 import { requireUserId } from '#app/utils/auth.server'
 import { getUserTracksWithVersionInfo } from '#app/utils/track.server'
@@ -27,6 +28,7 @@ export default function Route() {
 
 	return (
 		<>
+			<MixdownPlayer />
 			<Outlet />
 			{searchParams.get('new') === 'true' && (
 				<NewTrackModal
