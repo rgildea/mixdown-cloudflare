@@ -1,84 +1,124 @@
+import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { Form, NavLink } from '@remix-run/react'
-import { Card } from './ui/card'
-import * as ScrollArea from '@radix-ui/react-scroll-area'
+import { useContext } from 'react'
+import DataTable from '#app/components/DataTableBase'
 import { Button } from './ui/button'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
 
 interface TrackListProps {
 	tracks: TrackWithVersions[]
-	setURL: (url: string) => void
-	onTrackDeleted: (track: TrackWithVersions) => void
+	onTrackDeleted?: (track: TrackWithVersions) => void
+	onRowClicked?: (track: TrackWithVersions) => void
 }
 
-function TrackList({ tracks, setURL, onTrackDeleted }: TrackListProps) {
-	return (
-		<Card className="flex h-full flex-col justify-around bg-background">
-			{/* <ScrollArea.Root className="max-h-96 rounded bg-white shadow-gray-800"> */}
-			<ScrollArea.Root>
-				<ScrollArea.Viewport className="h-full">
-					<div className="px-5 py-[15px]">
-						{tracks &&
-							tracks.map((track, index) => {
-								const audioFile = track.versions[0]?.audioFile
-								const trackUrl = `/storage/${audioFile?.fileKey}`
-								return (
-									trackUrl && (
-										<Form key={track.id} method="DELETE" action={trackUrl}>
-											<NavLink to={track.id}>
-												<div
-													className="space-between mt-1 flex w-full items-center justify-center border-t pt-1 align-middle text-body-sm"
-													role="button"
-													onKeyDown={e => e.key === 'Enter' && setURL(trackUrl)}
-													tabIndex={index + 1}
-												>
-													<Button
-														variant="ghost"
-														onClick={e => {
-															e.stopPropagation()
-															setURL(trackUrl)
-														}}
-													>
-														<InlineIcon className="size-5" icon="akar-icons:play"></InlineIcon>
-													</Button>
-													{track.title}
-													<Button
-														className=" ml-auto text-button"
-														type="submit"
-														variant="ghost"
-														onClick={e => {
-															e.stopPropagation()
-															onTrackDeleted(track)
-														}}
-														onSubmit={e => {
-															e.preventDefault()
-														}}
-													>
-														<InlineIcon className="size-5" icon="akar-icons:cross" />
-													</Button>
-												</div>
-											</NavLink>
-										</Form>
-									)
-								)
-							})}
-					</div>
-				</ScrollArea.Viewport>
-				<ScrollArea.Scrollbar
-					className="duration-[160ms] flex touch-none select-none bg-transparent p-0.5 transition-colors ease-out hover:bg-muted data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col"
-					orientation="vertical"
-				>
-					<ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-400 before:absolute before:left-1/2 before:top-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-				</ScrollArea.Scrollbar>
+export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
+	const found = tracks.find(track => track.id == trackId)
+	return found?.versions[0].audioFile?.url
+}
 
-				<ScrollArea.Scrollbar
-					className="duration-[300ms] flex touch-none select-none bg-transparent p-0.5 transition-colors ease-out hover:bg-muted data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col"
-					orientation="horizontal"
-				>
-					<ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-400 before:absolute before:left-1/2 before:top-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-				</ScrollArea.Scrollbar>
-			</ScrollArea.Root>
-		</Card>
+function TrackList({ tracks, onRowClicked }: TrackListProps) {
+	const dispatch = useContext(PlayerDispatchContext)
+
+	const handlePlayButtonClicked = (trackId: string) => {
+		const url = getLatestVersionUrl(trackId, tracks)
+		console.log('Dispatching play action with url: ', url)
+		dispatch({ type: 'PLAY', url })
+	}
+
+	const customStyles = {
+		rows: {
+			stripedStyle: {
+				backgroundColor: 'rgba(252, 103, 54, 0.7)',
+			},
+		},
+		headRow: {
+			style: {
+				border: '12px',
+			},
+		},
+		headCells: {
+			style: {
+				backgroundColor: '#ECEFEF',
+				color: '#202124',
+				fontSize: '14px',
+			},
+		},
+		pagination: {
+			style: {
+				border: 'none',
+			},
+		},
+	}
+
+	const cols: { name: string; selector: (row: TrackWithVersions) => any; cell?: (row: TrackWithVersions) => any }[] = [
+		{
+			name: 'title',
+			selector: row => row?.id,
+			cell: track => {
+				const audioFile = track.versions[0]?.audioFile
+				const trackUrl = `/storage/${audioFile?.fileKey}`
+				return (
+					trackUrl && (
+						<div
+							className="space-between flex w-full flex-nowrap items-center justify-between px-0 text-body-sm"
+							data-tag="allowRowEvents"
+						>
+							<Button
+								variant="ghost"
+								onClick={e => {
+									console.info('setting track id', track.id)
+									e.stopPropagation()
+									handlePlayButtonClicked(track.id)
+								}}
+								className="flex-6 p-1"
+							>
+								<InlineIcon className="size-4" icon="akar-icons:play"></InlineIcon>
+							</Button>
+							<div className="font-pixer flex-1 leading-snug" data-tag="allowRowEvents">
+								{track.title}
+							</div>
+							<Button variant="ghost" asChild>
+								<NavLink to={`${track.id}?edit`}>
+									<InlineIcon className="size-4" icon="akar-icons:pencil" />
+								</NavLink>
+							</Button>
+
+							<Form key={track.id} method="DELETE" action={trackUrl}>
+								<Button
+									className="flex-6 ml-auto p-0 text-button focus-visible:ring-0"
+									type="submit"
+									variant="ghost"
+									onClick={e => {
+										e.stopPropagation()
+										// onTrackDeleted(track)
+									}}
+									onSubmit={e => {
+										e.preventDefault()
+									}}
+								>
+									<InlineIcon className="size-4" icon="akar-icons:cross" />
+								</Button>{' '}
+							</Form>
+						</div>
+					)
+				)
+			},
+		},
+	]
+	console.log('Datatable is a ', typeof DataTable)
+	console.log('tracks', tracks)
+	return (
+		<DataTable
+			highlightOnHover
+			pointerOnHover
+			striped
+			onRowClicked={onRowClicked}
+			columns={cols}
+			data={tracks}
+			theme="mixdown"
+			customStyles={customStyles}
+		/>
 	)
 }
 

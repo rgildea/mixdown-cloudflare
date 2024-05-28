@@ -16,7 +16,7 @@ export default function MixdownPlayer() {
 						onLoadStart={e => console.info('onLoadStart', e)}
 						onCanPlay={e => console.info('onCanPlay', e)}
 						onPlayError={e => console.info('onPlayError', e)}
-						autoPlay={false}
+						autoPlay={true}
 						showDownloadProgress={true}
 						showFilledProgress={true}
 						showJumpControls={false}
@@ -25,7 +25,7 @@ export default function MixdownPlayer() {
 						autoPlayAfterSrcChange={true}
 						src={url ?? ''}
 						customVolumeControls={[]}
-						customProgressBarSection={[RHAP_UI.PROGRESS_BAR, RHAP_UI.CURRENT_TIME, RHAP_UI.DURATION]}
+						customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
 					/>
 				</>
 			)}

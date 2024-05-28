@@ -47,9 +47,9 @@ function DataTableBase<T>(props: TableProps<T>): JSX.Element {
 			{() => {
 				return (
 					<DataTable
-						pagination
-						paginationPerPage={10}
-						paginationRowsPerPageOptions={[5, 10, 20]}
+						// pagination
+						// paginationPerPage={10}
+						// paginationRowsPerPageOptions={[5, 10, 20]}
 						fixedHeader
 						sortIcon={sortIcon}
 						dense
