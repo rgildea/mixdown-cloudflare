@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client/edge'
-import { withAccelerate } from '@prisma/extension-accelerate'
+import { PrismaClient } from '@prisma/client'
+// import { withAccelerate } from '@prisma/extension-accelerate'
 import chalk from 'chalk'
 
 export const prisma = (databaseUrl: string) => {
@@ -18,7 +18,6 @@ export const prisma = (databaseUrl: string) => {
 		],
 	})
 	client.$on('query', async e => {
-		// console.info('prisma:que444ry', e.query, e.params)
 		if (e.duration < logThreshold) return
 		const color =
 			e.duration < logThreshold * 1.1
@@ -33,7 +32,7 @@ export const prisma = (databaseUrl: string) => {
 		const dur = chalk[color](`${e.duration}ms`)
 		console.info(`prisma:query - ${dur} - ${e.query}`)
 	})
-	client.$extends(withAccelerate())
+	// client.$extends(withAccelerate())
 	client.$connect()
 	return client
 }

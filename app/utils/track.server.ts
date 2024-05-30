@@ -4,6 +4,7 @@ import { StorageContext } from './auth.server'
 const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({
 	id: true,
 	title: true,
+	description: true,
 	versions: {
 		select: {
 			id: true,

@@ -1,21 +1,14 @@
+import EditTrackForm, { TrackSchema } from '#app/components/EditTrackForm'
 import { Button } from '#app/components/ui/button'
-import { Card, CardContent, CardFooter, CardTitle } from '#app/components/ui/card'
-import { TrackWithVersions, getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
-import { Form, Link, useActionData, useLoaderData, useSearchParams } from '@remix-run/react'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import z from 'zod'
-import { StatusButton } from '#app/components/ui/status-button'
-import { useIsPending } from '#app/utils/misc'
+import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '#app/components/ui/card'
 import { requireUserId } from '#app/utils/auth.server'
-import { Field } from '#app/components/forms'
-
-const TrackSchema = z.object({
-	title: z.string({ required_error: 'Title is required' }).min(3).max(100),
-	description: z.string({ required_error: 'Description is required' }).min(3).max(500),
-})
+import { useIsPending } from '#app/utils/misc'
+import { TrackWithVersions, getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
+import { useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
+import { Link, useActionData, useLoaderData, useSearchParams } from '@remix-run/react'
 
 export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
 	const userId = await requireUserId(storageContext, request)
@@ -66,110 +59,50 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 }
 
 export default function TrackRoute() {
-	const { track } = useLoaderData<typeof loader>() as { track: TrackWithVersions }
-	const actionData = useActionData<typeof action>()
-	const [searchParams] = useSearchParams()
 	const isPending = useIsPending()
+	const { track } = useLoaderData<typeof loader>() as { track: TrackWithVersions }
+	const [searchParams] = useSearchParams()
 	const isEditing = searchParams.get('edit') === 'true'
+	const actionData = useActionData<typeof action>()
 
 	const [form, fields] = useForm({
 		id: 'edit-track',
 		constraint: getZodConstraint(TrackSchema),
 		lastResult: actionData?.result,
+		defaultValue: track as TrackWithVersions,
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: TrackSchema })
 		},
 		shouldRevalidate: 'onBlur',
+		shouldValidate: 'onBlur',
 	})
 
 	return (
-		<Form method="post" {...getFormProps(form)} onSubmit={form.onSubmit}>
-			<Card className="flex flex-col space-y-8">
-				<CardTitle className=" px-6t m-4">
-					<div className="flex h-max w-full justify-between">
-						<div className="text-4xl font-extrabold">{track?.title}</div>
-						{isEditing ? ( // If we are editing, show the save button
-							<></>
-						) : (
-							// <Button className="bg-secondary text-button text-secondary-foreground" asChild variant="default" size="sm">
-							// 	Save
-							// </Button>
-							// Otherwise, show the edit button
-							<Button
-								className="bg-secondary text-button text-secondary-foreground"
-								asChild
-								variant="default"
-								size="sm"
-							>
-								<Link to="?edit=true">
-									<InlineIcon className="m-1 size-6" icon="akar-icons:edit" />
-									Edit
-								</Link>
-							</Button>
-						)}
-					</div>
-					<h2>
-						{track?.versions.length} version{track?.versions.length > 1 ? 's' : ''}
-					</h2>
-				</CardTitle>
-				<CardContent>
-					<div id={form.errorId} className="text-s h-2 font-semibold text-input-invalid">
-						{form.errors}
-					</div>
-					<div className="text-s h-2 font-semibold text-orange-500">
-						{actionData?.result?.status === 'success' && 'Success!'}
-					</div>
-
-					<Field
-						labelProps={{ htmlFor: fields.title.id, children: 'Title' }}
-						inputProps={{
-							...getInputProps(fields.title, { type: 'text' }),
-							autoComplete: 'name',
-						}}
-						errors={fields.title.errors}
-					/>
-
-					{/* <div> 
-								<input
-							className="text-md w-full border-b-2 bg-card focus-visible:placeholder-transparent focus-visible:outline-none"
-							defaultValue={fields.title.initialValue?.toString()}
-							placeholder="Title"
-							{...getInputProps(fields.title, { type: 'text' })}
-						/> <div id={fields.title.errorId} className="mt-1 h-1 text-xs font-semibold text-input-invalid">
-							{fields.title.errors}
-						</div>  */}
-
-					<Field
-						labelProps={{ htmlFor: fields.description.id, children: 'Description' }}
-						inputProps={{
-							...getInputProps(fields.description, { type: 'text' }),
-							autoComplete: 'description',
-						}}
-						errors={fields.description.errors}
-					/>
-
-					{/* <div>
-						<input
-							className="text-md w-full border-b-2 bg-card focus-visible:placeholder-transparent focus-visible:outline-none"
-							placeholder="Description"
-							{...getInputProps(fields.description, { type: 'text' })}
-						/>
-						<div id={fields.description.errorId} className="mt-1 h-1 text-xs font-semibold text-input-invalid">
-							{fields.description.errors}
-						</div>
-					</div> */}
-				</CardContent>
-				<CardFooter>
-					<StatusButton
-						className="w-full"
-						status={isPending ? 'pending' : form.status ?? 'idle'}
-						type="submit"
-						disabled={isPending}
-					>
-						Save
-					</StatusButton>
-				</CardFooter>
-			</Card>
-		</Form>
+		<Card className="flex flex-col space-y-4 p-2">
+			<CardTitle className="m-3">
+				<div className="flex h-max w-full justify-between">
+					<div className="mr-3 text-4xl ">{track?.title}</div>
+					{isEditing ? ( // If we are editing, show the save button
+						<></>
+					) : (
+						// <Button className="bg-secondary text-button text-secondary-foreground" asChild variant="default" size="sm">
+						// 	Save
+						// </Button>
+						// Otherwise, show the edit button
+						<Button className="bg-secondary text-button text-secondary-foreground" asChild variant="default" size="sm">
+							<Link to="?edit=true">
+								<InlineIcon className="m-1 size-6" icon="akar-icons:edit" />
+								Edit
+							</Link>
+						</Button>
+					)}
+				</div>
+			</CardTitle>
+			<CardDescription className="px-6">
+				{track?.versions.length} version{track?.versions.length > 1 ? 's' : ''}
+			</CardDescription>
+			<CardContent>{isEditing && EditTrackForm({ track, actionData, isPending, form, fields })}</CardContent>
+			<CardFooter></CardFooter>
+		</Card>
 	)
 }
