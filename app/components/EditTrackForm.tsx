@@ -14,7 +14,7 @@ interface EditTrackFormProps {
 	track: TrackWithVersions
 	actionData: any //ReturnType<typeof action> // Replace 'any' with the actual type if known
 	isPending: boolean
-	form: FormMetadata
+	form: FormMetadata<TrackWithVersions>
 	fields: any
 }
 
