@@ -2,13 +2,27 @@ import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 import '#app/styles/player.css'
 import { PlayerContext } from '#app/contexts/PlayerContext'
 import { useContext } from 'react'
+import { useRouteLoaderData } from '@remix-run/react'
+import { TrackWithVersions } from '#app/utils/track.server'
+import { loader as loaderTracks } from '#app/routes/tracks+/_layout'
+
+export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
+	const found = tracks.find(track => track.id == trackId)
+	return found?.versions[0].audioFile?.url
+}
 
 export default function MixdownPlayer() {
-	const url = useContext(PlayerContext)
-	console.log('MixdownPlayer url:', url)
+	const playerState = useContext(PlayerContext)
+	const trackId = playerState?.trackId ?? null
+	const loaderData = useRouteLoaderData<typeof loaderTracks>('routes/tracks+/_layout') as {
+		tracks: TrackWithVersions[]
+	}
+
+	const tracks = loaderData?.tracks ?? []
+	const url = trackId != null ? getLatestVersionUrl(trackId, tracks) : null
 	return (
 		<div className="fixed inset-x-0 bottom-0 z-50">
-			{url && (
+			{trackId && (
 				<>
 					<AudioPlayer
 						onPlay={e => console.info('onPlay', e)}

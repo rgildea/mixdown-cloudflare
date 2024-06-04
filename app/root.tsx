@@ -235,9 +235,9 @@ function App() {
 	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" />
 	useToast(data.toast)
-	const [currentFileURL, dispatch] = useReducer(PlayerContextReducer, '')
+	const [playerState, dispatch] = useReducer(PlayerContextReducer, {})
 	return (
-		<PlayerContext.Provider value={currentFileURL}>
+		<PlayerContext.Provider value={playerState}>
 			<PlayerDispatchContext.Provider value={dispatch}>
 				<Document nonce={nonce} theme={theme} env={{}}>
 					<div className="justify-top flex min-h-dvh flex-col font-normal">

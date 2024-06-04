@@ -57,5 +57,5 @@ export const action: ActionFunction = async ({
 export default function NewTrackRoute() {
 	const [isModalOpen, setModalOpen] = useState(true)
 
-	return isModalOpen && <NewTrackModal isModalOpen={isModalOpen} setModalOpen={setModalOpen} />
+	return isModalOpen && <NewTrackModal isModalOpen={isModalOpen} setIsModalOpen={setModalOpen} />
 }

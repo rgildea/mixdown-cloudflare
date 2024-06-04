@@ -1,14 +1,15 @@
-import EditTrackForm, { TrackSchema } from '#app/components/EditTrackForm'
+import { TrackSchema } from '#app/components/EditTrackForm'
+import EditTrackModal from '#app/components/EditTrackModal'
+import PlayButton from '#app/components/PlayButton'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '#app/components/ui/card'
 import { requireUserId } from '#app/utils/auth.server'
-import { useIsPending } from '#app/utils/misc'
 import { TrackWithVersions, getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
-import { useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
-import { Link, useActionData, useLoaderData, useSearchParams } from '@remix-run/react'
+import { Link, useLoaderData, useNavigate, useRevalidator, useSearchParams } from '@remix-run/react'
+import { useState } from 'react'
 
 export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
 	const userId = await requireUserId(storageContext, request)
@@ -59,50 +60,55 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 }
 
 export default function TrackRoute() {
-	const isPending = useIsPending()
 	const { track } = useLoaderData<typeof loader>() as { track: TrackWithVersions }
 	const [searchParams] = useSearchParams()
-	const isEditing = searchParams.get('edit') === 'true'
-	const actionData = useActionData<typeof action>()
+	const isEditing = searchParams.get('edit') !== null
+	const [isModalOpen, setModalOpen] = useState(isEditing)
+	const navigate = useNavigate()
+	const { revalidate } = useRevalidator()
 
-	const [form, fields] = useForm({
-		id: 'edit-track',
-		constraint: getZodConstraint(TrackSchema),
-		lastResult: actionData?.result,
-		defaultValue: track as TrackWithVersions,
-		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: TrackSchema })
-		},
-		shouldRevalidate: 'onBlur',
-		shouldValidate: 'onBlur',
-	})
+	const handleDismiss = () => {
+		navigate(-1)
+	}
 
 	return (
-		<Card className="flex flex-col space-y-4 p-2">
-			<CardTitle className="m-3">
-				<div className="flex h-max w-full justify-between">
-					<div className="mr-3 text-4xl ">{track?.title}</div>
-					{isEditing ? ( // If we are editing, show the save button
-						<></>
-					) : (
-						// <Button className="bg-secondary text-button text-secondary-foreground" asChild variant="default" size="sm">
-						// 	Save
-						// </Button>
-						// Otherwise, show the edit button
-						<Button className="bg-secondary text-button text-secondary-foreground" asChild variant="default" size="sm">
-							<Link to="?edit=true">
-								<InlineIcon className="m-1 size-6" icon="akar-icons:edit" />
-								Edit
-							</Link>
-						</Button>
-					)}
-				</div>
-			</CardTitle>
-			<CardDescription className="px-6">
-				{track?.versions.length} version{track?.versions.length > 1 ? 's' : ''}
-			</CardDescription>
-			<CardContent>{isEditing && EditTrackForm({ track, actionData, isPending, form, fields })}</CardContent>
-			<CardFooter></CardFooter>
-		</Card>
+		<>
+			<EditTrackModal track={track} isModalOpen={isModalOpen} setIsModalOpen={setModalOpen} onDismiss={handleDismiss} />
+			<Card className="flex flex-col space-y-4 p-2 sm:w-3/4">
+				<CardTitle className="m-4 px-6">
+					<div className="flex h-max w-full justify-between">
+						<PlayButton size="large" trackId={track.id} />
+						<div className="mr-3 text-4xl ">{track?.title}</div>
+						{
+							<Button
+								className="bg-secondary text-button text-secondary-foreground"
+								asChild
+								variant="default"
+								size="sm"
+								disabled={isModalOpen}
+								onClick={() => {
+									setModalOpen(true)
+									revalidate()
+								}}
+							>
+								<Link to="?edit">
+									<InlineIcon className="m-1 size-6" icon="akar-icons:edit" />
+									Edit
+								</Link>
+							</Button>
+						}
+					</div>
+				</CardTitle>
+				<CardDescription className="px-6">
+					{track?.versions.length} version{track?.versions.length > 1 ? 's' : ''}
+				</CardDescription>
+				<CardContent>
+					<div className="text-sm font-medium leading-none">{track.title}</div>
+					{`isModalOpen: ${isModalOpen}`} <br />
+					{`isEditing: ${isEditing}`}
+				</CardContent>
+				<CardFooter></CardFooter>
+			</Card>
+		</>
 	)
 }

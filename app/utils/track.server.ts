@@ -152,7 +152,7 @@ export async function updateTrack(
 	storageContext: StorageContext,
 	trackId: string,
 	title: string,
-	description: string,
+	description?: string,
 	creatorId?: string,
 ) {
 	const { db } = storageContext

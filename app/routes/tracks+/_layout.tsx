@@ -33,7 +33,7 @@ export default function Route() {
 			{searchParams.get('new') === 'true' && (
 				<NewTrackModal
 					isModalOpen={true}
-					setModalOpen={() => {
+					setIsModalOpen={() => {
 						// nothing
 					}}
 					onDismiss={() => {

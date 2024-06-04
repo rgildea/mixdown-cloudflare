@@ -6,11 +6,11 @@ import { uploadEndpoint } from '../routes/tracks+/new'
 
 type NewTrackModalProps = {
 	isModalOpen: boolean
-	setModalOpen: (open: boolean) => void
+	setIsModalOpen: (open: boolean) => void
 	onDismiss?: () => void
 }
 
-export default function NewTrackModal({ isModalOpen, onDismiss }: NewTrackModalProps) {
+export default function NewTrackModal({ isModalOpen, setIsModalOpen, onDismiss }: NewTrackModalProps) {
 	const navigate = useNavigate()
 
 	const handleDismiss = () => {
@@ -20,7 +20,14 @@ export default function NewTrackModal({ isModalOpen, onDismiss }: NewTrackModalP
 	return (
 		<>
 			<AnimatePresence onExitComplete={() => onDismiss?.()}>
-				<ModalDialog isDisabled={false} title="New Track" isModalOpen={isModalOpen} handleOpenChange={handleDismiss}>
+				<ModalDialog
+					isDisabled={false}
+					title="New Track"
+					description={'Upload a track to get started.'}
+					setIsModalOpen={setIsModalOpen}
+					isModalOpen={isModalOpen}
+					handleOpenChange={handleDismiss}
+				>
 					<UppyDragDropUploadForm
 						className="mt-4 pt-4"
 						onSuccess={() => {

@@ -1,3 +1,4 @@
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
 import { PropsWithChildren } from 'react'
@@ -7,13 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './car
 export default function ModalDialog(
 	props: PropsWithChildren<{
 		title?: string
-		isDisabled?: boolean
-		isModalOpen?: boolean
-		setIsModalOpen?: (open: boolean) => void
-		handleOpenChange?: () => void
+		description?: string
+		isDisabled: boolean
+		isModalOpen: boolean
+		setIsModalOpen: (open: boolean) => void
+		handleOpenChange: () => void
 	}>,
 ) {
-	const { title, isDisabled, isModalOpen, setIsModalOpen, handleOpenChange } = props
+	;``
+	const { title, description, isDisabled, isModalOpen, setIsModalOpen, handleOpenChange } = props
 
 	function handleDismissClicked() {
 		setIsModalOpen?.(false)
@@ -46,14 +49,15 @@ export default function ModalDialog(
 						<Card className="text-card-foreground">
 							<CardHeader className="flex flex-row justify-between">
 								<div>
-									<CardTitle className="text-4xl font-extrabold">
-										<Dialog.Title>{title}</Dialog.Title>
-									</CardTitle>
-									<CardDescription>Upload a track to get started.</CardDescription>
+									<CardTitle className="text-4xl font-extrabold">{title}</CardTitle>
+									<CardDescription>{description}</CardDescription>
 								</div>
-
 								<Dialog.Close asChild>
-									{!isDisabled && <Button onClick={handleDismissClicked}>Close</Button>}
+									{!isDisabled && (
+										<Button variant={'ghost'} size="icon" onClick={handleDismissClicked}>
+											<InlineIcon className="size-4" icon="akar-icons:cross" />
+										</Button>
+									)}
 								</Dialog.Close>
 							</CardHeader>
 							<CardContent className="flex flex-col space-y-8">{props.children}</CardContent>

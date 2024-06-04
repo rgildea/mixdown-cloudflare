@@ -1,28 +1,46 @@
-import { FormMetadata, getFormProps, getInputProps } from '@conform-to/react'
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { Field } from './forms'
-import { Form } from '@remix-run/react'
+import { Form, useActionData } from '@remix-run/react'
 import z from 'zod'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { StatusButton } from './ui/status-button'
+import { useIsPending } from '#app/utils/misc'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { action } from '#app/routes/tracks+/$id'
+import { Button } from './ui/button'
 
 export const TrackSchema = z.object({
 	title: z.string({ required_error: 'Title is required' }).min(3).max(100),
-	description: z.string({ required_error: 'Description is required' }).min(3).max(500),
+	description: z.string().min(3).max(500).optional(),
 })
 
 interface EditTrackFormProps {
 	track: TrackWithVersions
-	actionData: any //ReturnType<typeof action> // Replace 'any' with the actual type if known
-	isPending: boolean
-	form: FormMetadata<TrackWithVersions>
-	fields: any
+	onCancelButtonClicked: () => void
+	onSubmitButtonClicked?: () => void
 }
 
-function EditTrackForm({ track, actionData, isPending, form, fields }: EditTrackFormProps) {
-	console.log('rending form for', track)
+function EditTrackForm({ track, onCancelButtonClicked, onSubmitButtonClicked }: EditTrackFormProps) {
+	const isPending = useIsPending()
+	const actionData = useActionData<typeof action>()
+
+	const [form, fields] = useForm({
+		id: 'edit-track',
+		constraint: getZodConstraint(TrackSchema),
+		lastResult: actionData?.result,
+		defaultValue: track as TrackWithVersions,
+		onValidate({ formData }) {
+			return parseWithZod(formData, { schema: TrackSchema })
+		},
+		shouldRevalidate: 'onBlur',
+		shouldValidate: 'onBlur',
+		onSubmit() {
+			onSubmitButtonClicked?.()
+		},
+	})
 
 	return (
-		<Form method="post" {...getFormProps(form)} onSubmit={form.onSubmit}>
+		<Form method="post" {...getFormProps(form)}>
 			<div id={form.errorId} className="text-s h-2 font-semibold text-input-invalid">
 				{form.errors}
 			</div>
@@ -77,6 +95,9 @@ function EditTrackForm({ track, actionData, isPending, form, fields }: EditTrack
 			>
 				Save
 			</StatusButton>
+			<Button onClick={onCancelButtonClicked} className="mt-1 flex w-full justify-center gap-4" variant="ghost">
+				Cancel
+			</Button>
 		</Form>
 	)
 }

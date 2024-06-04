@@ -5,6 +5,8 @@ import { useContext } from 'react'
 import DataTable from '#app/components/DataTableBase'
 import { Button } from './ui/button'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { useIsPending } from '#app/utils/misc'
+import PlayButton from './PlayButton'
 
 interface TrackListProps {
 	tracks: TrackWithVersions[]
@@ -12,18 +14,12 @@ interface TrackListProps {
 	onRowClicked?: (track: TrackWithVersions) => void
 }
 
-export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
-	const found = tracks.find(track => track.id == trackId)
-	return found?.versions[0].audioFile?.url
-}
-
-function TrackList({ tracks, onRowClicked }: TrackListProps) {
+function TrackList({ tracks }: TrackListProps) {
 	const dispatch = useContext(PlayerDispatchContext)
+	const isPending = useIsPending()
 
 	const handlePlayButtonClicked = (trackId: string) => {
-		const url = getLatestVersionUrl(trackId, tracks)
-		console.log('Dispatching play action with url: ', url)
-		dispatch({ type: 'PLAY', url })
+		dispatch({ type: 'PLAY_TRACK', trackId })
 	}
 
 	const customStyles = {
@@ -64,26 +60,15 @@ function TrackList({ tracks, onRowClicked }: TrackListProps) {
 							className="space-between flex w-full flex-nowrap items-center justify-between px-0 text-body-sm"
 							data-tag="allowRowEvents"
 						>
-							<Button
-								variant="ghost"
-								onClick={e => {
-									console.info('setting track id', track.id)
-									e.stopPropagation()
-									handlePlayButtonClicked(track.id)
-								}}
-								className="flex-6 p-1"
-							>
-								<InlineIcon className="size-4" icon="akar-icons:play"></InlineIcon>
-							</Button>
+							<PlayButton trackId={track.id} />
 							<div className="font-pixer flex-1 leading-snug" data-tag="allowRowEvents">
 								{track.title}
 							</div>
-							<Button variant="ghost" asChild>
+							<Button variant="ghost" size={'icon'} asChild>
 								<NavLink to={`/tracks/${track.id}?edit`}>
 									<InlineIcon className="size-4" icon="akar-icons:pencil" />
 								</NavLink>
 							</Button>
-
 							<Form key={track.id} method="DELETE" action={trackUrl}>
 								<Button
 									className="flex-6 ml-auto p-0 text-button focus-visible:ring-0"
@@ -109,14 +94,19 @@ function TrackList({ tracks, onRowClicked }: TrackListProps) {
 
 	return (
 		<DataTable
+			progressPending={isPending}
+			noDataComponent={'Try uploading a track to get started.'}
 			highlightOnHover
 			pointerOnHover
 			striped
-			onRowClicked={onRowClicked}
+			onRowClicked={row => {
+				handlePlayButtonClicked(row.id)
+			}}
 			columns={cols}
 			data={tracks}
 			theme="mixdown"
 			customStyles={customStyles}
+			noTableHead
 		/>
 	)
 }

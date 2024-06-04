@@ -7,7 +7,7 @@ export const prisma = (databaseUrl: string) => {
 	// the dev server to see your changes.
 
 	// Feel free to change this log threshold to something that makes sense for you
-	const logThreshold = 0 // ms
+	const logThreshold = 500 // ms
 
 	const client = new PrismaClient({
 		datasources: { db: { url: databaseUrl } },
