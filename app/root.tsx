@@ -20,6 +20,7 @@ import {
 	useFetcher,
 	useFetchers,
 	useLoaderData,
+	useLocation,
 	useNavigate,
 	useSubmit,
 } from '@remix-run/react'
@@ -235,34 +236,35 @@ function App() {
 	const nonce = useNonce()
 	const user = useOptionalUser()
 	const theme = useTheme()
-	// const matches = useMatches()
 	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" /> // Change the variable name to 'searchBar'
 	useToast(data.toast)
 	const navigate = useNavigate()
+	const location = useLocation()
+	const isRoot = location.pathname === '/'
+	console.log('isRoot:', isRoot)
 	const [playerState, dispatch] = useReducer(PlayerContextReducer, null)
-	// const matches = useMatches()
-	// console.log('hooey', matches)
 	return (
 		<PlayerContext.Provider value={playerState}>
 			<PlayerDispatchContext.Provider value={dispatch}>
 				<Document nonce={nonce} theme={theme} env={{}}>
 					<header className="p-2">
-						<nav className="flex flex-wrap justify-between align-middle">
-							<Button
-								className="p-0.5"
-								onClick={() => {
-									navigate('..')
-								}}
-								variant="ghost"
-								size="sm"
-								hidden={true}
-							>
-								<InlineIcon className="vertical-align-0 size-12" icon="mdi:chevron-left" />
-							</Button>
-							<Logo />
+						<nav className="flex justify-between">
+							<div className="flex bg-blue-400">
+								<Button
+									className={`p-0.5 ${isRoot ? 'hidden' : ''}`}
+									onClick={() => {
+										navigate('..')
+									}}
+									variant="ghost"
+									size="sm"
+								>
+									<InlineIcon className="vertical-align-0 size-12" icon="mdi:chevron-left" />
+								</Button>
+								<Logo />
+							</div>
 							{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
-							<div className="items-centers flex">
+							<div className="flex items-center bg-red-400">
 								{user ? (
 									<UserDropdown />
 								) : (
@@ -271,7 +273,7 @@ function App() {
 									</Button>
 								)}
 							</div>
-							<div className="block w-full sm:hidden">{searchBar}</div>
+							{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
 						</nav>
 					</header>
 
@@ -282,6 +284,7 @@ function App() {
 					<div className="p-2">
 						<Logo />
 						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+						HI!
 					</div>
 					<EpicToaster closeButton position="top-center" theme={theme} />
 					<EpicProgress />
@@ -294,10 +297,10 @@ function App() {
 
 function Logo() {
 	return (
-		<Link to="/" className="group grid flex-grow font-nourd leading-snug">
-			<div className="font-light transition group-hover:-translate-x-1">
+		<Link to="/" className="justify-self-star group font-nourd leading-snug">
+			<div className="justify-self-starts flex font-light transition group-hover:-translate-x-1">
 				<svg
-					className="size-5 text-foreground xl:-mt-4"
+					className="size-7 text-foreground group-hover:rotate-180"
 					fill="none"
 					viewBox="0 0 87 100"
 					xmlns="http://www.w3.org/2000/svg"
@@ -308,9 +311,9 @@ function Logo() {
 						id="Path"
 					></path>
 				</svg>
-				<div className="text-body-md">Mixdown</div>
+				<div className="justify-self-start text-body-md">Mixdown</div>
 			</div>
-			<span className="font-bold transition group-hover:translate-x-1">Share your mixes</span>
+			<span className="flex text-xs font-light transition group-hover:translate-x-1">Share your mixes</span>
 		</Link>
 	)
 }

@@ -1,6 +1,6 @@
 import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { Form, NavLink } from '@remix-run/react'
+import { Form, Link, NavLink } from '@remix-run/react'
 import { useContext } from 'react'
 import DataTable from '#app/components/DataTableBase'
 import { Button } from './ui/button'
@@ -96,10 +96,22 @@ function TrackList({ tracks }: TrackListProps) {
 		},
 	]
 
+	const noDataComponent = (
+		<div className="flex-col">
+			<Button className="my-2 bg-secondary text-button text-secondary-foreground" asChild variant="default" size="icon">
+				<Link to="/tracks/?new=true">
+					<InlineIcon className="size-48" icon="mdi:cloud-upload" />
+				</Link>
+			</Button>
+			{/* <InlineIcon className="size-48" icon="mdi:cloud-upload" /> */}
+			<div>Upload a track to get started.</div>
+		</div>
+	)
+
 	return (
 		<DataTable
 			progressPending={isPending}
-			noDataComponent={'Try uploading a track to get started.'}
+			noDataComponent={noDataComponent}
 			highlightOnHover
 			pointerOnHover
 			striped

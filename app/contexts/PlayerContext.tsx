@@ -27,7 +27,6 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
 }
 
 export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
-	console.log('PlayerContextReducer received action:', action)
 	switch (action.type) {
 		case 'PLAY_TRACK':
 			if (!action.track) {

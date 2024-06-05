@@ -1,7 +1,6 @@
 import { PlayerContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { useMatches } from '@remix-run/react'
 import { useContext } from 'react'
 import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 
@@ -11,8 +10,8 @@ export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]
 }
 
 export default function MixdownPlayer() {
-	const matches = useMatches()
-	console.log('MixdownPlayer matches:', matches)
+	// const matches = useMatches()
+	// console.log('MixdownPlayer matches:', matches)
 	const playerState = useContext(PlayerContext)
 	const track = playerState?.track ?? null
 	const url = track?.versions[0].audioFile?.url // 'https://naturecreepsbeneath.com/player/1879830/tracks/3056260.mp3'
@@ -28,6 +27,7 @@ export default function MixdownPlayer() {
 						onCanPlay={e => console.info('onCanPlay', e)}
 						onPlayError={e => console.info('onPlayError', e)}
 						autoPlay={true}
+						customAdditionalControls={[]}
 						showDownloadProgress={true}
 						showFilledProgress={true}
 						showJumpControls={false}

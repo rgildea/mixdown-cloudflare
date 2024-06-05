@@ -26,7 +26,6 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	const icon = isPlaying ? 'mdi:pause' : 'mdi:play'
 
 	const handleClick = () => {
-		console.log('PlayButton clicked')
 		dispatch({ type: 'PLAY_TRACK', track })
 	}
 

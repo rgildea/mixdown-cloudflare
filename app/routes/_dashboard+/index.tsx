@@ -12,8 +12,8 @@ export const action: ActionFunction = async () => {
 
 export default function Route() {
 	const matches = useMatches()
-	console.log('Route _dashboard+_index.tsx')
-	console.log('Route matches:', matches)
+	// console.log('Route _dashboard+_index.tsx')
+	// console.log('Route matches:', matches)
 
 	const match = matches.find(match => match.id == 'routes/_dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
@@ -34,7 +34,7 @@ export default function Route() {
 					</Link>
 				</Button>
 			</CardTitle>
-			<CardContent>
+			<CardContent className="px-0">
 				<TrackList tracks={tracks || []} />
 			</CardContent>
 		</Card>
