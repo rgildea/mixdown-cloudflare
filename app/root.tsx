@@ -237,7 +237,7 @@ function App() {
 	const user = useOptionalUser()
 	const theme = useTheme()
 	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
-	const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" /> // Change the variable name to 'searchBar'
+	// const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" /> // Change the variable name to 'searchBar'
 	useToast(data.toast)
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -250,7 +250,7 @@ function App() {
 				<Document nonce={nonce} theme={theme} env={{}}>
 					<header className="p-2">
 						<nav className="flex justify-between">
-							<div className="flex bg-blue-400">
+							<div className="flex">
 								<Button
 									className={`p-0.5 ${isRoot ? 'hidden' : ''}`}
 									onClick={() => {
@@ -264,7 +264,7 @@ function App() {
 								<Logo />
 							</div>
 							{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
-							<div className="flex items-center bg-red-400">
+							<div className="flex items-center">
 								{user ? (
 									<UserDropdown />
 								) : (
