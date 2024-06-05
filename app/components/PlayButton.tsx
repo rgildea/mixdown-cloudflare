@@ -4,9 +4,10 @@ import React, { useContext } from 'react'
 import { InlineIcon } from '@iconify/react'
 import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { Button } from './ui/button'
+import { TrackWithVersions } from '#app/utils/track.server'
 
 interface PlayButtonProps {
-	trackId: string
+	track: TrackWithVersions
 	size?: 'small' | 'large'
 }
 
@@ -16,16 +17,17 @@ const sizes = {
 	large: 'size-8',
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ trackId, size }) => {
+const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	const playerState = useContext(PlayerContext)
-	const nowPlayingTrackId = playerState?.trackId
+	const nowPlayingTrack = playerState?.track
 
 	const dispatch = useContext(PlayerDispatchContext)
-	const isPlaying = nowPlayingTrackId === trackId
-	const icon = isPlaying ? 'akar-icons:pause' : 'akar-icons:play'
+	const isPlaying = nowPlayingTrack?.id === track?.id
+	const icon = isPlaying ? 'mdi:pause' : 'mdi:play'
 
 	const handleClick = () => {
-		dispatch({ type: 'PLAY_TRACK', trackId })
+		console.log('PlayButton clicked')
+		dispatch({ type: 'PLAY_TRACK', track })
 	}
 
 	return (

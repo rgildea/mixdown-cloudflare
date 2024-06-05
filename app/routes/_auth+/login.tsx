@@ -54,7 +54,7 @@ export async function action({ context: { storageContext }, request }: ActionFun
 		request,
 		session,
 		remember: remember ?? false,
-		redirectTo: redirectTo || '/dashboard',
+		redirectTo: redirectTo || '/',
 	})
 }
 

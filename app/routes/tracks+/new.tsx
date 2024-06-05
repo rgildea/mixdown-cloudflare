@@ -8,7 +8,7 @@ import z from 'zod'
 import NewTrackModal from '../../components/NewTrackModal'
 export const uploadEndpoint = '/storage/new'
 
-const redirectTo = '/tracks'
+const redirectTo = '/'
 const title = z.string({ required_error: 'Title is required' }).min(3).max(100)
 const TrackSchema = z.object({ title })
 

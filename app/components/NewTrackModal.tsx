@@ -31,7 +31,7 @@ export default function NewTrackModal({ isModalOpen, setIsModalOpen, onDismiss }
 					<UppyDragDropUploadForm
 						className="mt-4 pt-4"
 						onSuccess={() => {
-							navigate(`/tracks`)
+							navigate('/tracks', { replace: true })
 						}}
 						endpoint={uploadEndpoint}
 					/>

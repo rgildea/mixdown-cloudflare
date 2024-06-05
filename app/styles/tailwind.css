@@ -4,14 +4,14 @@
 
 /* help me visualize the colors */
 .root {
-	.foreground-destructive {
-		color: hsl(345, 83%, 41%);
+	.foreground {
+		color: hsl(214, 76%, 19%);
 	}
 	.background {
 		color: hsl(180, 9%, 93%);
 	}
-	.foreground {
-		color: hsl(214, 76%, 19%);
+	.foreground-destructive {
+		color: hsl(345, 83%, 41%);
 	}
 	.muted {
 		color: hsl(15, 0%, 80%);
@@ -68,6 +68,72 @@
 		}
 	}
 }
+.dark {
+	.foreground {
+		color: hsl(210, 40%, 98%);
+	}
+	.background {
+		/* color: hsl(222.2, 84%, 4.9%); */
+		color: hsl(214, 76%, 19%);
+	}
+	.foreground-destructive {
+		color: hsl(-4, 84%, 60%);
+	}
+	.muted {
+		color: hsl(217.2, 32.6%, 12);
+		.foreground {
+			color: hsl(215, 20.2%, 65.1%);
+		}
+	}
+	.popover {
+		color: hsl(222.2, 84%, 4.9%);
+		.foreground {
+			color: hsl(210 40% 98);
+		}
+	}
+	.card {
+		color: hsl(180, 9%, 100%);
+		.foreground {
+			color: hsl(222.2, 84%, 4.9%);
+		}
+	}
+	.border {
+		color: hsl(0, 0%, 50%);
+	}
+	.input {
+		color: hsl(214 76.8% 19.19%);
+		.invalid {
+			color: hsl(0 84.2% 60.2%);
+		}
+	}
+	.primary {
+		color: hsl(15, 97%, 60%);
+		.foreground {
+			color: hsl(180, 9%, 93%);
+		}
+	}
+	.secondary {
+		color: hsl(214, 76%, 19%);
+		.foreground {
+			color: hsl(180, 9%, 93%);
+		}
+	}
+	.accent {
+		color: hsl(15, 0%, 80%);
+		.foreground {
+			color: hsl(214, 76%, 19%);
+		}
+	}
+	.ring {
+		color: hsl(214, 76%, 19%);
+	}
+	.destructive {
+		color: hsl(0 70% 50%);
+		.foreground {
+			color: hsl(210, 40%, 98%);
+		}
+	}
+}
 
 @layer base {
 	:root {
@@ -76,13 +142,12 @@
 		--font-logo: 'League Spartan';
 		--font-pixer: 'Pixer';
 		--font-nourd: 'Nourd';
-		/* --font-sans: 'Nourd'; */
-
-		/* prefixed with foreground because it should look good on the background */
-		--foreground-destructive: 345 83% 41%;
 
 		--background: 180 9% 93%;
 		--foreground: 0 0 50%%;
+
+		/* prefixed with foreground because it should look good on the background */
+		--foreground-destructive: 345 83% 41%;
 
 		--muted: 15 0% 80%;
 		--muted-foreground: 0 0% 50%;
@@ -110,13 +175,12 @@
 		--destructive-foreground: 210 40% 98%;
 
 		--ring: 15 97% 60%;
-
 		--radius: 0.5rem;
 	}
 
 	.dark {
-		--background: 222.2 84% 4.9%;
 		--foreground: 210 40% 98%;
+		--background: 214 76% 19%;
 
 		/* prefixed with foreground because it should look good on the background */
 		--foreground-destructive: -4 84% 60%;
@@ -127,8 +191,8 @@
 		--popover: 222.2 84% 4.9%;
 		--popover-foreground: 210 40% 98%;
 
-		/* --card: 180 9% 93%;
-		--card-foreground: 210 40% 98%; */
+		--card: 180 9% 93%;
+		--card-foreground: 222.2 84% 4.9%;
 
 		--border: 0 0% 50%;
 		--input: 214 76% 19%;
@@ -147,5 +211,7 @@
 		--destructive-foreground: 210 40% 98%;
 
 		--ring: 214 76% 90%;
+
+		--radius: 0.5rem;
 	}
 }

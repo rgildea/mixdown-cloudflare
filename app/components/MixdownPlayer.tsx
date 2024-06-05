@@ -1,10 +1,9 @@
-import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
-import '#app/styles/player.css'
 import { PlayerContext } from '#app/contexts/PlayerContext'
-import { useContext } from 'react'
-import { useRouteLoaderData } from '@remix-run/react'
+import '#app/styles/player.css'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { loader as loaderTracks } from '#app/routes/tracks+/_layout'
+import { useMatches } from '@remix-run/react'
+import { useContext } from 'react'
+import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
@@ -12,17 +11,15 @@ export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]
 }
 
 export default function MixdownPlayer() {
+	const matches = useMatches()
+	console.log('MixdownPlayer matches:', matches)
 	const playerState = useContext(PlayerContext)
-	const trackId = playerState?.trackId ?? null
-	const loaderData = useRouteLoaderData<typeof loaderTracks>('routes/tracks+/_layout') as {
-		tracks: TrackWithVersions[]
-	}
-
-	const tracks = loaderData?.tracks ?? []
-	const url = trackId != null ? getLatestVersionUrl(trackId, tracks) : null
+	const track = playerState?.track ?? null
+	const url = track?.versions[0].audioFile?.url // 'https://naturecreepsbeneath.com/player/1879830/tracks/3056260.mp3'
+	console.log('MixdownPlayer Loading URL: ', url)
 	return (
 		<div className="fixed inset-x-0 bottom-0 z-50">
-			{trackId && (
+			{track && (
 				<>
 					<AudioPlayer
 						onPlay={e => console.info('onPlay', e)}

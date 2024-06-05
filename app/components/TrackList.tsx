@@ -18,14 +18,18 @@ function TrackList({ tracks }: TrackListProps) {
 	const dispatch = useContext(PlayerDispatchContext)
 	const isPending = useIsPending()
 
-	const handlePlayButtonClicked = (trackId: string) => {
-		dispatch({ type: 'PLAY_TRACK', trackId })
+	const handlePlayButtonClicked = (track: TrackWithVersions) => {
+		console.log(track)
+		dispatch({ type: 'PLAY_TRACK', track })
 	}
 
 	const customStyles = {
 		rows: {
+			style: {
+				borderRadius: '0.5rem',
+			},
 			stripedStyle: {
-				backgroundColor: 'rgba(252, 103, 54, 0.7)',
+				backgroundColor: 'rgba(252, 103, 54, 0.9)',
 			},
 		},
 		headRow: {
@@ -57,16 +61,16 @@ function TrackList({ tracks }: TrackListProps) {
 				return (
 					trackUrl && (
 						<div
-							className="space-between flex w-full flex-nowrap items-center justify-between px-0 text-body-sm"
+							className="space-between flex w-full flex-nowrap items-center justify-between px-0"
 							data-tag="allowRowEvents"
 						>
-							<PlayButton trackId={track.id} />
+							<PlayButton track={track} />
 							<div className="font-pixer flex-1 leading-snug" data-tag="allowRowEvents">
 								{track.title}
 							</div>
 							<Button variant="ghost" size={'icon'} asChild>
 								<NavLink to={`/tracks/${track.id}?edit`}>
-									<InlineIcon className="size-4" icon="akar-icons:pencil" />
+									<InlineIcon className="size-4" icon="mdi:pencil" />
 								</NavLink>
 							</Button>
 							<Form key={track.id} method="DELETE" action={trackUrl}>
@@ -82,7 +86,7 @@ function TrackList({ tracks }: TrackListProps) {
 										e.preventDefault()
 									}}
 								>
-									<InlineIcon className="size-4" icon="akar-icons:cross" />
+									<InlineIcon className="size-4" icon="mdi:delete" />
 								</Button>{' '}
 							</Form>
 						</div>
@@ -100,7 +104,7 @@ function TrackList({ tracks }: TrackListProps) {
 			pointerOnHover
 			striped
 			onRowClicked={row => {
-				handlePlayButtonClicked(row.id)
+				handlePlayButtonClicked(row)
 			}}
 			columns={cols}
 			data={tracks}

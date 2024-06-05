@@ -65,7 +65,7 @@ export async function action({ params, request, context }: ActionFunctionArgs) {
 				throw new Response(`Failed to delete object from R2 with key ${key}`, { status: 500 })
 			}
 
-			return redirect('/tracks')
+			return redirect('/')
 		}
 	}
 }
