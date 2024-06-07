@@ -12,9 +12,10 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 	if (!key) {
 		return new Response('Not found', { status: 404 })
 	}
-
+	console.log('loader key:', key)
 	// const response = await servePublicPathFromStorage(env.STORAGE_BUCKET, key)
 	const object: R2ObjectBody | null = await env.STORAGE_BUCKET.get(key)
+	console.log('loaded object from storage for key', key, object)
 	if (!object) {
 		return notFoundResponse
 	}

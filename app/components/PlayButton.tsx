@@ -22,15 +22,67 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	const nowPlayingTrack = playerState?.track
 
 	const dispatch = useContext(PlayerDispatchContext)
-	const isPlaying = nowPlayingTrack?.id === track?.id
-	const icon = isPlaying ? 'mdi:pause' : 'mdi:play'
+	const isLoaded = nowPlayingTrack?.id == track?.id
+	const isPlaying = ['PLAYING', 'READY_TO_PLAY'].includes(playerState?.playerState || '')
+	let icon = 'mdi:exclamation'
+
+	icon = `mdi:${isLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`
 
 	const handleClick = () => {
-		dispatch({ type: 'PLAY_TRACK', track })
+		console.log(
+			`${track.title} (${track.id})clicked. isLoaded? ${isLoaded} isPlaying? ${isPlaying}	nowPlayingTrack? ${nowPlayingTrack?.id}`,
+		)
+
+		if (!isLoaded) {
+			dispatch({ type: 'PLAY_TRACK', track })
+			return
+		}
+
+		switch (playerState?.playerState) {
+			case 'PLAYING':
+				console.log('PAUSE')
+				dispatch({ type: 'PAUSE' })
+				return
+
+			case 'READY_TO_PLAY':
+				console.log('PLAY')
+				if (playerState.player?.current?.isPlaying) {
+					console.log('PAUSE')
+					dispatch({ type: 'PAUSE' })
+					return
+				}
+				dispatch({ type: 'PLAY_TRACK', track })
+				return
+
+			case 'LOADING':
+				console.log('PAUSE')
+				dispatch({ type: 'PAUSE' })
+				return
+
+			case 'INITIAL_STATE':
+				console.log('PLAY_TRACK', track)
+				dispatch({ type: 'PLAY_TRACK', track })
+				return
+
+			case 'PAUSED':
+				console.log('PLAY')
+				dispatch({ type: 'PLAY_TRACK', track })
+				return
+
+			case 'ENDED':
+				console.log('PLAY')
+				dispatch({ type: 'RESTART_TRACK', track })
+				return
+
+			default:
+				console.log('PAUSE')
+				dispatch({ type: 'PAUSE' })
+				return
+		}
 	}
 
 	return (
-		<Button variant="ghost" size="icon" className={'flex-6 p-1'} onClick={handleClick}>
+		<Button variant="ghost" size="icon" className={'p-1'} onClick={handleClick}>
 			<InlineIcon className={size ? sizes[size] : sizes['medium']} icon={icon} />
 		</Button>
 	)

@@ -32,6 +32,7 @@ export default function Route() {
 				<NewTrackModal
 					isModalOpen={true}
 					setIsModalOpen={() => {
+						console.log('noop')
 						// nothing
 					}}
 					onDismiss={() => {

@@ -6,7 +6,7 @@
 	font-family: inherit;
 	width: 100%;
 	padding: 10px 15px;
-	background-color: rgb(134, 134, 134, 0.1);
+	background-color: --primary;
 }
 .rhap_container:focus:not(:focus-visible) {
 	outline: 0;
