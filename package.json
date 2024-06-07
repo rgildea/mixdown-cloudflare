@@ -25,6 +25,7 @@
     "typegen": "wrangler types"
   },
   "dependencies": {
+    "buffer-polyfill": "npm:buffer@^6.0.3",
     "@conform-to/react": "^1.0.4",
     "@conform-to/zod": "^1.0.4",
     "@epic-web/cachified": "^5.1.2",

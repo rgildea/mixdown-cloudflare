@@ -142,7 +142,7 @@ export default function MixdownPlayer() {
 					exit={{ opacity: 0 }}
 					transition={{ y: 300, duration: 2 }}
 				>
-					<h2 className="bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
+					<h2 className="invisible bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
 					<InternalPlayerComponent {...playerController} url={url} ref={player} track={track} />
 				</motion.div>
 			)}
