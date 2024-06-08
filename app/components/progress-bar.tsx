@@ -18,9 +18,7 @@ function EpicProgress() {
 		if (!ref.current) return
 		if (delayedPending) setAnimationComplete(false)
 
-		const animationPromises = ref.current
-			.getAnimations()
-			.map(({ finished }) => finished)
+		const animationPromises = ref.current.getAnimations().map(({ finished }) => finished)
 
 		Promise.allSettled(animationPromises).then(() => {
 			if (!delayedPending) setAnimationComplete(true)
@@ -38,22 +36,14 @@ function EpicProgress() {
 				ref={ref}
 				className={cn(
 					'h-full w-0 bg-foreground duration-500 ease-in-out',
-					transition.state === 'idle' &&
-						(animationComplete
-							? 'transition-none'
-							: 'w-full opacity-0 transition-all'),
+					transition.state === 'idle' && (animationComplete ? 'transition-none' : 'w-full opacity-0 transition-all'),
 					delayedPending && transition.state === 'submitting' && 'w-5/12',
 					delayedPending && transition.state === 'loading' && 'w-8/12',
 				)}
 			/>
 			{delayedPending && (
 				<div className="absolute flex items-center justify-center">
-					<Icon
-						name="update"
-						size="md"
-						className="m-1 animate-spin text-foreground"
-						aria-hidden
-					/>
+					<Icon name="update" size="md" className="m-1 animate-spin text-foreground" aria-hidden />
 				</div>
 			)}
 		</div>

@@ -241,6 +241,7 @@ function App() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const isRoot = location.pathname === '/'
+	console.log('location.pathname is', location.pathname)
 	const [playerState, dispatch] = useReducer(PlayerContextReducer, null)
 	return (
 		<PlayerContext.Provider value={playerState}>
@@ -346,7 +347,6 @@ function UserDropdown() {
 					<DropdownMenuItem asChild>
 						{/* <Link prefetch="intent" to={`/users/${user.username}`}> */}
 						<>
-							<span className="text-xs text-muted-foreground">Signed In As:</span>
 							<Icon className="text-body-md" name="avatar">
 								<span className="text-xs text-muted-foreground">
 									{user.name ?? user.username} ({user.email}){' '}

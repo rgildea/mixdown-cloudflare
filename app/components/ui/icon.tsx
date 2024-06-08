@@ -1,9 +1,7 @@
-import { type SVGProps } from 'react'
-// import { cn } from '#app/utils/misc.tsx'
+import { cn } from '#app/utils/misc'
 import { type IconName } from '@/icon-name'
-// import href from './icons/sprite.svg'
+import { type SVGProps } from 'react'
 
-// export { href }
 export { IconName }
 
 const sizeClassName = {
@@ -52,10 +50,12 @@ export function Icon({
 			</span>
 		)
 	}
+	const href = `./img/sprite.svg#${name}`
+	console.log(href)
 	return (
-		<></>
-		// <svg {...props} className={cn(sizeClassName[size], 'inline self-center', className)}>
-		// 	<use href={`${href}#${name}`} />
-		// </svg>
+		// <></>
+		<svg {...props} className={cn(sizeClassName[size], 'inline self-center', className)}>
+			<use href={href} />
+		</svg>
 	)
 }
