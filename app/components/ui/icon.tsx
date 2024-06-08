@@ -50,7 +50,7 @@ export function Icon({
 			</span>
 		)
 	}
-	const href = `/img/sprite.svg#${name}`
+	const href = `/img/icons/sprite.svg#${name}`
 	console.log(href)
 	return (
 		// <></>

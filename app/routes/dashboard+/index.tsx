@@ -21,10 +21,13 @@ export default function Route() {
 	const { tracks } = loaderData
 	return (
 		<Card className="m-2 w-full border-none shadow-none">
-			<CardHeader className="flex flex-row items-end justify-between py-2">
+			<CardHeader className="flex flex-row items-end justify-between px-0 py-1">
 				{/* <div className="h-fit rounded-lg bg-blue-800 p-2 align-bottom text-white">Div 1</div>
 				<div className="h-32 rounded-lg bg-blue-800 p-2 text-white">Div 2</div> */}
-				<CardTitle className="justify-self-end text-4xl">My Tracks</CardTitle>
+				<CardTitle className="flex flex-nowrap items-center justify-self-end text-4xl">
+					<InlineIcon className="" icon="mdi:home" />
+					&nbsp;My Tracks
+				</CardTitle>
 				<Button className="h-9 bg-secondary px-3 py-2 text-button text-secondary-foreground" asChild size="pill">
 					<Link to="?new=true">
 						<InlineIcon className="size-6" icon="mdi:plus-circle-outline" />

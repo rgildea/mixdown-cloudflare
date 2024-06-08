@@ -20,6 +20,7 @@ export type IconName =
 	| 'link-2'
 	| 'lock-closed'
 	| 'lock-open-1'
+	| 'logo'
 	| 'magnifying-glass'
 	| 'mixdown-initials'
 	| 'moon'
@@ -31,4 +32,3 @@ export type IconName =
 	| 'sun'
 	| 'trash'
 	| 'update'
-	| 'X-logo'
