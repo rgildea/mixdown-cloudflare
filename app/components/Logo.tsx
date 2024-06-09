@@ -29,8 +29,8 @@ export default function Logo({
 	console.log('Size: ', size, sizeClassName[size])
 	return (
 		<div className={className}>
-			<Link to="/" className="\tracking-tight flex flex-col font-nourd">
-				<div className="text-3xl tracking-widest">Mixdown</div>
+			<Link to="/" className="group flex flex-col font-nourd tracking-tight">
+				<div className="tracking-wides animate text-3xl transition group-hover:-translate-x-1">Mixdown</div>
 
 				<div className="flex text-nowrap align-middle font-light">
 					<svg
@@ -45,7 +45,7 @@ export default function Logo({
 							id="Path"
 						></path>
 					</svg>
-					<span className="leading-tightest flex text-nowrap text-body-xs font-light tracking-widest">
+					<span className="leading-tightest flex text-nowrap text-body-xs font-light tracking-widest transition group-hover:translate-x-1">
 						Share your mixes
 					</span>
 				</div>
