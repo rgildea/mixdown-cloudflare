@@ -242,7 +242,6 @@ function App() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const isRoot = location.pathname === '/'
-	console.log('location.pathname is', location.pathname)
 	const [playerState, dispatch] = useReducer(PlayerContextReducer, null)
 	return (
 		<PlayerContext.Provider value={playerState}>

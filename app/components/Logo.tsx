@@ -26,7 +26,6 @@ export default function Logo({
 	className,
 	size = 'default',
 }: React.PropsWithChildren<{ className?: string; size: Size }>) {
-	console.log('Size: ', size, sizeClassName[size])
 	return (
 		<div className={className}>
 			<Link to="/" className="group flex flex-col font-nourd tracking-tight">

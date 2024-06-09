@@ -51,7 +51,7 @@ export function Icon({
 		)
 	}
 	const href = `/img/icons/sprite.svg#${name}`
-	console.log(href)
+
 	return (
 		// <></>
 		<svg {...props} className={cn(sizeClassName[size], 'inline self-center', className)}>

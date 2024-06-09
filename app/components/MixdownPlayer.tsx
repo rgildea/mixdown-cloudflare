@@ -1,11 +1,11 @@
+import WaveForm from '#app/components/WaveForm'
 import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
+import useSize from '#app/hooks/useSize'
 import '#app/styles/player.css'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { forwardRef, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 import { motion } from 'framer-motion'
-import WaveForm from '#app/components/WaveForm'
-import useSize from '#app/hooks/useSize'
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
+import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
@@ -87,7 +87,7 @@ export default function MixdownPlayer() {
 		bufferLength: number
 		dataArray: Uint8Array
 	} | null>(null)
-	const audioElmRef = useRef<HTMLMediaElement>(null)
+	const audioElmRef = player as ReturnType<typeof useRef<AudioPlayer>>
 
 	// audioAnalyzer function analyzes the audio and sets the analyzerData state
 	const audioAnalyzer = () => {
@@ -99,12 +99,18 @@ export default function MixdownPlayer() {
 
 		const bufferLength = analyzer.frequencyBinCount
 		const dataArray = new Uint8Array(bufferLength)
-		const source = audioCtx.createMediaElementSource(audioElmRef.current ?? new HTMLMediaElement())
+		if (audioElmRef?.current?.audio?.current == null) {
+			console.log('audioElmRef.current.audio.current is null')
+			return
+		}
+		console.log('audioElmRef.current', audioElmRef.current)
+		const source = audioCtx.createMediaElementSource(audioElmRef.current.audio.current)
 		source.connect(analyzer)
 		source.connect(audioCtx.destination)
 		source.addEventListener('ended', () => {
 			source.disconnect()
 		})
+
 		console.log('setting analyzerData', analyzer, bufferLength, dataArray)
 		// set the analyzerData state with the analyzer, bufferLength, and dataArray
 		setAnalyzerData({ analyzer, bufferLength, dataArray })
@@ -113,6 +119,7 @@ export default function MixdownPlayer() {
 	const playerController: PlayerController = {
 		handleLoadStart: e => {
 			console.info('onLoadStart', e)
+			console.log('Running Audio Analyzer from onLoadStart')
 			audioAnalyzer()
 			dispatch({ type: 'LOAD_START', track: playerState?.track })
 		},
@@ -156,7 +163,6 @@ export default function MixdownPlayer() {
 	// }
 
 	const track = playerState?.track ?? null
-	useCallback(audioAnalyzer, [track])
 	// const url = 'https://naturecreepsbeneath.com/player/1879830/tracks/3056260.mp3'
 	const url = track?.versions[0].audioFile?.url
 	// console.log('MixdownPlayer loading with URL: ', url)
