@@ -25,6 +25,7 @@ export type PlayerContextActionType =
 	| 'PLAY_TRACK'
 	| 'RESTART_TRACK'
 	| 'PAUSE'
+	| 'CLOSE_PLAYER'
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
@@ -106,6 +107,10 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			console.log('Player', player)
 			player?.pause()
 			return state
+		case 'CLOSE_PLAYER':
+			player?.pause()
+			// unsetting  the track will cause the player to be hidden
+			return { ...state, track: undefined, playerState: 'INITIAL_STATE' }
 
 		default:
 			return state
