@@ -7,6 +7,7 @@ export type PlayerContextType = {
 	track?: TrackWithVersions
 	player?: React.RefObject<AudioPlayer> | null
 	playerState?: PlayerStates
+	audioRef?: React.RefObject<HTMLAudioElement> | null
 } | null
 
 export const PlayerContext = createContext<PlayerContextType>({ playerState: 'INITIAL_STATE' })
@@ -46,22 +47,26 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
 	console.log(`PlayerContextReducer received ${action.type} ACTION`, action)
-	// console.log('BOOBOO', state)
-	// console.log('NowPlayingTrack', state?.track)
 	const player = state?.player?.current?.audio.current
 
 	switch (action.type) {
 		case 'INIT_PLAYER':
-			return { ...state, player: action.playerRef, playerState: 'INITIAL_STATE' }
+			return {
+				...state,
+				player: action.playerRef,
+				audioRef: action.playerRef?.current?.audio,
+				playerState: 'INITIAL_STATE',
+			}
 		case 'DESTROY_PLAYER':
 			return { ...state, playerState: 'INITIAL_STATE' }
 		case 'LOAD_START':
 			if (!action.track) {
 				throw new Error('TrackId missing from LOAD_START action')
 			}
-			return { ...state, track: action.track, playerState: 'LOADING' }
+			return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
 		case 'CAN_PLAY':
 			console.log('CAN_PLAY called from state ', state?.playerState)
+
 			if (state?.playerState !== 'LOADING') {
 				return state
 			}

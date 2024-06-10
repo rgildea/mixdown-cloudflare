@@ -1,10 +1,9 @@
 import WaveForm from '#app/components/WaveForm'
 import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
-import useSize from '#app/hooks/useSize'
 import '#app/styles/player.css'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { motion } from 'framer-motion'
-import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
+import { forwardRef, useContext, useEffect, useRef } from 'react'
 import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
@@ -25,15 +24,7 @@ export type PlayerStates =
 export interface AudioPlayerProps {
 	url?: string
 	track?: TrackWithVersions
-	handleLoadStart: (e: any) => void
-	handlePlayError: (e: any) => void
-	handleCanPlay: (e: any) => void
-	handlePlay: (e: any) => void
-	handlePause: (e: any) => void
-	handleNext: (e: any) => void
-	handlePrev: (e: any) => void
-	handleAbort: (e: any) => void
-	handleEnded: (e: any) => void
+	controller: PlayerController
 }
 
 export interface PlayerController {
@@ -49,18 +40,18 @@ export interface PlayerController {
 }
 
 // eslint-disable-next-line react/display-name
-const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>((props, playerRef) => {
+const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url, controller }, playerRef) => {
 	return (
 		<AudioPlayer
-			onLoadStart={props.handleLoadStart}
-			onPlayError={props.handlePlayError}
-			onCanPlay={props.handleCanPlay}
-			onPlay={props.handlePlay}
-			onPause={props.handlePause}
-			onAbort={props.handleAbort}
-			onEnded={props.handleEnded}
-			onClickNext={props.handleNext}
-			onClickPrevious={props.handlePrev}
+			onLoadStart={controller.handleLoadStart}
+			onPlayError={controller.handlePlayError}
+			onCanPlay={controller.handleCanPlay}
+			onPlay={controller.handlePlay}
+			onPause={controller.handlePause}
+			onAbort={controller.handleAbort}
+			onEnded={controller.handleEnded}
+			onClickNext={controller.handleNext}
+			onClickPrevious={controller.handlePrev}
 			autoPlay={true}
 			customAdditionalControls={[]}
 			showDownloadProgress={true}
@@ -69,7 +60,7 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>((props
 			showFilledVolume={true}
 			showSkipControls={false}
 			autoPlayAfterSrcChange={true}
-			src={props.url ?? ''}
+			src={url ?? ''}
 			ref={playerRef}
 			customVolumeControls={[]}
 			customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
@@ -80,52 +71,15 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>((props
 export default function MixdownPlayer() {
 	const playerState = useContext(PlayerContext)
 	const dispatch = useContext(PlayerDispatchContext)
-	const size = useSize()
 	const player = useRef<AudioPlayer>(null)
-	const [analyzerData, setAnalyzerData] = useState<{
-		analyzer: any
-		bufferLength: number
-		dataArray: Uint8Array
-	} | null>(null)
-	const audioElmRef = player as ReturnType<typeof useRef<AudioPlayer>>
-
-	// audioAnalyzer function analyzes the audio and sets the analyzerData state
-	const audioAnalyzer = () => {
-		// create a new AudioContext
-		const audioCtx = new (window.AudioContext || window.AudioContext)()
-		// create an analyzer node with a buffer size of 2048
-		const analyzer = audioCtx.createAnalyser()
-		analyzer.fftSize = 2048
-
-		const bufferLength = analyzer.frequencyBinCount
-		const dataArray = new Uint8Array(bufferLength)
-		if (audioElmRef?.current?.audio?.current == null) {
-			console.log('audioElmRef.current.audio.current is null')
-			return
-		}
-		console.log('audioElmRef.current', audioElmRef.current)
-		const source = audioCtx.createMediaElementSource(audioElmRef.current.audio.current)
-		source.connect(analyzer)
-		source.connect(audioCtx.destination)
-		source.addEventListener('ended', () => {
-			source.disconnect()
-		})
-
-		console.log('setting analyzerData', analyzer, bufferLength, dataArray)
-		// set the analyzerData state with the analyzer, bufferLength, and dataArray
-		setAnalyzerData({ analyzer, bufferLength, dataArray })
-	}
 
 	const playerController: PlayerController = {
 		handleLoadStart: e => {
 			console.info('onLoadStart', e)
-			console.log('Running Audio Analyzer from onLoadStart')
-			audioAnalyzer()
 			dispatch({ type: 'LOAD_START', track: playerState?.track })
 		},
 		handleCanPlay: e => {
 			console.info('onCanPlay', e)
-			audioAnalyzer()
 			dispatch({ type: 'CAN_PLAY' })
 		},
 		handlePlayError: e => {
@@ -173,20 +127,27 @@ export default function MixdownPlayer() {
 		}
 	}, [playerState?.player, dispatch])
 
+	const audioElementRef = player.current?.audio
+
 	return (
 		<div className="container z-50">
-			{track && (
+			{
 				<motion.div
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
 					transition={{ y: 300, duration: 2 }}
 				>
-					<h2 className="invisible bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
-					{analyzerData && <WaveForm size={size} analyzerData={analyzerData} />}
-					<InternalPlayerComponent {...playerController} url={url} ref={player} track={track} />
+					<h2 className=" bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
+					{audioElementRef?.current && (
+						<div>
+							<h3>Waveform goes here</h3>
+							{player.current && audioElementRef.current && <WaveForm audioElementRef={audioElementRef} />}
+						</div>
+					)}
+					<InternalPlayerComponent controller={playerController} url={url} ref={player} track={track || undefined} />
 				</motion.div>
-			)}
+			}
 		</div>
 	)
 }
