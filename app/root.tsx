@@ -1,7 +1,7 @@
+import Logo from '#app/components/Logo'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import Logo from '#app/components/Logo'
 import {
 	ActionFunctionArgs,
 	HeadersFunction,
@@ -279,8 +279,10 @@ function App() {
 						<Outlet />
 					</div>
 
-					<div className="p-2">
-						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+					<div className="container flex flex-col items-center p-2">
+						<div className="self-end">
+							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+						</div>
 						<Link to="https://www.ryangildea.com" className="text-xs text-muted-foreground">
 							© {new Date().getFullYear()} Ryan Gildea
 						</Link>
