@@ -2,10 +2,11 @@ import WaveForm from '#app/components/WaveForm'
 import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { motion } from 'framer-motion'
-import { forwardRef, useContext, useEffect, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
 import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
 import { Button } from './ui/button'
+
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
 	return found?.versions[0].audioFile?.url
@@ -31,7 +32,10 @@ export interface PlayerController {
 	handleLoadStart: (e: any) => void
 	handlePlayError: (e: any) => void
 	handleCanPlay: (e: any) => void
+	handleCanPlayThrough: (e: any) => void
+	handleLoadedData: (e: any) => void
 	handlePlay: (e: any) => void
+	handlePlaying: (e: any) => void
 	handlePause: (e: any) => void
 	handleNext: (e: any) => void
 	handlePrev: (e: any) => void
@@ -43,23 +47,25 @@ export interface PlayerController {
 const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url, controller }, playerRef) => {
 	return (
 		<AudioPlayer
+			className="min-h-0"
 			onLoadStart={controller.handleLoadStart}
 			onPlayError={controller.handlePlayError}
+			onLoadedData={controller.handleLoadedData}
 			onCanPlay={controller.handleCanPlay}
+			onCanPlayThrough={controller.handleCanPlayThrough}
 			onPlay={controller.handlePlay}
+			onPlaying={controller.handlePlaying}
 			onPause={controller.handlePause}
 			onAbort={controller.handleAbort}
 			onEnded={controller.handleEnded}
 			onClickNext={controller.handleNext}
 			onClickPrevious={controller.handlePrev}
-			autoPlay={true}
 			customAdditionalControls={[]}
 			showDownloadProgress={true}
 			showFilledProgress={true}
 			showJumpControls={false}
 			showFilledVolume={true}
 			showSkipControls={false}
-			autoPlayAfterSrcChange={true}
 			src={url ?? ''}
 			ref={playerRef}
 			customVolumeControls={[]}
@@ -78,17 +84,29 @@ export default function MixdownPlayer() {
 			console.info('onLoadStart', e)
 			dispatch({ type: 'LOAD_START', track: playerState?.track })
 		},
-		handleCanPlay: e => {
-			console.info('onCanPlay', e)
-			dispatch({ type: 'CAN_PLAY' })
-		},
 		handlePlayError: e => {
 			console.info('onPlayError', e)
 			dispatch({ type: 'PLAYBACK_ERROR', error: e.message })
 		},
+		handleCanPlay: e => {
+			console.info('onCanPlay', e)
+			dispatch({ type: 'CAN_PLAY' })
+		},
+		handleCanPlayThrough: e => {
+			console.info('onCanPlayThrough', e)
+			setWaveformHidden(false)
+			dispatch({ type: 'CAN_PLAY_THROUGH' })
+		},
+		handleLoadedData: e => {
+			console.info('onLoadedData', e)
+			dispatch({ type: 'LOADED_DATA' })
+		},
 		handlePlay: e => {
-			console.info('onPlay', e)
-			dispatch({ type: 'PLAYBACK_STARTED' })
+			console.info('onPlay, starting to load and play', e)
+		},
+		handlePlaying: e => {
+			console.info('onPlaying', e)
+			if (e?.base) dispatch({ type: 'PLAYBACK_STARTED' })
 		},
 		handlePause: e => {
 			console.info('onPause', e)
@@ -112,14 +130,9 @@ export default function MixdownPlayer() {
 		},
 	}
 
-	// if (playerState?.player == null || playerState?.player !== player) {
-	// 	dispatch({ type: 'INIT_PLAYER', playerRef: player })
-	// }
-
 	const track = playerState?.track ?? null
 	// const url = 'https://naturecreepsbeneath.com/player/1879830/tracks/3056260.mp3'
 	const url = track?.versions[0].audioFile?.url
-	// console.log('MixdownPlayer loading with URL: ', url)
 
 	useEffect(() => {
 		if (!playerState?.player) {
@@ -128,27 +141,43 @@ export default function MixdownPlayer() {
 	}, [playerState?.player, dispatch])
 
 	const audioElementRef = player.current?.audio
+	const [isWaveformHidden, setWaveformHidden] = useState<boolean>(true)
+	console.log('currentSrc', audioElementRef)
 
 	return (
 		<div className="container z-50">
-			{
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{ y: 300, duration: 2 }}
+			<h2 className=" bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
+
+			<div className=" flex flex-col justify-start ">
+				<Button
+					className=" my-1 max-w-min text-nowrap"
+					size="wide"
+					onClick={() => setWaveformHidden(!isWaveformHidden)}
 				>
-					<h2 className=" bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
-					{audioElementRef?.current && (
-						<div>
-							<h3>Waveform goes here</h3>
-							{player.current && audioElementRef.current && <WaveForm audioElementRef={audioElementRef} />}
-						</div>
-					)}
-					<InternalPlayerComponent controller={playerController} url={url} ref={player} track={track || undefined} />
-				</motion.div>
-			}
+					{isWaveformHidden ? 'Show Waveform' : 'Hide Waveform'}
+				</Button>
+				<AnimatePresence>
+					<motion.div
+						initial={{ opacity: 0, y: -300 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -300 }}
+						transition={{ y: -300, duration: 4 }}
+					>
+						{!isWaveformHidden && (
+							<div>
+								<WaveForm
+									// className={`${shouldShow ? ' translate-x-0 ' : ' translate-x-full '} z-30 h-full transform overflow-auto bg-white transition-all duration-300 ease-in-out`}
+									className="h-full w-full bg-yellow-500"
+									audioElementRef={audioElementRef}
+									currentSrc={audioElementRef?.current?.currentSrc}
+								/>
+							</div>
+						)}
+					</motion.div>
+				</AnimatePresence>
+			</div>
+
+			<InternalPlayerComponent controller={playerController} url={url} ref={player} track={track || undefined} />
 		</div>
 	)
 }
-//

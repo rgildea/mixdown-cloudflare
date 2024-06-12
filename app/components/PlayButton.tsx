@@ -1,10 +1,10 @@
 // File: app/components/PlayButton.tsx
 
-import React, { useContext } from 'react'
-import { InlineIcon } from '@iconify/react'
 import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
-import { Button } from './ui/button'
 import { TrackWithVersions } from '#app/utils/track.server'
+import { InlineIcon } from '@iconify/react'
+import React, { useContext } from 'react'
+import { Button } from './ui/button'
 
 interface PlayButtonProps {
 	track: TrackWithVersions
@@ -23,7 +23,8 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 
 	const dispatch = useContext(PlayerDispatchContext)
 	const isLoaded = nowPlayingTrack?.id == track?.id
-	const isPlaying = ['PLAYING', 'READY_TO_PLAY'].includes(playerState?.playerState || '')
+	const isPlaying = playerState?.player?.current?.isPlaying()
+	// const isPlaying = ['PLAYING', 'READY_TO_PLAY'].includes(playerState?.playerState || '')
 	let icon = 'mdi:exclamation'
 
 	icon = `mdi:${isLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`
@@ -38,47 +39,54 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 			return
 		}
 
-		switch (playerState?.playerState) {
-			case 'PLAYING':
-				console.log('PAUSE')
-				dispatch({ type: 'PAUSE' })
-				return
-
-			case 'READY_TO_PLAY':
-				console.log('PLAY')
-				if (playerState.player?.current?.isPlaying) {
-					console.log('PAUSE')
-					dispatch({ type: 'PAUSE' })
-					return
-				}
-				dispatch({ type: 'PLAY_TRACK', track })
-				return
-
-			case 'LOADING':
-				console.log('PAUSE')
-				dispatch({ type: 'PAUSE' })
-				return
-
-			case 'INITIAL_STATE':
-				console.log('PLAY_TRACK', track)
-				dispatch({ type: 'PLAY_TRACK', track })
-				return
-
-			case 'PAUSED':
-				console.log('PLAY')
-				dispatch({ type: 'PLAY_TRACK', track })
-				return
-
-			case 'ENDED':
-				console.log('PLAY')
-				dispatch({ type: 'RESTART_TRACK', track })
-				return
-
-			default:
-				console.log('PAUSE')
-				dispatch({ type: 'PAUSE' })
-				return
+		if (isPlaying) {
+			dispatch({ type: 'PAUSE' })
+			return
 		}
+
+		dispatch({ type: 'PLAY_TRACK', track })
+
+		// switch (playerState?.playerState) {
+		// 	case 'PLAYING':
+		// 		console.log('PAUSE')
+		// 		dispatch({ type: 'PAUSE' })
+		// 		return
+
+		// 	case 'READY_TO_PLAY':
+		// 		console.log('PLAY')
+		// 		if (playerState.player?.current?.isPlaying) {
+		// 			console.log('PAUSE')
+		// 			dispatch({ type: 'PAUSE' })
+		// 			return
+		// 		}
+		// 		dispatch({ type: 'PLAY_TRACK', track })
+		// 		return
+
+		// 	case 'LOADING':
+		// 		console.log('PAUSE')
+		// 		dispatch({ type: 'PAUSE' })
+		// 		return
+
+		// 	case 'INITIAL_STATE':
+		// 		console.log('PLAY_TRACK', track)
+		// 		dispatch({ type: 'PLAY_TRACK', track })
+		// 		return
+
+		// 	case 'PAUSED':
+		// 		console.log('PLAY')
+		// 		dispatch({ type: 'PLAY_TRACK', track })
+		// 		return
+
+		// 	case 'ENDED':
+		// 		console.log('PLAY')
+		// 		dispatch({ type: 'RESTART_TRACK', track })
+		// 		return
+
+		// 	default:
+		// 		console.log('PAUSE')
+		// 		dispatch({ type: 'PAUSE' })
+		// 		return
+		// }
 	}
 
 	return (

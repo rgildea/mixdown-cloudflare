@@ -16,7 +16,9 @@ export type PlayerContextActionType =
 	| 'INIT_PLAYER'
 	| 'DESTROY_PLAYER'
 	| 'LOAD_START'
+	| 'LOADED_DATA'
 	| 'CAN_PLAY'
+	| 'CAN_PLAY_THROUGH'
 	| 'PLAYBACK_STARTED'
 	| 'PLAYBACK_PAUSED'
 	| 'PLAYBACK_ERROR'
@@ -52,6 +54,10 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 
 	switch (action.type) {
 		case 'INIT_PLAYER':
+			if (player) {
+				console.log('Player already exists')
+				return state
+			}
 			return {
 				...state,
 				player: action.playerRef,
@@ -59,12 +65,16 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 				playerState: 'INITIAL_STATE',
 			}
 		case 'DESTROY_PLAYER':
-			return { ...state, playerState: 'INITIAL_STATE' }
+			console.log('Would be destroying player')
+			return state //{ ...state, playerState: 'INITIAL_STATE' }
+
 		case 'LOAD_START':
 			if (!action.track) {
-				throw new Error('TrackId missing from LOAD_START action')
+				console.log('TrackId missing from LOAD_START action')
+				return state
 			}
 			return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
+
 		case 'CAN_PLAY':
 			console.log('CAN_PLAY called from state ', state?.playerState)
 
@@ -72,31 +82,51 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 				return state
 			}
 			return { ...state, playerState: 'READY_TO_PLAY' }
+		case 'CAN_PLAY_THROUGH':
+			console.log('CAN_PLAY_THROUGH called')
+
+			if (state?.playerState !== 'LOADING') {
+				return state
+			}
+			return { ...state, playerState: 'READY_TO_PLAY' }
+
+		case 'LOADED_DATA':
+			console.log('LOADED_DATA event called')
+			return state
 		case 'PLAYBACK_STARTED':
 			return { ...state, playerState: 'PLAYING' }
 		case 'PLAYBACK_PAUSED':
 			return { ...state, playerState: 'PAUSED' }
 		case 'PLAYBACK_ERROR':
-			return state
-		// return { ...state, playerState: 'ERROR' }
+			return { ...state, playerState: 'ERROR' }
 		case 'PLAYBACK_ENDED':
 			return state
 		// return { ...state, playerState: 'ENDED' }
 		case 'PLAYBACK_ABORTED':
 			// return { ...state, playerState: 'ABORTED' }
 			return state
+
+		// Important: we're setting track, audio ref, and player ref here by returning them
+		// in the state.
+		// This re-renders the Waveform component, re-creating the WaveSurfer instance
+		// with the updated audio element.
 		case 'PLAY_TRACK':
 			if (!action.track) {
 				throw new Error('Track missing from PLAY_TRACK action')
 			}
-			player?.play()
-			return { ...state, track: action.track }
+
+			if (player?.readyState ?? 0 >= 2) {
+				console.log('Player readyState is >= 2, so playing')
+				player?.play()
+			}
+
+			return { ...state, player: action.playerRef, track: action.track, playerState: 'LOADING' }
 		case 'RESTART_TRACK':
 			if (!state?.track) {
 				throw new Error('Track missing from RESTART_TRACK action')
 			}
-			player?.load()
-			player?.play()
+			// player?.load()
+			// player?.play()
 			return state
 
 		case 'PAUSE':
