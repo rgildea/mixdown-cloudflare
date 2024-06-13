@@ -275,7 +275,7 @@ function App() {
 						</nav>
 					</header>
 
-					<div className="min-h-dvh/50 flex flex-col items-center p-2">
+					<div className="min-h-dvh/25 flex flex-col items-center p-2">
 						<Outlet />
 					</div>
 

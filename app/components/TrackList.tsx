@@ -19,7 +19,6 @@ function TrackList({ tracks }: TrackListProps) {
 	const isPending = useIsPending()
 
 	const handlePlayButtonClicked = (track: TrackWithVersions) => {
-		console.log(track)
 		dispatch({ type: 'PLAY_TRACK', track })
 	}
 

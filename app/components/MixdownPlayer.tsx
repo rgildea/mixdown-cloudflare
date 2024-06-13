@@ -5,7 +5,6 @@ import { TrackWithVersions } from '#app/utils/track.server'
 import { AnimatePresence, motion } from 'framer-motion'
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
 import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
-import { Button } from './ui/button'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
@@ -78,6 +77,10 @@ export default function MixdownPlayer() {
 	const playerState = useContext(PlayerContext)
 	const dispatch = useContext(PlayerDispatchContext)
 	const player = useRef<AudioPlayer>(null)
+	const [isWaveformHidden, setWaveformHidden] = useState<boolean>(true)
+	const track = playerState?.track ?? null
+	const url = track?.versions[0].audioFile?.url
+	const audioElementRef = player.current?.audio
 
 	const playerController: PlayerController = {
 		handleLoadStart: e => {
@@ -130,32 +133,26 @@ export default function MixdownPlayer() {
 		},
 	}
 
-	const track = playerState?.track ?? null
-	// const url = 'https://naturecreepsbeneath.com/player/1879830/tracks/3056260.mp3'
-	const url = track?.versions[0].audioFile?.url
-
 	useEffect(() => {
 		if (!playerState?.player) {
 			dispatch({ type: 'INIT_PLAYER', playerRef: player })
 		}
 	}, [playerState?.player, dispatch])
 
-	const audioElementRef = player.current?.audio
-	const [isWaveformHidden, setWaveformHidden] = useState<boolean>(true)
-	console.log('currentSrc', audioElementRef)
-
 	return (
 		<div className="container z-50">
-			<h2 className=" bg-gray-900 p-2 text-center text-white">{playerState?.playerState}</h2>
+			{/* <h2 className="top-0 w-min bg-accent p-2 text-center font-mono text-sm text-accent-foreground">
+				{playerState?.playerState}
+			</h2> */}
 
 			<div className=" flex flex-col justify-start ">
-				<Button
+				{/* <Button
 					className=" my-1 max-w-min text-nowrap"
 					size="wide"
 					onClick={() => setWaveformHidden(!isWaveformHidden)}
 				>
 					{isWaveformHidden ? 'Show Waveform' : 'Hide Waveform'}
-				</Button>
+				</Button> */}
 				<AnimatePresence>
 					<motion.div
 						initial={{ opacity: 0, y: -300 }}
@@ -167,7 +164,7 @@ export default function MixdownPlayer() {
 							<div>
 								<WaveForm
 									// className={`${shouldShow ? ' translate-x-0 ' : ' translate-x-full '} z-30 h-full transform overflow-auto bg-white transition-all duration-300 ease-in-out`}
-									className="h-full w-full bg-yellow-500"
+									className="h-full w-full"
 									audioElementRef={audioElementRef}
 									currentSrc={audioElementRef?.current?.currentSrc}
 								/>
