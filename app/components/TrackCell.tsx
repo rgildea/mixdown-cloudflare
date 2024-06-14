@@ -1,8 +1,8 @@
 import { TrackWithVersions } from '#app/utils/track.server'
-import { NavLink, Form } from '@remix-run/react'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { Form, NavLink } from '@remix-run/react'
 import PlayButton from './PlayButton'
 import { Button } from './ui/button'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
 
 const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 	const audioFile = track.versions[0]?.audioFile
@@ -17,16 +17,16 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 				<div className="font-pixer flex-1 leading-snug" data-tag="allowRowEvents">
 					{track.title}
 				</div>
-				<Button variant="ghost" size={'icon'} asChild>
+				<Button variant="playbutton" size={'icon'} asChild>
 					<NavLink to={`/tracks/${track.id}?edit`}>
-						<InlineIcon className="size-4" icon="mdi:pencil" />
+						<InlineIcon className="size-6" icon="mdi:pencil" />
 					</NavLink>
 				</Button>
 				<Form key={track.id} method="DELETE" action={trackUrl}>
 					<Button
-						className="flex-6 ml-auto p-0 text-button focus-visible:ring-0"
+						className="ml-auto p-0 text-button focus-visible:ring-0"
 						type="submit"
-						variant="ghost"
+						variant="playbutton-destructive"
 						onClick={e => {
 							e.stopPropagation()
 							// onTrackDeleted(track)
@@ -35,7 +35,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 							e.preventDefault()
 						}}
 					>
-						<InlineIcon className="size-4" icon="mdi:delete" />
+						<InlineIcon className="size-6" icon="mdi:delete" />
 					</Button>{' '}
 				</Form>
 			</div>

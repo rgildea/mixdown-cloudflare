@@ -21,8 +21,6 @@ import {
 	useFetcher,
 	useFetchers,
 	useLoaderData,
-	useLocation,
-	useNavigate,
 	useSubmit,
 } from '@remix-run/react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
@@ -38,6 +36,7 @@ import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from './components/toaster.tsx'
 import { Button } from './components/ui/button.tsx'
+import { CardTitle } from './components/ui/card.tsx'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -48,6 +47,7 @@ import {
 import { Icon } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
 import { PlayerContext, PlayerContextReducer, PlayerDispatchContext } from './contexts/PlayerContext.tsx'
+import { TitleContext, TitleContextReducer, TitleDispatchContext } from './contexts/TitleContext.tsx'
 import { getUserId, logout } from './utils/auth.server'
 import { ClientHintCheck, getHints, useHints } from './utils/client-hints.tsx'
 import { getHoneypot } from './utils/honeypot.server.ts'
@@ -95,6 +95,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ name: 'description', content: `The best way to share your mixes` },
 	]
 }
+
 export async function loader({
 	request,
 	context: {
@@ -239,62 +240,83 @@ function App() {
 	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	// const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" /> // Change the variable name to 'searchBar'
 	useToast(data.toast)
-	const navigate = useNavigate()
-	const location = useLocation()
-	const isRoot = location.pathname === '/'
-	const [playerState, dispatch] = useReducer(PlayerContextReducer, null)
+	// const navigate = useNavigate()
+	// const location = useLocation()
+	// const shouldShowBackButton = location.pathname !== '/' && location.pathname !== '/dashboard'
+	const [playerState, playerDispatch] = useReducer(PlayerContextReducer, null)
+	const [titleState, titleDispatch] = useReducer(TitleContextReducer, null)
+	const title = titleState?.title ?? ''
+	const icon = titleState?.icon
+
 	return (
-		<PlayerContext.Provider value={playerState}>
-			<PlayerDispatchContext.Provider value={dispatch}>
-				<Document nonce={nonce} theme={theme} env={{}}>
-					<header className="container p-2">
-						<nav className="flex h-8 flex-row justify-between">
-							<Button
-								className={`p-0.5 ${isRoot ? 'hidden' : ''}`}
-								onClick={() => {
-									navigate('..')
-								}}
-								variant="ghost"
-								size="sm"
-							>
-								<InlineIcon className="vertical-align-0 size-12" icon="mdi:chevron-left" />
-							</Button>
-							<Logo size="sm" className="flex shrink-0 grow-0" />
+		<TitleContext.Provider value={titleState}>
+			<TitleDispatchContext.Provider value={titleDispatch}>
+				<PlayerContext.Provider value={playerState}>
+					<PlayerDispatchContext.Provider value={playerDispatch}>
+						<Document nonce={nonce} theme={theme} env={{}}>
+							<header className="container mt-1 h-12 pb-0">
+								<nav className="grid grid-cols-3 items-center">
+									{/* <Button
+										className={`p-0.5 ${!shouldShowBackButton ? 'hidden' : ''}`}
+										onClick={() => {
+											navigate('..')
+										}}
+										variant="ghost"
+										size="sm"
+									>
+										<InlineIcon className="vertical-align-0 size-12" icon="mdi:chevron-left" />
+									</Button> */}
+									<Link className="col-span-1" to="/">
+										<CardTitle className="flex flex-nowrap items-center text-4xl">
+											{icon && <InlineIcon className="shrink-0" icon={icon as unknown as string} />}
+											&nbsp;{title}
+										</CardTitle>
+									</Link>
+									<div className="col-span-1 mx-auto justify-center">
+										<Logo size="sm" className="invisible" />
+									</div>
+									{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
+									<div className="col-span-1 flex justify-end space-x-1">
+										<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 
-							{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
-							<div className="">
-								{user ? (
-									<UserDropdown />
-								) : (
-									<Button asChild variant="default" size="lg">
-										<Link to="/login">Log In</Link>
-									</Button>
-								)}
+										{user ? (
+											<UserDropdown />
+										) : (
+											<Button asChild variant="default" size="lg">
+												<Link to="/login">Log In</Link>
+											</Button>
+										)}
+									</div>
+									{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
+								</nav>
+							</header>
+
+							<div className="min-h-dvh/25 flex flex-col items-center p-2">
+								<Outlet />
 							</div>
-							{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
-						</nav>
-					</header>
 
-					<div className="min-h-dvh/25 flex flex-col items-center p-2">
-						<Outlet />
-					</div>
+							<div className="mx-auto w-min p-2 ">
+								<Logo size="sm" className="visible text-foreground" />
+								<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">
+									<Link to="https://www.ryangildea.com">© {new Date().getFullYear()} Ryan Gildea</Link>
+									&nbsp;
+									<Link to="https://github.com/rgildea/">
+										<InlineIcon className="size-3" icon="mdi:github" />
+									</Link>{' '}
+									&nbsp;
+									<Link target="_blank" to="https://www.linkedin.com/in/ryangildea/" rel="noreferrer">
+										<InlineIcon className="size-3" icon="mdi:linkedin" />
+									</Link>
+								</div>
+							</div>
 
-					<div className="container flex flex-col items-center p-2">
-						<div className="self-end">
-							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-						</div>
-						<Link to="https://www.ryangildea.com" className="text-xs text-muted-foreground">
-							© {new Date().getFullYear()} Ryan Gildea
-						</Link>
-						<Link to="https://github.com/rgildea/" className="flex align-bottom text-xs text-muted-foreground">
-							<InlineIcon className="size-4" icon="mdi:github" />
-						</Link>
-					</div>
-					<EpicToaster closeButton position="top-center" theme={theme} />
-					<EpicProgress />
-				</Document>
-			</PlayerDispatchContext.Provider>
-		</PlayerContext.Provider>
+							<EpicToaster closeButton position="top-center" theme={theme} />
+							<EpicProgress />
+						</Document>
+					</PlayerDispatchContext.Provider>
+				</PlayerContext.Provider>
+			</TitleDispatchContext.Provider>
+		</TitleContext.Provider>
 	)
 }
 

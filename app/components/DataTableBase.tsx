@@ -1,6 +1,6 @@
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import DataTable, { TableProps, createTheme } from 'react-data-table-component'
 import { ClientOnly } from 'remix-utils/client-only'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
 const sortIcon = <InlineIcon className="size-2" icon="mdi:chevron-down" />
 // createTheme creates a new theme named solarized that overrides the build in dark theme
 createTheme(
@@ -54,7 +54,6 @@ function DataTableBase<T>(props: TableProps<T>): JSX.Element {
 						// paginationRowsPerPageOptions={[5, 10, 20]}
 						fixedHeader
 						sortIcon={sortIcon}
-						dense
 						{...props}
 					/>
 				)

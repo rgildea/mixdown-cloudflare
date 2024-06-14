@@ -1,6 +1,6 @@
 import { PlayerStates } from '#app/components/MixdownPlayer'
 import { TrackWithVersions } from '#app/utils/track.server'
-import React, { createContext, useReducer } from 'react'
+import React, { createContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
 export type PlayerContextType = {
@@ -36,17 +36,17 @@ export interface PlayerContextAction {
 	error?: string
 }
 
-export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [playerState, dispatch] = useReducer<
-		(state: PlayerContextType, action: PlayerContextAction) => PlayerContextType
-	>(PlayerContextReducer, null)
+// export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// 	const [playerState, dispatch] = useReducer<
+// 		(state: PlayerContextType, action: PlayerContextAction) => PlayerContextType
+// 	>(PlayerContextReducer, null)
 
-	return (
-		<PlayerContext.Provider value={playerState}>
-			<PlayerDispatchContext.Provider value={dispatch}>{children}</PlayerDispatchContext.Provider>
-		</PlayerContext.Provider>
-	)
-}
+// 	return (
+// 		<PlayerContext.Provider value={playerState}>
+// 			<PlayerDispatchContext.Provider value={dispatch}>{children}</PlayerDispatchContext.Provider>
+// 		</PlayerContext.Provider>
+// 	)
+// }
 
 export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
 	console.log(`PlayerContextReducer received ${action.type} ACTION`, action)

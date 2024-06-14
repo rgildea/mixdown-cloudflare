@@ -90,7 +90,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	}
 
 	return (
-		<Button variant="ghost" size="icon" className={'p-1'} onClick={handleClick}>
+		<Button variant="playbutton" size="icon" className="p-1" onClick={handleClick}>
 			<InlineIcon className={size ? sizes[size] : sizes['medium']} icon={icon} />
 		</Button>
 	)

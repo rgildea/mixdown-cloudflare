@@ -1,5 +1,5 @@
-import { Link } from '@remix-run/react'
 import { cn } from '#app/utils/misc.tsx'
+import { Link } from '@remix-run/react'
 
 const sizeClassName = {
 	font: 'w-[1em] h-[1em]',
@@ -29,7 +29,7 @@ export default function Logo({
 	return (
 		<div className={className}>
 			<Link to="/" className="group flex flex-col font-nourd tracking-tight">
-				<div className="tracking-wides animate text-3xl transition group-hover:-translate-x-1">Mixdown</div>
+				<div className="animate text-3xl tracking-wide transition group-hover:-translate-x-1">Mixdown</div>
 
 				<div className="flex text-nowrap align-middle font-light">
 					<svg
