@@ -27,10 +27,9 @@ export default function Logo({
 	size = 'default',
 }: React.PropsWithChildren<{ className?: string; size: Size }>) {
 	return (
-		<div className={className}>
+		<div className={cn('w-min', className)}>
 			<Link to="/" className="group flex flex-col font-nourd tracking-tight">
-				<div className="animate text-3xl tracking-wide transition group-hover:-translate-x-1">Mixdown</div>
-
+				<div className="animate w-min text-3xl tracking-wide transition group-hover:-translate-x-1">Mixdown</div>
 				<div className="flex text-nowrap align-middle font-light">
 					<svg
 						className={cn(sizeClassName[size], 'inline self-center', className)}

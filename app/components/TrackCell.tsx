@@ -10,11 +10,14 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 	return (
 		trackUrl && (
 			<div
-				className="space-between flex h-16 w-full flex-nowrap items-center justify-between px-0"
+				className="space-between group mx-0 flex h-16 w-full flex-nowrap items-center justify-between"
 				data-tag="allowRowEvents"
 			>
 				<PlayButton size="large" track={track} />
-				<div className="font-pixer flex-1 leading-snug" data-tag="allowRowEvents">
+				<div
+					className="flex-1 font-nourd text-body-sm font-semibold leading-snug group-hover:font-extrabold"
+					data-tag="allowRowEvents"
+				>
 					{track.title}
 				</div>
 				<Button variant="playbutton" size={'icon'} asChild>
@@ -29,7 +32,6 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 						variant="playbutton-destructive"
 						onClick={e => {
 							e.stopPropagation()
-							// onTrackDeleted(track)
 						}}
 						onSubmit={e => {
 							e.preventDefault()

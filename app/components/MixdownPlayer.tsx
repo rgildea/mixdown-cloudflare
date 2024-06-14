@@ -4,7 +4,7 @@ import '#app/styles/player.css'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { AnimatePresence, motion } from 'framer-motion'
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
-import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
+import AudioPlayer from 'react-h5-audio-player'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
@@ -68,7 +68,7 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url
 			src={url ?? ''}
 			ref={playerRef}
 			customVolumeControls={[]}
-			customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
+			// customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
 		/>
 	)
 })

@@ -295,7 +295,7 @@ function App() {
 								<Outlet />
 							</div>
 
-							<div className="mx-auto w-min p-2 ">
+							<div className=" mx-auto flex w-min flex-col items-center">
 								<Logo size="sm" className="visible text-foreground" />
 								<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">
 									<Link to="https://www.ryangildea.com">© {new Date().getFullYear()} Ryan Gildea</Link>
