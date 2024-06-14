@@ -59,27 +59,45 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url
 			onEnded={controller.handleEnded}
 			onClickNext={controller.handleNext}
 			onClickPrevious={controller.handlePrev}
+			autoPlayAfterSrcChange={true}
 			customAdditionalControls={[]}
 			showDownloadProgress={true}
 			showFilledProgress={true}
 			showJumpControls={false}
 			showFilledVolume={true}
 			showSkipControls={false}
-			src={url ?? ''}
+			src={url}
 			ref={playerRef}
-			customVolumeControls={[]}
+			// customVolumeControls={[]}
 			// customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
 		/>
 	)
 })
 
-export default function MixdownPlayer() {
-	const playerState = useContext(PlayerContext)
-	const dispatch = useContext(PlayerDispatchContext)
-	const player = useRef<AudioPlayer>(null)
+export interface MixdownPlayerProps {
+	url?: string
+	track?: TrackWithVersions
+}
+
+export default function MixdownPlayer({ url }: MixdownPlayerProps) {
 	const [isWaveformHidden, setWaveformHidden] = useState<boolean>(true)
+
+	const dispatch = useContext(PlayerDispatchContext)
+	const playerState = useContext(PlayerContext)
+	const player = useRef<AudioPlayer>(null)
+
+	useEffect(() => {
+		if (!playerState?.player) {
+			dispatch({ type: 'INIT_PLAYER', playerRef: player })
+		}
+	}, [playerState?.player, dispatch])
+
 	const track = playerState?.track ?? null
-	const url = track?.versions[0].audioFile?.url
+	if (!track) return null
+
+	const newSourceUrl = url || getLatestVersionUrl(track.id, [track])
+	// const url = track?.versions[0].audioFile?.url
+
 	const audioElementRef = player.current?.audio
 
 	const playerController: PlayerController = {
@@ -133,12 +151,6 @@ export default function MixdownPlayer() {
 		},
 	}
 
-	useEffect(() => {
-		if (!playerState?.player) {
-			dispatch({ type: 'INIT_PLAYER', playerRef: player })
-		}
-	}, [playerState?.player, dispatch])
-
 	return (
 		<div className="container z-50">
 			{/* <h2 className="top-0 w-min bg-accent p-2 text-center font-mono text-sm text-accent-foreground">
@@ -173,8 +185,13 @@ export default function MixdownPlayer() {
 					</motion.div>
 				</AnimatePresence>
 			</div>
-
-			<InternalPlayerComponent controller={playerController} url={url} ref={player} track={track || undefined} />
+			<h3>{newSourceUrl}</h3>
+			<InternalPlayerComponent
+				controller={playerController}
+				url={newSourceUrl}
+				ref={player}
+				track={track || undefined}
+			/>
 		</div>
 	)
 }

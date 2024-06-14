@@ -2,6 +2,7 @@ import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardHeader } from '#app/components/ui/card'
+import { PlayerContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -25,8 +26,9 @@ export default function Route() {
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
 	const dispatch = useContext(TitleDispatchContext)
-
 	const { tracks } = loaderData
+	const playerState = useContext(PlayerContext)
+	const url = playerState?.track?.versions[0]?.audioFile?.url
 
 	useEffect(() => {
 		dispatch({ type: 'SET_TITLE', title: 'Dashboard', icon: 'mdi:home' })
@@ -50,7 +52,8 @@ export default function Route() {
 			<CardContent className="px-0">
 				<TrackList tracks={tracks || []} />
 				<AnimatePresence>
-					<MixdownPlayer />
+					URL: {url}
+					<MixdownPlayer url={url} />
 				</AnimatePresence>
 			</CardContent>
 		</Card>
