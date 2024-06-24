@@ -61,7 +61,6 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url
 			onEnded={controller.handleEnded}
 			onClickNext={controller.handleNext}
 			onClickPrevious={controller.handlePrev}
-			autoPlayAfterSrcChange={true}
 			customAdditionalControls={[]}
 			showDownloadProgress={true}
 			showFilledProgress={true}
