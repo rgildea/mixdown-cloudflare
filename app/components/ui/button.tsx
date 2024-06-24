@@ -27,6 +27,7 @@ const buttonVariants = cva(
 				lg: 'h-11 rounded-md px-8',
 				pill: 'px-6 py-3 rounded-full leading-3',
 				icon: 'p-2 rounded-full',
+				trackrow: 'h-10 w-10 p-2 rounded-full',
 			},
 		},
 		defaultVariants: {

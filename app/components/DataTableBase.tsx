@@ -16,7 +16,7 @@ createTheme(
 			secondary: '#010202',
 		},
 		background: {
-			default: 'hsl(180, 8%, 93%)',
+			default: '#ecefef',
 		},
 		context: {
 			background: '#cb4b16',
@@ -26,9 +26,10 @@ createTheme(
 			default: '#ffffff',
 		},
 		highlightOnHover: {
-			default: 'rgba(252, 103, 54, 0.7)',
-			color: '#s0c2c55',
+			default: '#fc6736',
+			// default: 'rgba(80, 194, 197, .5)',
 			// default: 'rgba(255,	 255, 255, .25)',
+			// color: '##FF0000',
 		},
 		button: {
 			default: '#2aa198',
@@ -37,7 +38,7 @@ createTheme(
 			disabled: 'rgba(255, 255, 255, .34)',
 		},
 		sortFocus: {
-			default: '#2aa198',
+			// default: '#2aa198',
 		},
 	},
 	'default',

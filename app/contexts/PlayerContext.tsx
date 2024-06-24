@@ -77,7 +77,7 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 
 		case 'CAN_PLAY':
 			console.log('CAN_PLAY called from state ', state?.playerState)
-
+			player?.play()
 			if (state?.playerState !== 'LOADING') {
 				return state
 			}
@@ -114,10 +114,18 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			if (!action.track) {
 				throw new Error('Track missing from PLAY_TRACK action')
 			}
-			player?.load()
-			player?.play()
 
-			return { ...state, player: action.playerRef, track: action.track, playerState: 'LOADING' }
+			// this will cause the player to reset and re-load the track
+			player?.load()
+
+			return {
+				...state,
+				player: action.playerRef,
+				track: action.track,
+				audioRef: action.playerRef?.current?.audio,
+				playerState: 'LOADING',
+			}
+
 		case 'RESTART_TRACK':
 			if (!state?.track) {
 				throw new Error('Track missing from RESTART_TRACK action')

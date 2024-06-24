@@ -8,13 +8,13 @@ import { Button } from './ui/button'
 
 interface PlayButtonProps {
 	track: TrackWithVersions
-	size?: 'small' | 'large'
+	size?: 'small' | 'medium' | 'large'
 }
 
 const sizes = {
-	small: 'size-4',
-	medium: 'size-6',
-	large: 'size-8',
+	small: 'size-6 sm:size-4 xl:size-6',
+	medium: 'size-8 sm:size-6 xl:size-8',
+	large: 'size-12 sm:size-8 xl:size-10',
 }
 
 const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
@@ -22,19 +22,19 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	const nowPlayingTrack = playerState?.track
 
 	const dispatch = useContext(PlayerDispatchContext)
-	const isLoaded = nowPlayingTrack?.id == track?.id
+	const isTrackLoaded = nowPlayingTrack?.id === track?.id
 	const isPlaying = playerState?.player?.current?.isPlaying()
 	// const isPlaying = ['PLAYING', 'READY_TO_PLAY'].includes(playerState?.playerState || '')
 	let icon = 'mdi:exclamation'
 
-	icon = `mdi:${isLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`
+	icon = `mdi:${isTrackLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`
 
 	const handleClick = () => {
 		console.log(
-			`${track.title} (${track.id})clicked. isLoaded? ${isLoaded} isPlaying? ${isPlaying}	nowPlayingTrack? ${nowPlayingTrack?.id}`,
+			`${track.title} (${track.id})clicked. isLoaded? ${isTrackLoaded} isPlaying? ${isPlaying}	nowPlayingTrack? ${nowPlayingTrack?.id}`,
 		)
 
-		if (!isLoaded) {
+		if (!isTrackLoaded) {
 			dispatch({ type: 'PLAY_TRACK', track })
 			return
 		}

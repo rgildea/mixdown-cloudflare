@@ -31,7 +31,9 @@ import pixerFontStyleSheetUrl from './styles/font-pixer.css?url'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 
 import { getFormProps, useForm } from '@conform-to/react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useReducer, useRef } from 'react'
+import MixdownPlayer from './components/MixdownPlayer.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from './components/toaster.tsx'
@@ -217,7 +219,8 @@ function Document({
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<Links />
 			</head>
-			<body className="bg-background text-foreground">
+			{/* <body className="m-0 h-full overflow-hidden bg-background text-foreground"> */}
+			<body className="m-0 h-full overflow-hidden bg-background text-foreground">
 				{children}
 				{/* <script
 					nonce={nonce}
@@ -254,62 +257,68 @@ function App() {
 				<PlayerContext.Provider value={playerState}>
 					<PlayerDispatchContext.Provider value={playerDispatch}>
 						<Document nonce={nonce} theme={theme} env={{}}>
-							<header className="container mt-1 h-12 pb-0">
-								<nav className="grid grid-cols-3 items-center">
-									{/* <Button
+							<AnimatePresence>
+								{/* <motion.div layout className="flex min-h-dvh flex-col"> */}
+								<motion.div key="main" layout className="min-h-dvh">
+									<header className="container mt-1 h-12 shrink-0 grow-0 pb-0  ">
+										<nav className="grid grid-cols-3 items-center">
+											{/* <Button
 										className={`p-0.5 ${!shouldShowBackButton ? 'hidden' : ''}`}
 										onClick={() => {
 											navigate('..')
-										}}
-										variant="ghost"
+											}}
+											variant="ghost"
 										size="sm"
-									>
+										>
 										<InlineIcon className="vertical-align-0 size-12" icon="mdi:chevron-left" />
-									</Button> */}
-									<Link className="col-span-1" to="/">
-										<CardTitle className="flex flex-nowrap items-center text-4xl">
-											{icon && <InlineIcon className="shrink-0" icon={icon as unknown as string} />}
-											&nbsp;{title}
-										</CardTitle>
-									</Link>
-									<div className="col-span-1 mx-auto justify-center">
-										<Logo size="sm" className="invisible" />
+										</Button> */}
+											<Link className="col-span-2" to="/">
+												<CardTitle className="flex flex-nowrap items-center text-4xl text-card-foreground">
+													{/* {icon && <InlineIcon className="shrink-0" icon={icon as unknown as string} />} */}
+													{icon && <Icon name="mixdown-initials" />}
+													{title}
+												</CardTitle>
+											</Link>
+											{/* <div className="col-span-1 mx-auto justify-center">
+												<Logo size="sm" className="invisible" />
+											</div> */}
+											{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
+											<div className="col-span-1 flex justify-end space-x-1">
+												<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+
+												{user ? (
+													<UserDropdown />
+												) : (
+													<Button asChild variant="default" size="lg">
+														<Link to="/login">Log In</Link>
+													</Button>
+												)}
+											</div>
+											{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
+										</nav>
+									</header>
+
+									<div className="flex grow flex-col items-center overflow-y-scroll p-2 md:overflow-auto">
+										<Outlet />
+
+										<Logo size="sm" className="visible text-foreground" />
+										<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">
+											<Link to="https://www.ryangildea.com">© {new Date().getFullYear()} Ryan Gildea</Link>
+											&nbsp;
+											<Link to="https://github.com/rgildea/">
+												<InlineIcon className="size-3" icon="mdi:github" />
+											</Link>{' '}
+											&nbsp;
+											<Link target="_blank" to="https://www.linkedin.com/in/ryangildea/" rel="noreferrer">
+												<InlineIcon className="size-3" icon="mdi:linkedin" />
+											</Link>
+										</div>
 									</div>
-									{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
-									<div className="col-span-1 flex justify-end space-x-1">
-										<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+									{/* <Spacer className="min-h-[442px] shrink-0 grow-0" size="player" /> */}
 
-										{user ? (
-											<UserDropdown />
-										) : (
-											<Button asChild variant="default" size="lg">
-												<Link to="/login">Log In</Link>
-											</Button>
-										)}
-									</div>
-									{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
-								</nav>
-							</header>
-
-							<div className="min-h-dvh/25 flex flex-col items-center p-2">
-								<Outlet />
-							</div>
-
-							<div className=" mx-auto flex w-min flex-col items-center">
-								<Logo size="sm" className="visible text-foreground" />
-								<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">
-									<Link to="https://www.ryangildea.com">© {new Date().getFullYear()} Ryan Gildea</Link>
-									&nbsp;
-									<Link to="https://github.com/rgildea/">
-										<InlineIcon className="size-3" icon="mdi:github" />
-									</Link>{' '}
-									&nbsp;
-									<Link target="_blank" to="https://www.linkedin.com/in/ryangildea/" rel="noreferrer">
-										<InlineIcon className="size-3" icon="mdi:linkedin" />
-									</Link>
-								</div>
-							</div>
-
+									<MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />
+								</motion.div>
+							</AnimatePresence>
 							<EpicToaster closeButton position="top-center" theme={theme} />
 							<EpicProgress />
 						</Document>

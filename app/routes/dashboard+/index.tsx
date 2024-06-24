@@ -1,4 +1,3 @@
-import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardHeader } from '#app/components/ui/card'
@@ -9,39 +8,40 @@ import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunction, json } from '@remix-run/cloudflare'
 import { Link, useMatches, useRouteLoaderData } from '@remix-run/react'
-import { AnimatePresence } from 'framer-motion'
 import { useContext, useEffect } from 'react'
 export const action: ActionFunction = async () => {
 	return json({}, { status: 200 })
 }
-// export function meta() {
-// 	return {
-// 		title: 'Dashboard',
-// 		description: 'Dashboard',
-// 	}
-// }
 
 export default function Route() {
+	// const playerState = useContext(PlayerContext)
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
-	const dispatch = useContext(TitleDispatchContext)
+	// const playerDispatch = useContext(PlayerDispatchContext)
+	const titleDispatch = useContext(TitleDispatchContext)
+
 	const { tracks } = loaderData
 	const playerState = useContext(PlayerContext)
 	const url = playerState?.track?.versions[0]?.audioFile?.url
 
+	// set the title and icon for the page
 	useEffect(() => {
-		dispatch({ type: 'SET_TITLE', title: 'Dashboard', icon: 'mdi:home' })
+		titleDispatch({ type: 'SET_TITLE', title: 'My Tracks', icon: 'mdi:home' })
 		return () => {}
 	})
+
+	// // load the first track if there is no track loaded
+	// useEffect(() => {
+	// 	if (!playerState?.track) {
+	// 		playerDispatch({ type: 'PLAY_TRACK', track: tracks[0] })
+	// 	}
+	// 	return () => {}
+	// }, [playerState?.track, playerDispatch, tracks])
 
 	return (
 		<Card className="border-none shadow-none">
 			<CardHeader className="flex flex-row items-end justify-between px-0 py-1">
-				{/* <CardTitle className="flex flex-nowrap items-center justify-self-end text-4xl">
-					<InlineIcon className="" icon="mdi:home" />
-					&nbsp;My Tracks
-				</CardTitle> */}
 				<Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
 					<Link to="?new=true">
 						<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
@@ -49,12 +49,8 @@ export default function Route() {
 					</Link>
 				</Button>
 			</CardHeader>
-			<CardContent className="px-0">
+			<CardContent className="grow px-0">
 				<TrackList tracks={tracks || []} />
-				<AnimatePresence>
-					URL: {url}
-					<MixdownPlayer url={url} />
-				</AnimatePresence>
 			</CardContent>
 		</Card>
 	)

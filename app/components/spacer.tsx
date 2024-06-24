@@ -1,6 +1,10 @@
+import { cn } from '#app/utils/misc'
+
 export function Spacer({
+	className,
 	size,
 }: {
+	className?: string
 	/**
 	 * The size of the space
 	 *
@@ -26,7 +30,7 @@ export function Spacer({
 	 *
 	 * 4xl: h-44 (176px)
 	 */
-	size: '4xs' | '3xs' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl'
+	size: '4xs' | '3xs' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'player'
 }) {
 	const options: Record<typeof size, string> = {
 		'4xs': 'h-4',
@@ -40,7 +44,8 @@ export function Spacer({
 		'2xl': 'h-36',
 		'3xl': 'h-40',
 		'4xl': 'h-44',
+		player: 'h-[442px]',
 	}
-	const className = options[size]
-	return <div className={className} />
+	const classes = options[size]
+	return <div className={cn(className, classes)} />
 }

@@ -1,10 +1,13 @@
 import WaveForm from '#app/components/WaveForm'
 import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
+import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { AnimatePresence, motion } from 'framer-motion'
+import { Link } from '@remix-run/react'
+import { AnimatePresence } from 'framer-motion'
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
+import { CardTitle } from './ui/card'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
@@ -46,7 +49,6 @@ export interface PlayerController {
 const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url, controller }, playerRef) => {
 	return (
 		<AudioPlayer
-			className="min-h-0"
 			onLoadStart={controller.handleLoadStart}
 			onPlayError={controller.handlePlayError}
 			onLoadedData={controller.handleLoadedData}
@@ -69,17 +71,19 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url
 			src={url}
 			ref={playerRef}
 			// customVolumeControls={[]}
+			autoPlayAfterSrcChange={false}
+			autoPlay={false}
 			// customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
 		/>
 	)
 })
-
 export interface MixdownPlayerProps {
+	className?: string
 	url?: string
 	track?: TrackWithVersions
 }
 
-export default function MixdownPlayer({ url }: MixdownPlayerProps) {
+export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProps) {
 	const [isWaveformHidden, setWaveformHidden] = useState<boolean>(true)
 
 	const dispatch = useContext(PlayerDispatchContext)
@@ -96,7 +100,7 @@ export default function MixdownPlayer({ url }: MixdownPlayerProps) {
 	if (!track) return null
 
 	const newSourceUrl = url || getLatestVersionUrl(track.id, [track])
-	// const url = track?.versions[0].audioFile?.url
+	// const url = track?.versions[0].audioFile?.url ?? ''
 
 	const audioElementRef = player.current?.audio
 
@@ -152,40 +156,36 @@ export default function MixdownPlayer({ url }: MixdownPlayerProps) {
 	}
 
 	return (
-		<div className="container z-50">
+		// merge classes that were passed in with the default classes
+		<div className={cn(className, 'min-h-min w-full bg-yellow-500/90')}>
 			{/* <h2 className="top-0 w-min bg-accent p-2 text-center font-mono text-sm text-accent-foreground">
 				{playerState?.playerState}
 			</h2> */}
 
-			<div className=" flex flex-col justify-start ">
-				{/* <Button
-					className=" my-1 max-w-min text-nowrap"
-					size="wide"
-					onClick={() => setWaveformHidden(!isWaveformHidden)}
-				>
-					{isWaveformHidden ? 'Show Waveform' : 'Hide Waveform'}
-				</Button> */}
+			<div className="flex flex-col justify-start ">
 				<AnimatePresence>
-					<motion.div
-						initial={{ opacity: 0, y: -300 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -300 }}
-						transition={{ y: -300, duration: 4 }}
-					>
-						{!isWaveformHidden && (
-							<div>
-								<WaveForm
-									// className={`${shouldShow ? ' translate-x-0 ' : ' translate-x-full '} z-30 h-full transform overflow-auto bg-white transition-all duration-300 ease-in-out`}
-									className="h-full w-full"
-									audioElementRef={audioElementRef}
-									currentSrc={audioElementRef?.current?.currentSrc}
-								/>
-							</div>
-						)}
-					</motion.div>
+					{!isWaveformHidden && (
+						<div>
+							<WaveForm
+								// className={`${shouldShow ? ' translate-x-0 ' : ' translate-x-full '} z-30 h-full transform overflow-auto bg-white transition-all duration-300 ease-in-out`}
+								className="z-30 h-64 w-full"
+								audioElementRef={audioElementRef}
+								currentSrc={audioElementRef?.current?.currentSrc}
+							/>
+						</div>
+					)}
 				</AnimatePresence>
 			</div>
-			<h3>{newSourceUrl}</h3>
+			<div className="text-left">
+				{track && (
+					<div className="relative -inset-y-16">
+						<Link className="col-span-1" to="/">
+							<CardTitle className="flex flex-nowrap items-center text-xl sm:text-4xl">{track?.title}</CardTitle>
+						</Link>
+						<div className="text-xs">{newSourceUrl}</div>
+					</div>
+				)}
+			</div>
 			<InternalPlayerComponent
 				controller={playerController}
 				url={newSourceUrl}

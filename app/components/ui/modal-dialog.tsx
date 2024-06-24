@@ -15,7 +15,6 @@ export default function ModalDialog(
 		handleOpenChange: () => void
 	}>,
 ) {
-	;``
 	const { title, description, isDisabled, isModalOpen, setIsModalOpen, handleOpenChange } = props
 
 	function handleDismissClicked() {

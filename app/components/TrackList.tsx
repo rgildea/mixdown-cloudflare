@@ -28,7 +28,7 @@ function TrackList({ tracks }: TrackListProps) {
 				borderRadius: '0.5rem',
 			},
 			stripedStyle: {
-				backgroundColor: 'rgba(252, 103, 54, 0.9)',
+				backgroundColor: '#F3F4F6',
 			},
 		},
 		headRow: {
@@ -85,6 +85,9 @@ function TrackList({ tracks }: TrackListProps) {
 			theme="mixdown"
 			customStyles={customStyles}
 			noTableHead
+			noHeader
+			noContextMenu
+			fixedHeaderScrollHeight={'100%-2.5rem'}
 		/>
 	)
 }
