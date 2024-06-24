@@ -1,7 +1,6 @@
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardHeader } from '#app/components/ui/card'
-import { PlayerContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -22,8 +21,6 @@ export default function Route() {
 	const titleDispatch = useContext(TitleDispatchContext)
 
 	const { tracks } = loaderData
-	const playerState = useContext(PlayerContext)
-	const url = playerState?.track?.versions[0]?.audioFile?.url
 
 	// set the title and icon for the page
 	useEffect(() => {
