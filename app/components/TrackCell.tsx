@@ -19,7 +19,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 	return (
 		trackUrl && (
 			<div
-				className={`${isTrackLoaded ? 'primary-foreground bg-primary' : ''} space-between group mx-0 flex h-20 w-full flex-nowrap items-center justify-between sm:h-16`}
+				className={`${isTrackLoaded ? 'primary-foreground bg-primary' : ''} space-between group mx-0 flex h-20 w-full flex-nowrap items-center justify-between rounded-sm px-0  sm:h-16`}
 				data-tag="allowRowEvents"
 			>
 				<PlayButton size="medium" track={track} />

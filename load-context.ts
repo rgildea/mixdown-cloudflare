@@ -1,13 +1,13 @@
-import {
-	createAuthSessionStorage,
-	createToastSessionStorage,
-	createVerificationSessionStorage,
-	createConnectionSessionStorage,
-} from './app/utils/session.server'
 import { AppLoadContext } from '@remix-run/cloudflare'
 import { type PlatformProxy } from 'wrangler'
-import { db } from './app/utils/db.server'
 import { StorageContext } from './app/utils/auth.server'
+import { db } from './app/utils/db.server'
+import {
+	createAuthSessionStorage,
+	createConnectionSessionStorage,
+	createToastSessionStorage,
+	createVerificationSessionStorage,
+} from './app/utils/session.server'
 
 // When using `wrangler.toml` to configure bindings,
 // `wrangler types` will generate types for those bindings
@@ -43,7 +43,7 @@ type GetLoadContext = (args: {
 // Shared implementation compatible with Vite, Wrangler, and Cloudflare Pages
 export const getLoadContext: GetLoadContext = ({ context }) => {
 	const { COOKIE_SECRET, ENVIRONMENT_NAME, DATABASE_URL, SESSIONS } = context.cloudflare.env
-	const database = db(DATABASE_URL)
+	const database = db(DATABASE_URL, ENVIRONMENT_NAME)
 	const authSessionStorage = createAuthSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
 	const verificationSessionStorage = createVerificationSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
 	const toastSessionStorage = createToastSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)

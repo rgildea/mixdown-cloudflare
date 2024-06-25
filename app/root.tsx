@@ -259,7 +259,7 @@ function App() {
 						<Document nonce={nonce} theme={theme} env={{}}>
 							<AnimatePresence>
 								{/* <motion.div layout className="flex min-h-dvh flex-col"> */}
-								<motion.div key="main" layout className="min-h-dvh">
+								<motion.div key="main" layout="size" className="min-h-dvh">
 									<header className="container mt-1 h-12 shrink-0 grow-0 pb-0  ">
 										<nav className="grid grid-cols-3 items-center">
 											{/* <Button

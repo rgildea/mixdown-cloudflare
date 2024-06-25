@@ -1,16 +1,17 @@
-import { PlayerStates } from '#app/components/MixdownPlayer'
+import { PlayerState, PlayerVisualState } from '#app/components/MixdownPlayer'
 import { TrackWithVersions } from '#app/utils/track.server'
 import React, { createContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
 export type PlayerContextType = {
-	track?: TrackWithVersions
+	track?: TrackWithVersions | null
 	player?: React.RefObject<AudioPlayer> | null
-	playerState?: PlayerStates
+	playerState?: PlayerState | null
 	audioRef?: React.RefObject<HTMLAudioElement> | null
+	visualState?: PlayerVisualState | null
 } | null
 
-export const PlayerContext = createContext<PlayerContextType>({ playerState: 'INITIAL_STATE' })
+export const PlayerContext = createContext<PlayerContextType>({ playerState: 'INITIAL_STATE', visualState: 'HIDDEN' })
 export const PlayerDispatchContext = createContext<React.Dispatch<PlayerContextAction>>(() => {})
 export type PlayerContextActionType =
 	| 'INIT_PLAYER'
@@ -28,6 +29,8 @@ export type PlayerContextActionType =
 	| 'RESTART_TRACK'
 	| 'PAUSE'
 	| 'CLOSE_PLAYER'
+	| 'COLLAPSE_PLAYER'
+	| 'EXPAND_PLAYER'
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
@@ -35,18 +38,6 @@ export interface PlayerContextAction {
 	playerRef?: React.RefObject<AudioPlayer> | null
 	error?: string
 }
-
-// export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-// 	const [playerState, dispatch] = useReducer<
-// 		(state: PlayerContextType, action: PlayerContextAction) => PlayerContextType
-// 	>(PlayerContextReducer, null)
-
-// 	return (
-// 		<PlayerContext.Provider value={playerState}>
-// 			<PlayerDispatchContext.Provider value={dispatch}>{children}</PlayerDispatchContext.Provider>
-// 		</PlayerContext.Provider>
-// 	)
-// }
 
 export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
 	console.log(`PlayerContextReducer received ${action.type} ACTION`, action)
@@ -63,10 +54,11 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 				player: action.playerRef,
 				audioRef: action.playerRef?.current?.audio,
 				playerState: 'INITIAL_STATE',
+				visualState: 'LARGE',
 			}
 		case 'DESTROY_PLAYER':
-			console.log('Would be destroying player')
-			return state //{ ...state, playerState: 'INITIAL_STATE' }
+			// no-op
+			return state
 
 		case 'LOAD_START':
 			if (!action.track) {
@@ -76,11 +68,10 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
 
 		case 'CAN_PLAY':
-			console.log('CAN_PLAY called from state ', state?.playerState)
-			player?.play()
 			if (state?.playerState !== 'LOADING') {
 				return state
 			}
+			player?.play()
 			return { ...state, playerState: 'READY_TO_PLAY' }
 		case 'CAN_PLAY_THROUGH':
 			console.log('CAN_PLAY_THROUGH called')
@@ -100,11 +91,9 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 		case 'PLAYBACK_ERROR':
 			return { ...state, playerState: 'ERROR' }
 		case 'PLAYBACK_ENDED':
-			return state
-		// return { ...state, playerState: 'ENDED' }
+			return { ...state, playerState: 'ENDED' }
 		case 'PLAYBACK_ABORTED':
-			// return { ...state, playerState: 'ABORTED' }
-			return state
+			return { ...state, playerState: 'ABORTED' }
 
 		// Important: we're setting track, audio ref, and player ref here by returning them
 		// in the state.
@@ -114,9 +103,6 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			if (!action.track) {
 				throw new Error('Track missing from PLAY_TRACK action')
 			}
-
-			// this will cause the player to reset and re-load the track
-			player?.load()
 
 			return {
 				...state,
@@ -130,9 +116,14 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			if (!state?.track) {
 				throw new Error('Track missing from RESTART_TRACK action')
 			}
-			player?.load()
-			player?.play()
-			return state
+
+			return {
+				...state,
+				player: action.playerRef,
+				track: action.track,
+				audioRef: action.playerRef?.current?.audio,
+				playerState: 'LOADING',
+			}
 
 		case 'PAUSE':
 			if (!state?.track) {
@@ -144,8 +135,16 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			return state
 		case 'CLOSE_PLAYER':
 			player?.pause()
-			// unsetting  the track will cause the player to be hidden
-			return { ...state, track: undefined, playerState: 'INITIAL_STATE' }
+			// unsetting the track will cause the player to be hidden
+			return { ...state, track: undefined, visualState: 'HIDDEN', playerState: 'INITIAL_STATE' }
+		case 'COLLAPSE_PLAYER':
+			return { ...state, visualState: 'SMALL' }
+		case 'EXPAND_PLAYER':
+			if (!state?.track) {
+				console.log('No track to expand player with')
+				return state
+			}
+			return { ...state, visualState: 'LARGE' }
 
 		default:
 			return state

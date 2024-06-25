@@ -3,10 +3,11 @@ import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContex
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { Link } from '@remix-run/react'
-import { AnimatePresence } from 'framer-motion'
-import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
-import AudioPlayer from 'react-h5-audio-player'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { NavLink } from '@remix-run/react'
+import { forwardRef, useContext, useEffect, useRef } from 'react'
+import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
+import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
 
 export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
@@ -14,7 +15,7 @@ export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]
 	return found?.versions[0].audioFile?.url
 }
 
-export type PlayerStates =
+export type PlayerState =
 	| 'INITIAL_STATE'
 	| 'LOADING'
 	| 'READY_TO_PLAY'
@@ -24,7 +25,10 @@ export type PlayerStates =
 	| 'ABORTED'
 	| 'ERROR'
 
+export type PlayerVisualState = 'LARGE' | 'SMALL' | 'HIDDEN'
+
 export interface AudioPlayerProps {
+	visualState?: PlayerVisualState
 	url?: string
 	track?: TrackWithVersions
 	controller: PlayerController
@@ -46,36 +50,43 @@ export interface PlayerController {
 }
 
 // eslint-disable-next-line react/display-name
-const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url, controller }, playerRef) => {
-	return (
-		<AudioPlayer
-			onLoadStart={controller.handleLoadStart}
-			onPlayError={controller.handlePlayError}
-			onLoadedData={controller.handleLoadedData}
-			onCanPlay={controller.handleCanPlay}
-			onCanPlayThrough={controller.handleCanPlayThrough}
-			onPlay={controller.handlePlay}
-			onPlaying={controller.handlePlaying}
-			onPause={controller.handlePause}
-			onAbort={controller.handleAbort}
-			onEnded={controller.handleEnded}
-			onClickNext={controller.handleNext}
-			onClickPrevious={controller.handlePrev}
-			customAdditionalControls={[]}
-			showDownloadProgress={true}
-			showFilledProgress={true}
-			showJumpControls={false}
-			showFilledVolume={true}
-			showSkipControls={false}
-			src={url}
-			ref={playerRef}
-			// customVolumeControls={[]}
-			autoPlayAfterSrcChange={false}
-			autoPlay={false}
-			// customProgressBarSection={[RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]}
-		/>
-	)
-})
+const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(
+	({ url, controller, visualState }, playerRef) => {
+		let progressBarSection: RHAP_UI[] = []
+		if (visualState === 'LARGE') {
+			progressBarSection = [RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]
+		}
+
+		return (
+			<AudioPlayer
+				onLoadStart={controller.handleLoadStart}
+				onPlayError={controller.handlePlayError}
+				onLoadedData={controller.handleLoadedData}
+				onCanPlay={controller.handleCanPlay}
+				onCanPlayThrough={controller.handleCanPlayThrough}
+				onPlay={controller.handlePlay}
+				onPlaying={controller.handlePlaying}
+				onPause={controller.handlePause}
+				onAbort={controller.handleAbort}
+				onEnded={controller.handleEnded}
+				onClickNext={controller.handleNext}
+				onClickPrevious={controller.handlePrev}
+				customAdditionalControls={[]}
+				showDownloadProgress={true}
+				showFilledProgress={true}
+				showJumpControls={false}
+				showFilledVolume={true}
+				showSkipControls={false}
+				src={url}
+				ref={playerRef}
+				autoPlayAfterSrcChange={false}
+				autoPlay={false}
+				customProgressBarSection={progressBarSection}
+			/>
+		)
+	},
+)
+
 export interface MixdownPlayerProps {
 	className?: string
 	url?: string
@@ -83,26 +94,44 @@ export interface MixdownPlayerProps {
 }
 
 export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProps) {
-	const [isWaveformHidden, setWaveformHidden] = useState<boolean>(true)
-
-	const dispatch = useContext(PlayerDispatchContext)
 	const playerState = useContext(PlayerContext)
+	const dispatch = useContext(PlayerDispatchContext)
 	const player = useRef<AudioPlayer>(null)
 
 	useEffect(() => {
 		if (!playerState?.player) {
 			dispatch({ type: 'INIT_PLAYER', playerRef: player })
 		}
-	}, [playerState?.player, dispatch])
+		return () => {
+			dispatch({ type: 'DESTROY_PLAYER' })
+		}
+	}, [dispatch, playerState?.player])
 
-	const track = playerState?.track ?? null
+	const { track, visualState } = playerState || {}
 	if (!track) return null
 
+	const handleCollapseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
+		console.log('handleCollapseButtonClicked', e)
+		switch (visualState) {
+			case 'LARGE':
+				dispatch({ type: 'COLLAPSE_PLAYER' })
+				break
+			case 'SMALL':
+				dispatch({ type: 'EXPAND_PLAYER' })
+				break
+			case 'HIDDEN': //intentional fall-through
+			default:
+				return
+		}
+	}
+
+	const handleCloseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
+		console.log('handleCloseButtonClicked', e)
+		dispatch({ type: 'CLOSE_PLAYER' })
+	}
+
 	const newSourceUrl = url || getLatestVersionUrl(track.id, [track])
-	// const url = track?.versions[0].audioFile?.url ?? ''
-
 	const audioElementRef = player.current?.audio
-
 	const playerController: PlayerController = {
 		handleLoadStart: e => {
 			console.info('onLoadStart', e)
@@ -118,7 +147,6 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 		},
 		handleCanPlayThrough: e => {
 			console.info('onCanPlayThrough', e)
-			setWaveformHidden(false)
 			dispatch({ type: 'CAN_PLAY_THROUGH' })
 		},
 		handleLoadedData: e => {
@@ -155,42 +183,46 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 	}
 
 	return (
-		// merge classes that were passed in with the default classes
-		<div className={cn(className, 'min-h-min w-full bg-yellow-500/90')}>
-			{/* <h2 className="top-0 w-min bg-accent p-2 text-center font-mono text-sm text-accent-foreground">
-				{playerState?.playerState}
-			</h2> */}
-
-			<div className="flex flex-col justify-start ">
-				<AnimatePresence>
-					{!isWaveformHidden && (
-						<div>
-							<WaveForm
-								// className={`${shouldShow ? ' translate-x-0 ' : ' translate-x-full '} z-30 h-full transform overflow-auto bg-white transition-all duration-300 ease-in-out`}
-								className="z-30 h-64 w-full"
-								audioElementRef={audioElementRef}
-								currentSrc={audioElementRef?.current?.currentSrc}
-							/>
+		<>
+			<div className={cn(className, 'min-h-min w-full bg-accent p-5')}>
+				<div className="flex flex-col items-stretch">
+					<div className="flex">
+						<div className="grow text-left">
+							{track && (
+								<>
+									<NavLink className="col-span-1" to={`/tracks/${track?.id}`}>
+										<CardTitle className="flex flex-nowrap items-center text-xl sm:text-4xl">{track?.title}</CardTitle>
+									</NavLink>
+									<div className="text-xs">{newSourceUrl}</div>
+								</>
+							)}
 						</div>
-					)}
-				</AnimatePresence>
-			</div>
-			<div className="text-left">
-				{track && (
-					<div className="relative -inset-y-16">
-						<Link className="col-span-1" to="/">
-							<CardTitle className="flex flex-nowrap items-center text-xl sm:text-4xl">{track?.title}</CardTitle>
-						</Link>
-						<div className="text-xs">{newSourceUrl}</div>
+
+						<Button onClick={handleCollapseButtonClicked} variant="ghost" size="icon">
+							<InlineIcon
+								className="size-8 sm:size-6"
+								icon={`mdi:${visualState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`}
+							/>
+						</Button>
+
+						<Button onClick={handleCloseButtonClicked} variant={'ghost'} size="icon">
+							<InlineIcon className="size-8 sm:size-6" icon="mdi:close-circle" />
+						</Button>
 					</div>
-				)}
+
+					{visualState === 'LARGE' && (
+						<WaveForm
+							className="z-30 h-64 w-full"
+							audioElementRef={audioElementRef}
+							currentSrc={audioElementRef?.current?.currentSrc}
+						/>
+					)}
+
+					{track && (
+						<InternalPlayerComponent controller={playerController} url={newSourceUrl} ref={player} track={track} />
+					)}
+				</div>
 			</div>
-			<InternalPlayerComponent
-				controller={playerController}
-				url={newSourceUrl}
-				ref={player}
-				track={track || undefined}
-			/>
-		</div>
+		</>
 	)
 }
