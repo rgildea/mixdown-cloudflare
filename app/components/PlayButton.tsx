@@ -23,7 +23,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 
 	const dispatch = useContext(PlayerDispatchContext)
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
-	const isPlaying = playerState?.player?.current?.isPlaying()
+	const isPlaying = playerState?.player?.current?.isPlaying() || false
 	// const isPlaying = ['PLAYING', 'READY_TO_PLAY'].includes(playerState?.playerState || '')
 	let icon = 'mdi:exclamation'
 

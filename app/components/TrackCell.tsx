@@ -13,9 +13,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 	const nowPlayingTrack = playerState?.track
 
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
-	if (isTrackLoaded) {
-		console.log('Track is currently loaded in player', track.id)
-	}
+
 	return (
 		trackUrl && (
 			<div

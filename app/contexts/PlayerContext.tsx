@@ -31,6 +31,7 @@ export type PlayerContextActionType =
 	| 'CLOSE_PLAYER'
 	| 'COLLAPSE_PLAYER'
 	| 'EXPAND_PLAYER'
+	| 'TOGGLE_VIEW'
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
@@ -143,6 +144,11 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			if (!state?.track) {
 				console.log('No track to expand player with')
 				return state
+			}
+			return { ...state, visualState: 'LARGE' }
+		case 'TOGGLE_VIEW':
+			if (state?.visualState === 'LARGE') {
+				return { ...state, visualState: 'SMALL' }
 			}
 			return { ...state, visualState: 'LARGE' }
 

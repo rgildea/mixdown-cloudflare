@@ -110,19 +110,9 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 	const { track, visualState } = playerState || {}
 	if (!track) return null
 
-	const handleCollapseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-		console.log('handleCollapseButtonClicked', e)
-		switch (visualState) {
-			case 'LARGE':
-				dispatch({ type: 'COLLAPSE_PLAYER' })
-				break
-			case 'SMALL':
-				dispatch({ type: 'EXPAND_PLAYER' })
-				break
-			case 'HIDDEN': //intentional fall-through
-			default:
-				return
-		}
+	const handleViewToggleClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
+		console.log('handleViewToggleClicked', e)
+		dispatch({ type: 'TOGGLE_VIEW' })
 	}
 
 	const handleCloseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -184,21 +174,19 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 
 	return (
 		<>
-			<div className={cn(className, 'min-h-min w-full bg-accent p-5')}>
-				<div className="flex flex-col items-stretch">
+			<div className={cn(className, 'w-full bg-accent p-5')}>
+				<div className="flex flex-col ">
 					<div className="flex">
 						<div className="grow text-left">
-							{track && (
-								<>
-									<NavLink className="col-span-1" to={`/tracks/${track?.id}`}>
-										<CardTitle className="flex flex-nowrap items-center text-xl sm:text-4xl">{track?.title}</CardTitle>
-									</NavLink>
-									<div className="text-xs">{newSourceUrl}</div>
-								</>
-							)}
+							<>
+								<NavLink className="col-span-1" to={`/tracks/${track?.id}`}>
+									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">{track?.title}</CardTitle>
+								</NavLink>
+								<div className="text-xs">{newSourceUrl}</div>
+							</>
 						</div>
 
-						<Button onClick={handleCollapseButtonClicked} variant="ghost" size="icon">
+						<Button onClick={handleViewToggleClicked} variant="ghost" size="icon">
 							<InlineIcon
 								className="size-8 sm:size-6"
 								icon={`mdi:${visualState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`}
@@ -209,7 +197,6 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 							<InlineIcon className="size-8 sm:size-6" icon="mdi:close-circle" />
 						</Button>
 					</div>
-
 					{visualState === 'LARGE' && (
 						<WaveForm
 							className="z-30 h-64 w-full"
@@ -218,9 +205,7 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 						/>
 					)}
 
-					{track && (
-						<InternalPlayerComponent controller={playerController} url={newSourceUrl} ref={player} track={track} />
-					)}
+					<InternalPlayerComponent controller={playerController} url={newSourceUrl} ref={player} track={track} />
 				</div>
 			</div>
 		</>
