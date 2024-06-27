@@ -43,7 +43,7 @@ type GetLoadContext = (args: {
 // Shared implementation compatible with Vite, Wrangler, and Cloudflare Pages
 export const getLoadContext: GetLoadContext = ({ context }) => {
 	const { COOKIE_SECRET, ENVIRONMENT_NAME, DATABASE_URL, SESSIONS } = context.cloudflare.env
-	const database = db(DATABASE_URL, ENVIRONMENT_NAME)
+	const database = db(DATABASE_URL)
 	const authSessionStorage = createAuthSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
 	const verificationSessionStorage = createVerificationSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
 	const toastSessionStorage = createToastSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)

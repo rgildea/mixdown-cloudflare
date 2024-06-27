@@ -1,16 +1,17 @@
-import { PrismaClient } from '@prisma/client'
 import { PrismaClient as PrismaEdgeClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import chalk from 'chalk'
 
-export const prisma = (databaseUrl: string, ENVIRONMENT_NAME: string) => {
+export const prisma = (databaseUrl: string) => {
 	// NOTE: if you change anything in this function you'll need to restart
 	// the dev server to see your changes.
 
 	// Feel free to change this log threshold to something that makes sense for you
 	const logThreshold = 500 // ms
-	const ClientToUse = ENVIRONMENT_NAME === 'production' ? PrismaEdgeClient : PrismaClient
-	const client = new ClientToUse({
+	// eslint-disable-next-line no-constant-condition
+	console.log('Database URL:', databaseUrl)
+	// eslint-disable-next-line no-constant-condition
+	const client = new PrismaEdgeClient({
 		datasources: { db: { url: databaseUrl } },
 		log: [
 			{ level: 'query', emit: 'event' },
