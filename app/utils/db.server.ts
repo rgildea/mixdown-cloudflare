@@ -8,9 +8,6 @@ export const prisma = (databaseUrl: string) => {
 
 	// Feel free to change this log threshold to something that makes sense for you
 	const logThreshold = 500 // ms
-	// eslint-disable-next-line no-constant-condition
-	console.log('Database URL:', databaseUrl)
-	// eslint-disable-next-line no-constant-condition
 	const client = new PrismaEdgeClient({
 		datasources: { db: { url: databaseUrl } },
 		log: [

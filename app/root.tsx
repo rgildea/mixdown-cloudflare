@@ -299,7 +299,9 @@ function App() {
 									</header>
 
 									<div className="flex grow flex-col items-center overflow-y-scroll p-2 md:overflow-auto">
-										<Outlet />
+										<div className="mx-auto flex w-full flex-col ">
+											<Outlet />
+										</div>
 
 										<Logo size="sm" className="visible text-foreground" />
 										<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">

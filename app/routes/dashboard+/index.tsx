@@ -37,14 +37,23 @@ export default function Route() {
 	// }, [playerState?.track, playerDispatch, tracks])
 
 	return (
-		<Card className="border-none shadow-none">
+		<Card className="min-h-screen/2 border-none shadow-none">
 			<CardHeader className="flex flex-row items-end justify-between px-0 py-1">
-				<Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
-					<Link to="?new=true">
+				<Button asChild>
+					<Link
+						className="leading font-sans text-body-sm font-medium hover:font-semibold hover:text-white"
+						to="?new=true"
+					>
 						<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
 						&nbsp; Add Track
 					</Link>
 				</Button>
+				{/* <Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
+					<Link to="?new=true">
+						<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
+						&nbsp; Add Track
+					</Link>
+				</Button> */}
 			</CardHeader>
 			<CardContent className="grow px-0">
 				<TrackList tracks={tracks || []} />

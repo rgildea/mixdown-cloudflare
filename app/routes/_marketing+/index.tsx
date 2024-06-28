@@ -11,7 +11,6 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 	if (user) {
 		throw redirect('dashboard')
 	}
-	console.log('user', user)
 
 	return json({})
 }
