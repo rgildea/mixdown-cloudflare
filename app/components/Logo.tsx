@@ -1,5 +1,5 @@
-import { Link } from '@remix-run/react'
 import { cn } from '#app/utils/misc.tsx'
+import { Link } from '@remix-run/react'
 
 const sizeClassName = {
 	font: 'w-[1em] h-[1em]',
@@ -26,12 +26,11 @@ export default function Logo({
 	className,
 	size = 'default',
 }: React.PropsWithChildren<{ className?: string; size: Size }>) {
-	console.log('Size: ', size, sizeClassName[size])
 	return (
-		<div className={className}>
-			<Link to="/" className="group flex flex-col font-nourd tracking-tight">
-				<div className="tracking-wides animate text-3xl transition group-hover:-translate-x-1">Mixdown</div>
 
+		<div className={cn('w-min', className)}>
+			<Link to="/" className="group flex flex-col font-nourd tracking-tight">
+				<div className="animate w-min text-3xl tracking-wide transition group-hover:-translate-x-1">Mixdown</div>
 				<div className="flex text-nowrap align-middle font-light">
 					<svg
 						className={cn(sizeClassName[size], 'inline self-center', className)}

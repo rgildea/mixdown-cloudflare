@@ -28,6 +28,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 	headers.set('filename', customMetadata.filename || 'unknown')
 	headers.set('Content-Length', object.size.toString())
 	headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream')
+	headers.set('Cache-Control', 'public, max-age=31536000') // 1 year
 	headers
 	const response = new Response(object.body, { headers, status: 200, statusText: 'OK' })
 

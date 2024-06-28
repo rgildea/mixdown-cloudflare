@@ -25,7 +25,6 @@
     "typegen": "wrangler types"
   },
   "dependencies": {
-    "buffer-polyfill": "npm:buffer@^6.0.3",
     "@conform-to/react": "^1.0.4",
     "@conform-to/zod": "^1.0.4",
     "@epic-web/cachified": "^5.1.2",
@@ -36,7 +35,7 @@
     "@mdi/react": "^1.6.1",
     "@nasa-gcn/remix-seo": "^2.0.0",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@prisma/client": "^5.14.0",
+    "@prisma/client": "^5.15.0",
     "@prisma/extension-accelerate": "^1.0.0",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -60,6 +59,7 @@
     "@uppy/status-bar": "^3.3.3",
     "@uppy/xhr-upload": "^3.6.6",
     "bcryptjs": "^2.4.3",
+    "buffer-polyfill": "npm:buffer@^6.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "crypto-js": "^4.2.0",
@@ -82,7 +82,8 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-radix": "^2.8.0",
     "tsx": "^4.7.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "wavesurfer.js": "^7.7.15"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230518.0",
@@ -116,19 +117,22 @@
     "postcss-nested": "^6.0.1",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.12",
-    "prisma": "^5.14.0",
+    "prisma": "^5.15.0",
     "spin-delay": "^1.2.0",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.1.6",
     "vite": "^5.1.0",
     "vite-tsconfig-paths": "^4.2.1",
-    "wrangler": "^3.24.0"
+    "wrangler": "^3.61.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.20.3"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.18.0"
   }
 }

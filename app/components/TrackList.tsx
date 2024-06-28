@@ -1,12 +1,12 @@
+import DataTable from '#app/components/DataTableBase'
 import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
+import { useIsPending } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
+import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { Link } from '@remix-run/react'
 import { useContext } from 'react'
-import DataTable from '#app/components/DataTableBase'
-import { Button } from './ui/button'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { useIsPending } from '#app/utils/misc'
 import TrackCell from './TrackCell'
+import { Button } from './ui/button'
 
 interface TrackListProps {
 	tracks: TrackWithVersions[]
@@ -19,7 +19,6 @@ function TrackList({ tracks }: TrackListProps) {
 	const isPending = useIsPending()
 
 	const handlePlayButtonClicked = (track: TrackWithVersions) => {
-		console.log(track)
 		dispatch({ type: 'PLAY_TRACK', track })
 	}
 
@@ -29,7 +28,7 @@ function TrackList({ tracks }: TrackListProps) {
 				borderRadius: '0.5rem',
 			},
 			stripedStyle: {
-				backgroundColor: 'rgba(252, 103, 54, 0.9)',
+				backgroundColor: '#F3F4F6',
 			},
 		},
 		headRow: {
@@ -86,6 +85,9 @@ function TrackList({ tracks }: TrackListProps) {
 			theme="mixdown"
 			customStyles={customStyles}
 			noTableHead
+			noHeader
+			noContextMenu
+			fixedHeaderScrollHeight={'100%-2.5rem'}
 		/>
 	)
 }

@@ -5,7 +5,7 @@
 /* help me visualize the colors */
 .root {
 	.foreground {
-		color: hsl(214, 76%, 19%);
+		color: hsl(0, 0%, 5%);
 	}
 	.background {
 		color: hsl(180, 9%, 93%);
@@ -144,7 +144,7 @@
 		--font-nourd: 'Nourd';
 
 		--background: 180 9% 93%;
-		--foreground: 0 0 50%%;
+		--foreground: 0 0% 5%;
 
 		/* prefixed with foreground because it should look good on the background */
 		--foreground-destructive: 345 83% 41%;

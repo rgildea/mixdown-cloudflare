@@ -161,10 +161,14 @@
 	height: 35px;
 }
 
+@media only screen and (min-width: 768px) {
+	.rhap_play-pause-button {
+		@apply size-8 text-xl;
+	}
+}
+
 .rhap_play-pause-button {
-	font-size: 40px;
-	width: 40px;
-	height: 40px;
+	@apply size-10 text-4xl;
 }
 
 .rhap_volume-controls {

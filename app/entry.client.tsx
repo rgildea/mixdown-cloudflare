@@ -5,9 +5,9 @@
  */
 
 import { RemixBrowser } from '@remix-run/react'
-import { startTransition, StrictMode } from 'react'
-import { hydrateRoot } from 'react-dom/client'
 import { Buffer } from 'buffer-polyfill'
+import { StrictMode, startTransition } from 'react'
+import { hydrateRoot } from 'react-dom/client'
 
 globalThis.Buffer = Buffer as unknown as BufferConstructor
 
