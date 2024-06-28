@@ -16,6 +16,7 @@ export const PlayerDispatchContext = createContext<React.Dispatch<PlayerContextA
 export type PlayerContextActionType =
 	| 'INIT_PLAYER'
 	| 'DESTROY_PLAYER'
+	| 'LOAD_TRACK'
 	| 'LOAD_START'
 	| 'LOADED_DATA'
 	| 'CAN_PLAY'
@@ -46,28 +47,36 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 
 	switch (action.type) {
 		case 'INIT_PLAYER':
-			if (player) {
-				console.log('Player already exists')
+			if (!player) {
+				console.log('Player missing from INIT_PLAYER action')
 				return state
 			}
+
+			if (state?.track?.id === action.track?.id) {
+				console.log('Player has already loaded the same track. No-op.')
+				return state
+			}
+
 			return {
 				...state,
+				track: action.track,
 				player: action.playerRef,
 				audioRef: action.playerRef?.current?.audio,
-				playerState: 'INITIAL_STATE',
+				playerState: 'LOADING',
 				visualState: 'LARGE',
 			}
 		case 'DESTROY_PLAYER':
 			// no-op
 			return state
-
-		case 'LOAD_START':
+		case 'LOAD_TRACK':
 			if (!action.track) {
-				console.log('TrackId missing from LOAD_START action')
+				console.log('TrackId missing from LOAD_TRACK action')
 				return state
 			}
 			return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
-
+		case 'LOAD_START':
+			console.log('LOAD_START event called')
+			return state
 		case 'CAN_PLAY':
 			if (state?.playerState !== 'LOADING') {
 				return state
@@ -101,17 +110,30 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 		// This re-renders the Waveform component, re-creating the WaveSurfer instance
 		// with the updated audio element.
 		case 'PLAY_TRACK':
-			if (!action.track) {
+			if (!action?.track) {
 				throw new Error('Track missing from PLAY_TRACK action')
 			}
 
-			return {
-				...state,
-				player: action.playerRef,
-				track: action.track,
-				audioRef: action.playerRef?.current?.audio,
-				playerState: 'LOADING',
+			if (!player) {
+				//throw new Error('Player missing')
+				//no-op?
+				return state
 			}
+
+			if (state?.playerState === 'PLAYING') {
+				console.log('PAUSE called')
+				player?.pause()
+				return state
+			}
+
+			if (state?.playerState === 'ENDED') {
+				console.log('RESTARTing track')
+				player.currentTime = 0
+			}
+
+			console.log('PLAY called')
+			player?.play()
+			return state
 
 		case 'RESTART_TRACK':
 			if (!state?.track) {

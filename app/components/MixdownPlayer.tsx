@@ -6,11 +6,11 @@ import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { NavLink } from '@remix-run/react'
 import { forwardRef, useContext, useEffect, useRef } from 'react'
-import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
+import AudioPlayer from 'react-h5-audio-player'
 import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
 
-export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
+const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	const found = tracks.find(track => track.id == trackId)
 	return found?.versions[0].audioFile?.url
 }
@@ -40,52 +40,45 @@ export interface PlayerController {
 	handleCanPlay: (e: any) => void
 	handleCanPlayThrough: (e: any) => void
 	handleLoadedData: (e: any) => void
-	handlePlay: (e: any) => void
 	handlePlaying: (e: any) => void
+	handlePlay: (e: any) => void
 	handlePause: (e: any) => void
 	handleNext: (e: any) => void
 	handlePrev: (e: any) => void
-	handleAbort: (e: any) => void
+	handleAborted: (e: any) => void
 	handleEnded: (e: any) => void
 }
 
 // eslint-disable-next-line react/display-name
-const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(
-	({ url, controller, visualState }, playerRef) => {
-		let progressBarSection: RHAP_UI[] = []
-		if (visualState === 'LARGE') {
-			progressBarSection = [RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]
-		}
-
-		return (
-			<AudioPlayer
-				onLoadStart={controller.handleLoadStart}
-				onPlayError={controller.handlePlayError}
-				onLoadedData={controller.handleLoadedData}
-				onCanPlay={controller.handleCanPlay}
-				onCanPlayThrough={controller.handleCanPlayThrough}
-				onPlay={controller.handlePlay}
-				onPlaying={controller.handlePlaying}
-				onPause={controller.handlePause}
-				onAbort={controller.handleAbort}
-				onEnded={controller.handleEnded}
-				onClickNext={controller.handleNext}
-				onClickPrevious={controller.handlePrev}
-				customAdditionalControls={[]}
-				showDownloadProgress={true}
-				showFilledProgress={true}
-				showJumpControls={false}
-				showFilledVolume={true}
-				showSkipControls={false}
-				src={url}
-				ref={playerRef}
-				autoPlayAfterSrcChange={false}
-				autoPlay={false}
-				customProgressBarSection={progressBarSection}
-			/>
-		)
-	},
-)
+const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url, controller }, playerRef) => {
+	return (
+		<AudioPlayer
+			onLoadStart={controller.handleLoadStart}
+			onPlayError={controller.handlePlayError}
+			onLoadedData={controller.handleLoadedData}
+			onCanPlay={controller.handleCanPlay}
+			onCanPlayThrough={controller.handleCanPlayThrough}
+			onPlaying={controller.handlePlaying}
+			onPlay={controller.handlePlay}
+			onPause={controller.handlePause}
+			onAbort={controller.handleAborted}
+			onEnded={controller.handleEnded}
+			onClickNext={controller.handleNext}
+			onClickPrevious={controller.handlePrev}
+			customAdditionalControls={[]}
+			showDownloadProgress={true}
+			showFilledProgress={true}
+			showJumpControls={false}
+			showFilledVolume={true}
+			showSkipControls={false}
+			src={url}
+			ref={playerRef}
+			autoPlayAfterSrcChange={false}
+			autoPlay={false}
+			customProgressBarSection={[]}
+		/>
+	)
+})
 
 export interface MixdownPlayerProps {
 	className?: string
@@ -143,12 +136,12 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 			console.info('onLoadedData', e)
 			dispatch({ type: 'LOADED_DATA' })
 		},
-		handlePlay: e => {
-			console.info('onPlay, starting to load and play', e)
-		},
 		handlePlaying: e => {
 			console.info('onPlaying', e)
 			if (e?.base) dispatch({ type: 'PLAYBACK_STARTED' })
+		},
+		handlePlay: e => {
+			console.info('onPlay, starting to load and play', e)
 		},
 		handlePause: e => {
 			console.info('onPause', e)
@@ -158,8 +151,8 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 			console.info('onEnded', e)
 			dispatch({ type: 'PLAYBACK_ENDED' })
 		},
-		handleAbort: e => {
-			console.info('onAbort', e)
+		handleAborted: e => {
+			console.info('onAborted', e)
 			dispatch({ type: 'PLAYBACK_ABORTED' })
 		},
 		handleNext: e => {

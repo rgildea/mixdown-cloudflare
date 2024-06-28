@@ -24,7 +24,6 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	const dispatch = useContext(PlayerDispatchContext)
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
 	const isPlaying = playerState?.player?.current?.isPlaying() || false
-	// const isPlaying = ['PLAYING', 'READY_TO_PLAY'].includes(playerState?.playerState || '')
 	let icon = 'mdi:exclamation'
 
 	icon = `mdi:${isTrackLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`
@@ -35,7 +34,8 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 		)
 
 		if (!isTrackLoaded) {
-			dispatch({ type: 'PLAY_TRACK', track })
+			console.log('LOAD_TRACK', track)
+			dispatch({ type: 'LOAD_TRACK', track })
 			return
 		}
 
