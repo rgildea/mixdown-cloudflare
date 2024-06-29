@@ -1,5 +1,4 @@
-import { PrismaClient as PrismaEdgeClient } from '@prisma/client/edge'
-import { withAccelerate } from '@prisma/extension-accelerate'
+import { PrismaClient } from '@prisma/client'
 import chalk from 'chalk'
 
 export const prisma = (databaseUrl: string) => {
@@ -8,7 +7,7 @@ export const prisma = (databaseUrl: string) => {
 
 	// Feel free to change this log threshold to something that makes sense for you
 	const logThreshold = 500 // ms
-	const client = new PrismaEdgeClient({
+	const client = new PrismaClient({
 		datasources: { db: { url: databaseUrl } },
 		log: [
 			{ level: 'query', emit: 'event' },
@@ -31,7 +30,6 @@ export const prisma = (databaseUrl: string) => {
 		const dur = chalk[color](`${e.duration}ms`)
 		console.info(`prisma:query - ${dur} - ${e.query}`)
 	})
-	client.$extends(withAccelerate())
 	client.$connect()
 	return client
 }
