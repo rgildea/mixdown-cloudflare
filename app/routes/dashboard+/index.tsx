@@ -14,7 +14,6 @@ export const action: ActionFunction = async () => {
 }
 
 export default function Route() {
-	// const playerState = useContext(PlayerContext)
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
@@ -37,11 +36,11 @@ export default function Route() {
 
 	// // load the first track if there is no track loaded
 	// useEffect(() => {
-	// 	if (!playerState?.track) {
-	// 		playerDispatch({ type: 'PLAY_TRACK', track: tracks[0] })
+	// 	if (playerState?.playlist.length && !playerState?.getCurrentTrack()) {
+	// 		playerDispatch({ type: 'LOAD_TRACK', track: playerState.playlist[0] })
 	// 	}
 	// 	return () => {}
-	// }, [playerState?.track, playerDispatch, tracks])
+	// }, [playerState, playerDispatch])
 
 	return (
 		<Card className="min-h-screen/2 border-none shadow-none">

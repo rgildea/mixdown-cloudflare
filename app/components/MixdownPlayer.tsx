@@ -5,7 +5,7 @@ import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { NavLink } from '@remix-run/react'
-import { forwardRef, useContext, useEffect, useRef } from 'react'
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
@@ -15,38 +15,26 @@ const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
 	return found?.versions[0].audioFile?.url
 }
 
-export type PlayerState =
-	| 'INITIAL_STATE'
-	| 'LOADING'
-	| 'READY_TO_PLAY'
-	| 'PLAYING'
-	| 'PAUSED'
-	| 'ENDED'
-	| 'ABORTED'
-	| 'ERROR'
-
 export type PlayerVisualState = 'LARGE' | 'SMALL' | 'HIDDEN'
 
 export interface AudioPlayerProps {
-	visualState?: PlayerVisualState
 	url?: string
-	track?: TrackWithVersions
 	controller: PlayerController
 }
 
 export interface PlayerController {
-	handleLoadStart: (e: any) => void
-	handlePlayError: (e: any) => void
-	handleCanPlay: (e: any) => void
-	handleCanPlayThrough: (e: any) => void
-	handleLoadedData: (e: any) => void
-	handlePlaying: (e: any) => void
-	handlePlay: (e: any) => void
-	handlePause: (e: any) => void
-	handleNext: (e: any) => void
-	handlePrev: (e: any) => void
-	handleAborted: (e: any) => void
-	handleEnded: (e: any) => void
+	handleLoadStart?: (e: any) => void
+	handleLoadedData?: (e: any) => void
+	handleCanPlay?: (e: any) => void
+	handleCanPlayThrough?: (e: any) => void
+	handlePlay?: (e: any) => void
+	handlePlayError?: (e: any) => void
+	handlePlaying?: (e: any) => void
+	handlePause?: (e: any) => void
+	handleNext?: (e: any) => void
+	handlePrev?: (e: any) => void
+	handleAborted?: (e: any) => void
+	handleEnded?: (e: any) => void
 }
 
 // eslint-disable-next-line react/display-name
@@ -87,95 +75,84 @@ export interface MixdownPlayerProps {
 }
 
 export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
+	const [viewState, setViewState] = useState<PlayerVisualState>('LARGE')
 	const playerState = useContext(PlayerContext)
 	const dispatch = useContext(PlayerDispatchContext)
 	const player = useRef<AudioPlayer>(null)
 
 	useEffect(() => {
-		if (!playerState?.player || playerState?.player.current !== player.current) {
-			dispatch({ type: 'INIT_PLAYER', playerRef: player })
-		}
+		dispatch({ type: 'SET_PLAYER', playerRef: player })
 		return () => {
-			dispatch({ type: 'DESTROY_PLAYER' })
+			dispatch({ type: 'SET_PLAYER', playerRef: null })
 		}
-	}, [dispatch, playerState?.player, playerState?.playlist, playerState?.currentTrackIndex])
-
-	const { track, visualState } = playerState || {}
-	if (!track) return null
+	})
 
 	const handleViewToggleClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
 		console.log('handleViewToggleClicked', e)
-		dispatch({ type: 'TOGGLE_VIEW' })
+		setViewState(viewState === 'LARGE' ? 'SMALL' : 'LARGE')
 	}
 
 	const handleCloseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
 		console.log('handleCloseButtonClicked', e)
-		dispatch({ type: 'CLOSE_PLAYER' })
+		setViewState('HIDDEN')
 	}
 
-	const currentTrack = getCurrentTrack(playerState)
 	const playlist = playerState?.playlist || []
+	const currentTrack = getCurrentTrack(playerState)
 	const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack?.id, playlist) : ''
 	const audioElementRef = player.current?.audio
+
 	const playerController: PlayerController = {
-		handleLoadStart: e => {
-			console.info('onLoadStart', e)
-			dispatch({ type: 'LOAD_START', track: playerState?.track })
+		handlePlay: e => {
+			console.info('onPlay, starting to load and play', e)
 		},
 		handlePlayError: e => {
 			console.info('onPlayError', e)
 			dispatch({ type: 'PLAYBACK_ERROR', error: e.message })
 		},
-		handleCanPlay: e => {
-			console.info('onCanPlay', e)
-			dispatch({ type: 'CAN_PLAY' })
-		},
-		handleCanPlayThrough: e => {
-			console.info('onCanPlayThrough', e)
-			dispatch({ type: 'CAN_PLAY_THROUGH' })
-		},
-		handleLoadedData: e => {
-			console.info('onLoadedData', e)
-			dispatch({ type: 'LOADED_DATA' })
-		},
-		handlePlaying: e => {
-			console.info('onPlaying', e)
-			if (e?.base) dispatch({ type: 'PLAYBACK_STARTED' })
-		},
-		handlePlay: e => {
-			console.info('onPlay, starting to load and play', e)
+		handlePlaying: () => {
+			dispatch({ type: 'PLAYBACK_STARTED' })
 		},
 		handlePause: e => {
 			console.info('onPause', e)
 			dispatch({ type: 'PLAYBACK_PAUSED' })
 		},
-		handleEnded: e => {
-			console.info('onEnded', e)
+		handleEnded: () => {
 			dispatch({ type: 'PLAYBACK_ENDED' })
 		},
-		handleAborted: e => {
-			console.info('onAborted', e)
+		handleAborted: () => {
 			dispatch({ type: 'PLAYBACK_ABORTED' })
 		},
-		handleNext: e => {
-			console.info('onClickNext', e)
+		handleNext: () => {
 			// TODO: Implement
 		},
-		handlePrev: e => {
-			console.info('onClickPrevious', e)
+		handlePrev: () => {
 			// TODO: Implement
+		},
+		handleCanPlay: () => {
+			dispatch({ type: 'CAN_PLAY' })
+		},
+		handleCanPlayThrough: () => {
+			dispatch({ type: 'CAN_PLAY_THROUGH' })
+		},
+		handleLoadedData: () => {
+			dispatch({ type: 'LOADED_DATA' })
 		},
 	}
 
+	const hidden = false //viewState === 'HIDDEN'
+	console.log('MixdownPlayer', { playlist, viewState, hidden, currentTrack, currentTrackUrl })
 	return (
 		<>
-			<div className={cn(className, 'w-full bg-accent p-5')}>
+			<div className={cn(className, hidden ? 'invisible ' : '' + 'w-full bg-accent p-5')}>
 				<div className="flex flex-col ">
 					<div className="flex">
 						<div className="grow text-left">
 							<>
-								<NavLink className="col-span-1" to={`/tracks/${track?.id}`}>
-									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">{track?.title}</CardTitle>
+								<NavLink className="col-span-1" to={`/tracks/${currentTrack?.id}`}>
+									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
+										{currentTrack?.title}
+									</CardTitle>
 								</NavLink>
 								<div className="text-xs">{currentTrackUrl}</div>
 							</>
@@ -184,7 +161,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 						<Button onClick={handleViewToggleClicked} variant="ghost" size="icon">
 							<InlineIcon
 								className="size-8 sm:size-6"
-								icon={`mdi:${visualState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`}
+								icon={`mdi:${viewState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`}
 							/>
 						</Button>
 
@@ -192,7 +169,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 							<InlineIcon className="size-8 sm:size-6" icon="mdi:close-circle" />
 						</Button>
 					</div>
-					{visualState === 'LARGE' && (
+					{viewState === 'LARGE' && (
 						<WaveForm
 							className="z-30 h-64 w-full"
 							audioElementRef={audioElementRef}
@@ -200,7 +177,11 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 						/>
 					)}
 
-					<InternalPlayerComponent controller={playerController} url={currentTrackUrl} ref={player} track={track} />
+					<InternalPlayerComponent
+						controller={playerController}
+						url={currentTrack ? getLatestVersionUrl(currentTrack?.id, playlist) : ''}
+						ref={player}
+					/>
 				</div>
 			</div>
 		</>

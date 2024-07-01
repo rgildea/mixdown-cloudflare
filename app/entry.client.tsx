@@ -6,7 +6,7 @@
 
 import { RemixBrowser } from '@remix-run/react'
 import { Buffer } from 'buffer-polyfill'
-import { StrictMode, startTransition } from 'react'
+import { startTransition } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 
 globalThis.Buffer = Buffer as unknown as BufferConstructor
@@ -14,8 +14,8 @@ globalThis.Buffer = Buffer as unknown as BufferConstructor
 startTransition(() => {
 	hydrateRoot(
 		document,
-		<StrictMode>
-			<RemixBrowser />
-		</StrictMode>,
+		// <StrictMode>
+		<RemixBrowser />,
+		// </StrictMode>,
 	)
 })

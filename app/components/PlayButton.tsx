@@ -1,6 +1,6 @@
 // File: app/components/PlayButton.tsx
 
-import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
+import { PlayerContext, PlayerDispatchContext, getCurrentTrack } from '#app/contexts/PlayerContext'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react'
 import React, { useContext } from 'react'
@@ -19,9 +19,8 @@ const sizes = {
 
 const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 	const playerState = useContext(PlayerContext)
-	const nowPlayingTrack = playerState?.track
-
 	const dispatch = useContext(PlayerDispatchContext)
+	const nowPlayingTrack = getCurrentTrack(playerState)
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
 	const isPlaying = playerState?.player?.current?.isPlaying() || false
 	let icon = 'mdi:exclamation'
@@ -30,12 +29,12 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 
 	const handleClick = () => {
 		console.log(
-			`${track.title} (${track.id})clicked. isLoaded? ${isTrackLoaded} isPlaying? ${isPlaying}	nowPlayingTrack? ${nowPlayingTrack?.id}`,
+			`${track.title} (${track.id})clicked. isThisTrackLoaded? ${isTrackLoaded} isPlaying? ${isPlaying}	nowPlayingTrack? ${nowPlayingTrack?.id}`,
 		)
 
 		if (!isTrackLoaded) {
-			console.log('LOAD_TRACK', track)
-			dispatch({ type: 'LOAD_TRACK', track })
+			console.log('PLAY', track)
+			dispatch({ type: 'PLAY_TRACK', track })
 			return
 		}
 
@@ -45,48 +44,6 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 		}
 
 		dispatch({ type: 'PLAY_TRACK', track })
-
-		// switch (playerState?.playerState) {
-		// 	case 'PLAYING':
-		// 		console.log('PAUSE')
-		// 		dispatch({ type: 'PAUSE' })
-		// 		return
-
-		// 	case 'READY_TO_PLAY':
-		// 		console.log('PLAY')
-		// 		if (playerState.player?.current?.isPlaying) {
-		// 			console.log('PAUSE')
-		// 			dispatch({ type: 'PAUSE' })
-		// 			return
-		// 		}
-		// 		dispatch({ type: 'PLAY_TRACK', track })
-		// 		return
-
-		// 	case 'LOADING':
-		// 		console.log('PAUSE')
-		// 		dispatch({ type: 'PAUSE' })
-		// 		return
-
-		// 	case 'INITIAL_STATE':
-		// 		console.log('PLAY_TRACK', track)
-		// 		dispatch({ type: 'PLAY_TRACK', track })
-		// 		return
-
-		// 	case 'PAUSED':
-		// 		console.log('PLAY')
-		// 		dispatch({ type: 'PLAY_TRACK', track })
-		// 		return
-
-		// 	case 'ENDED':
-		// 		console.log('PLAY')
-		// 		dispatch({ type: 'RESTART_TRACK', track })
-		// 		return
-
-		// 	default:
-		// 		console.log('PAUSE')
-		// 		dispatch({ type: 'PAUSE' })
-		// 		return
-		// }
 	}
 
 	return (
