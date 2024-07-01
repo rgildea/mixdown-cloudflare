@@ -1,6 +1,7 @@
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardHeader } from '#app/components/ui/card'
+import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -17,7 +18,7 @@ export default function Route() {
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
-	// const playerDispatch = useContext(PlayerDispatchContext)
+	const playerDispatch = useContext(PlayerDispatchContext)
 	const titleDispatch = useContext(TitleDispatchContext)
 
 	const { tracks } = loaderData
@@ -27,6 +28,12 @@ export default function Route() {
 		titleDispatch({ type: 'SET_TITLE', title: 'My Tracks', icon: 'mdi:home' })
 		return () => {}
 	})
+
+	// load the first track if there is no track loaded
+	useEffect(() => {
+		playerDispatch({ type: 'SET_PLAYLIST', tracks })
+		return () => {}
+	}, [playerDispatch, tracks])
 
 	// // load the first track if there is no track loaded
 	// useEffect(() => {

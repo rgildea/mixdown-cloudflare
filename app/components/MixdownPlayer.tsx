@@ -1,5 +1,5 @@
 import WaveForm from '#app/components/WaveForm'
-import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
+import { PlayerContext, PlayerDispatchContext, getCurrentTrack } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -86,19 +86,19 @@ export interface MixdownPlayerProps {
 	track?: TrackWithVersions
 }
 
-export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProps) {
+export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const playerState = useContext(PlayerContext)
 	const dispatch = useContext(PlayerDispatchContext)
 	const player = useRef<AudioPlayer>(null)
 
 	useEffect(() => {
-		if (!playerState?.player) {
+		if (!playerState?.player || playerState?.player.current !== player.current) {
 			dispatch({ type: 'INIT_PLAYER', playerRef: player })
 		}
 		return () => {
 			dispatch({ type: 'DESTROY_PLAYER' })
 		}
-	}, [dispatch, playerState?.player])
+	}, [dispatch, playerState?.player, playerState?.playlist, playerState?.currentTrackIndex])
 
 	const { track, visualState } = playerState || {}
 	if (!track) return null
@@ -113,7 +113,9 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 		dispatch({ type: 'CLOSE_PLAYER' })
 	}
 
-	const newSourceUrl = url || getLatestVersionUrl(track.id, [track])
+	const currentTrack = getCurrentTrack(playerState)
+	const playlist = playerState?.playlist || []
+	const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack?.id, playlist) : ''
 	const audioElementRef = player.current?.audio
 	const playerController: PlayerController = {
 		handleLoadStart: e => {
@@ -175,7 +177,7 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 								<NavLink className="col-span-1" to={`/tracks/${track?.id}`}>
 									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">{track?.title}</CardTitle>
 								</NavLink>
-								<div className="text-xs">{newSourceUrl}</div>
+								<div className="text-xs">{currentTrackUrl}</div>
 							</>
 						</div>
 
@@ -198,7 +200,7 @@ export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProp
 						/>
 					)}
 
-					<InternalPlayerComponent controller={playerController} url={newSourceUrl} ref={player} track={track} />
+					<InternalPlayerComponent controller={playerController} url={currentTrackUrl} ref={player} track={track} />
 				</div>
 			</div>
 		</>

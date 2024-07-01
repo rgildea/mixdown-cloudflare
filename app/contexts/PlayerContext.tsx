@@ -4,6 +4,8 @@ import React, { createContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
 export type PlayerContextType = {
+	playlist?: TrackWithVersions[]
+	currentTrackIndex?: number
 	track?: TrackWithVersions | null
 	player?: React.RefObject<AudioPlayer> | null
 	playerState?: PlayerState | null
@@ -11,9 +13,15 @@ export type PlayerContextType = {
 	visualState?: PlayerVisualState | null
 } | null
 
-export const PlayerContext = createContext<PlayerContextType>({ playerState: 'INITIAL_STATE', visualState: 'HIDDEN' })
+export const PlayerContext = createContext<PlayerContextType>({
+	playerState: 'INITIAL_STATE',
+	playlist: [],
+	visualState: 'HIDDEN',
+})
+
 export const PlayerDispatchContext = createContext<React.Dispatch<PlayerContextAction>>(() => {})
 export type PlayerContextActionType =
+	| 'SET_PLAYLIST'
 	| 'INIT_PLAYER'
 	| 'DESTROY_PLAYER'
 	| 'LOAD_TRACK'
@@ -36,9 +44,17 @@ export type PlayerContextActionType =
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
+	tracks?: TrackWithVersions[]
 	track?: TrackWithVersions | null
 	playerRef?: React.RefObject<AudioPlayer> | null
 	error?: string
+}
+
+export const getCurrentTrack = (state: PlayerContextType): TrackWithVersions | null => {
+	if (!state?.playlist || state?.currentTrackIndex === undefined) {
+		return null
+	}
+	return state.playlist[state.currentTrackIndex]
 }
 
 export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
@@ -46,43 +62,37 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 	const player = state?.player?.current?.audio.current
 
 	switch (action.type) {
-		case 'INIT_PLAYER':
-			if (!player) {
-				console.log('Player missing from INIT_PLAYER action')
-				return state
-			}
+		case 'SET_PLAYLIST':
+			return { ...state, playlist: action.tracks, currentTrackIndex: 0 }
+		// case 'INIT_PLAYER':
+		// 	if (!player) {
+		// 		console.log('Player missing from INIT_PLAYER action')
+		// 		return state
+		// 	}
 
-			if (state?.track?.id === action.track?.id) {
-				console.log('Player has already loaded the same track. No-op.')
-				return state
-			}
+		// 	if (getCurrentTrack(state)?.id === action.track?.id) {
+		// 		console.log('Player has already loaded the same track. No-op.')
+		// 		return state
+		// 	}
 
-			return {
-				...state,
-				track: action.track,
-				player: action.playerRef,
-				audioRef: action.playerRef?.current?.audio,
-				playerState: 'LOADING',
-				visualState: 'LARGE',
-			}
-		case 'DESTROY_PLAYER':
-			// no-op
-			return state
-		case 'LOAD_TRACK':
-			if (!action.track) {
-				console.log('TrackId missing from LOAD_TRACK action')
-				return state
-			}
-			return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
-		case 'LOAD_START':
-			console.log('LOAD_START event called')
-			return state
-		case 'CAN_PLAY':
-			if (state?.playerState !== 'LOADING') {
-				return state
-			}
-			player?.play()
-			return { ...state, playerState: 'READY_TO_PLAY' }
+		// 	return {
+		// 		...state,
+		// 		playlist: action.tracks || state?.playlist,
+		// 		player: action.playerRef,
+		// 		audioRef: action.playerRef?.current?.audio,
+		// 		playerState: 'LOADING',
+		// 		visualState: 'LARGE',
+		// 	}
+		// case 'DESTROY_PLAYER':
+		// 	// no-op
+		// 	return state
+		// case 'LOAD_TRACK':
+		// 	if (getCurrentTrack(state)?.id) {
+		// 		console.log('Track missing from LOAD_TRACK action')
+		// 		return state
+		// 	}
+		// 	return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
+
 		case 'CAN_PLAY_THROUGH':
 			console.log('CAN_PLAY_THROUGH called')
 
