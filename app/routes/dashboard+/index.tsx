@@ -28,19 +28,11 @@ export default function Route() {
 		return () => {}
 	})
 
-	// load the first track if there is no track loaded
+	// load the playlist into the player context
 	useEffect(() => {
 		playerDispatch({ type: 'SET_PLAYLIST', tracks })
 		return () => {}
 	}, [playerDispatch, tracks])
-
-	// // load the first track if there is no track loaded
-	// useEffect(() => {
-	// 	if (playerState?.playlist.length && !playerState?.getCurrentTrack()) {
-	// 		playerDispatch({ type: 'LOAD_TRACK', track: playerState.playlist[0] })
-	// 	}
-	// 	return () => {}
-	// }, [playerState, playerDispatch])
 
 	return (
 		<Card className="min-h-screen/2 border-none shadow-none">

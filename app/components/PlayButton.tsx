@@ -33,7 +33,6 @@ const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
 		)
 
 		if (!isTrackLoaded) {
-			console.log('PLAY', track)
 			dispatch({ type: 'PLAY_TRACK', track })
 			return
 		}

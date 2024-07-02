@@ -10,9 +10,8 @@ import AudioPlayer from 'react-h5-audio-player'
 import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
 
-const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
-	const found = tracks.find(track => track.id == trackId)
-	return found?.versions[0].audioFile?.url
+const getLatestVersionUrl = (track: TrackWithVersions) => {
+	return track?.versions[0]?.audioFile?.url || ''
 }
 
 export type PlayerVisualState = 'LARGE' | 'SMALL' | 'HIDDEN'
@@ -61,8 +60,8 @@ const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url
 			showSkipControls={false}
 			src={url}
 			ref={playerRef}
-			autoPlayAfterSrcChange={false}
-			autoPlay={false}
+			// autoPlayAfterSrcChange={false}
+			// autoPlay={false}
 			customProgressBarSection={[]}
 		/>
 	)
@@ -76,43 +75,41 @@ export interface MixdownPlayerProps {
 
 export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const [viewState, setViewState] = useState<PlayerVisualState>('LARGE')
-	const playerState = useContext(PlayerContext)
+	const context = useContext(PlayerContext)
 	const dispatch = useContext(PlayerDispatchContext)
-	const player = useRef<AudioPlayer>(null)
+	const playerRef = useRef<AudioPlayer>(null)
+	const audioElementRef = playerRef.current?.audio
+	const currentTrack = getCurrentTrack(context)
+	const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack) : ''
 
 	useEffect(() => {
-		dispatch({ type: 'SET_PLAYER', playerRef: player })
-		return () => {
-			dispatch({ type: 'SET_PLAYER', playerRef: null })
+		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
+			console.log('quack')
+			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
-	})
+		return () => {}
+	}, [context, dispatch, playerRef])
 
-	const handleViewToggleClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-		console.log('handleViewToggleClicked', e)
+	const handleViewToggleClicked = () => {
 		setViewState(viewState === 'LARGE' ? 'SMALL' : 'LARGE')
 	}
 
-	const handleCloseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-		console.log('handleCloseButtonClicked', e)
+	const handleCloseButtonClicked = () => {
 		setViewState('HIDDEN')
 	}
 
-	const playlist = playerState?.playlist || []
-	const currentTrack = getCurrentTrack(playerState)
-	const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack?.id, playlist) : ''
-	const audioElementRef = player.current?.audio
-
 	const playerController: PlayerController = {
 		handlePlay: e => {
-			console.info('onPlay, starting to load and play', e)
+			console.info('onPlay', e)
+			dispatch({ type: 'PLAYBACK_STARTED' })
 		},
 		handlePlayError: e => {
 			console.info('onPlayError', e)
 			dispatch({ type: 'PLAYBACK_ERROR', error: e.message })
 		},
-		handlePlaying: () => {
-			dispatch({ type: 'PLAYBACK_STARTED' })
-		},
+		// handlePlaying: () => {
+		// 	dispatch({ type: 'PLAYBACK_STARTED' })
+		// },
 		handlePause: e => {
 			console.info('onPause', e)
 			dispatch({ type: 'PLAYBACK_PAUSED' })
@@ -125,12 +122,13 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		},
 		handleNext: () => {
 			// TODO: Implement
+			dispatch({ type: 'PLAY_NEXT' })
 		},
 		handlePrev: () => {
-			// TODO: Implement
+			dispatch({ type: 'PLAY_PREV' })
 		},
 		handleCanPlay: () => {
-			dispatch({ type: 'CAN_PLAY' })
+			audioElementRef?.current?.play()
 		},
 		handleCanPlayThrough: () => {
 			dispatch({ type: 'CAN_PLAY_THROUGH' })
@@ -141,7 +139,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	}
 
 	const hidden = false //viewState === 'HIDDEN'
-	console.log('MixdownPlayer', { playlist, viewState, hidden, currentTrack, currentTrackUrl })
+	// console.log('MixdownPlayer', { playlist, viewState, hidden, currentTrack, currentTrackUrl })
 	return (
 		<>
 			<div className={cn(className, hidden ? 'invisible ' : '' + 'w-full bg-accent p-5')}>
@@ -179,8 +177,8 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 
 					<InternalPlayerComponent
 						controller={playerController}
-						url={currentTrack ? getLatestVersionUrl(currentTrack?.id, playlist) : ''}
-						ref={player}
+						url={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
+						ref={playerRef}
 					/>
 				</div>
 			</div>
