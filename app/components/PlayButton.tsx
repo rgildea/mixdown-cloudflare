@@ -18,11 +18,11 @@ const sizes = {
 }
 
 const PlayButton: React.FC<PlayButtonProps> = ({ track, size }) => {
-	const playerState = useContext(PlayerContext)
+	const context = useContext(PlayerContext)
 	const dispatch = useContext(PlayerDispatchContext)
-	const nowPlayingTrack = getCurrentTrack(playerState)
+	const nowPlayingTrack = getCurrentTrack(context)
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
-	const isPlaying = playerState?.player?.current?.isPlaying() || false
+	const isPlaying = context?.player?.current?.isPlaying() || false
 	let icon = 'mdi:exclamation'
 
 	icon = `mdi:${isTrackLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`

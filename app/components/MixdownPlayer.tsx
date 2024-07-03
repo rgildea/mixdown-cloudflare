@@ -1,12 +1,12 @@
-import WaveForm from '#app/components/WaveForm'
-import { PlayerContext, PlayerDispatchContext, getCurrentTrack } from '#app/contexts/PlayerContext'
+import { getCurrentTrack, usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { NavLink } from '@remix-run/react'
-import { forwardRef, useContext, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
+import WaveForm from './WaveForm'
 import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
 
@@ -36,37 +36,6 @@ export interface PlayerController {
 	handleEnded?: (e: any) => void
 }
 
-// eslint-disable-next-line react/display-name
-const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(({ url, controller }, playerRef) => {
-	return (
-		<AudioPlayer
-			onLoadStart={controller.handleLoadStart}
-			onPlayError={controller.handlePlayError}
-			onLoadedData={controller.handleLoadedData}
-			onCanPlay={controller.handleCanPlay}
-			onCanPlayThrough={controller.handleCanPlayThrough}
-			onPlaying={controller.handlePlaying}
-			onPlay={controller.handlePlay}
-			onPause={controller.handlePause}
-			onAbort={controller.handleAborted}
-			onEnded={controller.handleEnded}
-			onClickNext={controller.handleNext}
-			onClickPrevious={controller.handlePrev}
-			customAdditionalControls={[]}
-			showDownloadProgress={true}
-			showFilledProgress={true}
-			showJumpControls={false}
-			showFilledVolume={true}
-			showSkipControls={false}
-			src={url}
-			ref={playerRef}
-			// autoPlayAfterSrcChange={false}
-			// autoPlay={false}
-			customProgressBarSection={[]}
-		/>
-	)
-})
-
 export interface MixdownPlayerProps {
 	className?: string
 	url?: string
@@ -75,8 +44,8 @@ export interface MixdownPlayerProps {
 
 export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const [viewState, setViewState] = useState<PlayerVisualState>('LARGE')
-	const context = useContext(PlayerContext)
-	const dispatch = useContext(PlayerDispatchContext)
+	const context = usePlayerContext()
+	const dispatch = usePlayerDispatchContext()
 	const playerRef = useRef<AudioPlayer>(null)
 	const audioElementRef = playerRef.current?.audio
 	const currentTrack = getCurrentTrack(context)
@@ -84,13 +53,13 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 
 	useEffect(() => {
 		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
-			console.log('quack')
 			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
 		return () => {}
 	}, [context, dispatch, playerRef])
 
 	const handleViewToggleClicked = () => {
+		console.log('handleViewToggleClicked', viewState)
 		setViewState(viewState === 'LARGE' ? 'SMALL' : 'LARGE')
 	}
 
@@ -107,9 +76,6 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 			console.info('onPlayError', e)
 			dispatch({ type: 'PLAYBACK_ERROR', error: e.message })
 		},
-		// handlePlaying: () => {
-		// 	dispatch({ type: 'PLAYBACK_STARTED' })
-		// },
 		handlePause: e => {
 			console.info('onPause', e)
 			dispatch({ type: 'PLAYBACK_PAUSED' })
@@ -138,7 +104,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		},
 	}
 
-	const hidden = false //viewState === 'HIDDEN'
+	const hidden = viewState === 'HIDDEN'
 	// console.log('MixdownPlayer', { playlist, viewState, hidden, currentTrack, currentTrackUrl })
 	return (
 		<>
@@ -150,6 +116,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 								<NavLink className="col-span-1" to={`/tracks/${currentTrack?.id}`}>
 									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
 										{currentTrack?.title}
+										{context?.player?.current?.isPlaying() ? '🔊' : '🔇'}
 									</CardTitle>
 								</NavLink>
 								<div className="text-xs">{currentTrackUrl}</div>
@@ -174,11 +141,30 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 							currentSrc={audioElementRef?.current?.currentSrc}
 						/>
 					)}
-
-					<InternalPlayerComponent
-						controller={playerController}
-						url={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
+					<AudioPlayer
+						onLoadStart={playerController.handleLoadStart}
+						onPlayError={playerController.handlePlayError}
+						onLoadedData={playerController.handleLoadedData}
+						onCanPlay={playerController.handleCanPlay}
+						onCanPlayThrough={playerController.handleCanPlayThrough}
+						onPlaying={playerController.handlePlaying}
+						onPlay={playerController.handlePlay}
+						onPause={playerController.handlePause}
+						onAbort={playerController.handleAborted}
+						onEnded={playerController.handleEnded}
+						onClickNext={playerController.handleNext}
+						onClickPrevious={playerController.handlePrev}
+						customAdditionalControls={[]}
+						showDownloadProgress={true}
+						showFilledProgress={true}
+						showJumpControls={false}
+						showFilledVolume={true}
+						showSkipControls={false}
+						src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
 						ref={playerRef}
+						// autoPlayAfterSrcChange={false}
+						// autoPlay={false}
+						customProgressBarSection={[]}
 					/>
 				</div>
 			</div>

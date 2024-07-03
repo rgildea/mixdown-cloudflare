@@ -48,12 +48,13 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 			barWidth: 2,
 			media: audioElementRef.current,
 			mediaControls: false,
+			autoplay: false,
+			interact: true,
 		})
 
-		// // Play/pause on click
-		// waveSurfer.on('interaction', () => {
-		// 	waveSurfer.playPause()
-		// })
+		waveSurfer.on('click', relativeX => {
+			console.log('click', relativeX)
+		})
 
 		// Cleanup
 		return () => {

@@ -1,5 +1,5 @@
 import { TrackWithVersions } from '#app/utils/track.server'
-import React, { createContext } from 'react'
+import React, { createContext, useContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
 const DEFAULT_STATE: PlayerContextType = {
@@ -13,11 +13,13 @@ export type PlayerContextType = {
 	currentTrackIndex?: number
 	isPlaying: boolean
 	player?: React.RefObject<AudioPlayer> | null
-	audioRef?: React.RefObject<HTMLAudioElement> | null
 } | null
 
 export const PlayerContext = createContext<PlayerContextType>(DEFAULT_STATE)
+export const usePlayerContext = () => useContext(PlayerContext)
 export const PlayerDispatchContext = createContext<React.Dispatch<PlayerContextAction>>(() => {})
+export const usePlayerDispatchContext = () => useContext(PlayerDispatchContext)
+
 export type PlayerContextActionType =
 	| 'SET_PLAYER'
 	| 'SET_PLAYLIST'
@@ -73,7 +75,7 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 	// console.log(`PlayerContextReducer received ${action.type} ACTION`, action)
 	// console.log('Current state:', state)
 	state = state || DEFAULT_STATE
-	const audioElement = state.audioRef?.current
+	const audioElement = state.player?.current?.audio.current
 	const playlist = action?.tracks || state?.playlist || []
 	const isPlaying = state.player?.current?.isPlaying() || false
 
@@ -109,7 +111,22 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 		case 'PAUSE':
 			audioElement?.pause()
 			return state
+		case 'PLAYBACK_STARTED':
+			console.log('PLAYBACK_STARTED action received')
+			return { ...state, isPlaying: true }
+		case 'PLAYBACK_ERROR':
+			console.warn('Playback error:', action.error)
+			return state
+
 		case 'PLAYBACK_PAUSED':
+			console.log('PLAYBACK_PAUSED action received')
+			return { ...state, isPlaying: false }
+		case 'PLAYBACK_ENDED':
+			console.log('PLAYBACK_ENDED action received')
+			return { ...state, isPlaying }
+		case 'PLAYBACK_ABORTED':
+			console.log('PLAYBACK_ABORTED action received')
+			return { ...state, isPlaying: false }
 		default:
 			return state
 	}
