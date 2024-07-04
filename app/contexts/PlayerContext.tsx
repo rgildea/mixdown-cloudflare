@@ -6,6 +6,7 @@ const DEFAULT_STATE: PlayerContextType = {
 	playlist: [],
 	currentTrackIndex: 0,
 	isPlaying: false,
+	viewState: 'HIDDEN',
 }
 
 export type PlayerContextType = {
@@ -13,6 +14,7 @@ export type PlayerContextType = {
 	currentTrackIndex?: number
 	isPlaying: boolean
 	player?: React.RefObject<AudioPlayer> | null
+	viewState?: 'LARGE' | 'SMALL' | 'HIDDEN'
 } | null
 
 export const PlayerContext = createContext<PlayerContextType>(DEFAULT_STATE)
@@ -23,6 +25,7 @@ export const usePlayerDispatchContext = () => useContext(PlayerDispatchContext)
 export type PlayerContextActionType =
 	| 'SET_PLAYER'
 	| 'SET_PLAYLIST'
+	| 'SET_VIEW_STATE'
 	| 'LOAD_START'
 	| 'LOADED_DATA'
 	| 'CAN_PLAY'
@@ -43,6 +46,7 @@ export interface PlayerContextAction {
 	track?: TrackWithVersions | null
 	playerRef?: React.RefObject<AudioPlayer> | null
 	error?: string
+	viewState?: 'LARGE' | 'SMALL' | 'HIDDEN'
 }
 
 export const getCurrentTrack = (state: PlayerContextType): TrackWithVersions | null => {
@@ -84,6 +88,8 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			return { ...state, playlist, currentTrackIndex: 0 }
 		case 'SET_PLAYER':
 			return { ...state, player: action.playerRef }
+		case 'SET_VIEW_STATE':
+			return { ...state, viewState: action.viewState }
 		case 'PLAY_TRACK':
 			if (!action?.track) {
 				throw new Error('Track missing from PLAY_TRACK action')
@@ -113,7 +119,7 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			return state
 		case 'PLAYBACK_STARTED':
 			console.log('PLAYBACK_STARTED action received')
-			return { ...state, isPlaying: true }
+			return { ...state, isPlaying: true, viewState: 'LARGE' }
 		case 'PLAYBACK_ERROR':
 			console.warn('Playback error:', action.error)
 			return state

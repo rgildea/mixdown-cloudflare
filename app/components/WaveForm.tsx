@@ -49,7 +49,7 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 			media: audioElementRef.current,
 			mediaControls: false,
 			autoplay: false,
-			interact: true,
+			interact: false,
 		})
 
 		waveSurfer.on('click', relativeX => {

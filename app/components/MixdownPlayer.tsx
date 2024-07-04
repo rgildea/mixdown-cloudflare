@@ -3,12 +3,12 @@ import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { NavLink } from '@remix-run/react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
-import WaveForm from './WaveForm'
+import PlayButton from './PlayButton'
 import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
+import WaveForm from './WaveForm'
 
 const getLatestVersionUrl = (track: TrackWithVersions) => {
 	return track?.versions[0]?.audioFile?.url || ''
@@ -42,14 +42,57 @@ export interface MixdownPlayerProps {
 	track?: TrackWithVersions
 }
 
-export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
-	const [viewState, setViewState] = useState<PlayerVisualState>('LARGE')
+const PlayerViewStateToggleButton = () => {
 	const context = usePlayerContext()
+	const dispatch = usePlayerDispatchContext()
+
+	const icon = `mdi-${context?.viewState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`
+
+	return (
+		<Button
+			onClick={() =>
+				dispatch({ type: 'SET_VIEW_STATE', viewState: context?.viewState === 'LARGE' ? 'SMALL' : 'LARGE' })
+			}
+			variant="ghost"
+			size="icon"
+		>
+			<InlineIcon className="size-8 sm:size-6" icon={icon} />
+		</Button>
+	)
+}
+
+const PlayerCloseButton = () => {
+	const dispatch = usePlayerDispatchContext()
+	return (
+		<Button onClick={() => dispatch({ type: 'SET_VIEW_STATE', viewState: 'HIDDEN' })} variant="ghost" size="icon">
+			<InlineIcon className="size-8 sm:size-6" icon="mdi:close" />
+		</Button>
+	)
+}
+
+const WaveFormWrapper = () => {
+	const context = usePlayerContext()
+	const viewState = context?.viewState || 'LARGE'
+	const audioElementRef = context?.player?.current?.audio
+
+	return (
+		<WaveForm
+			key="waveform"
+			className={cn(viewState !== 'LARGE' ? 'hidden' : '', 'z-30 h-min w-full')}
+			audioElementRef={audioElementRef}
+			currentSrc={audioElementRef?.current?.currentSrc}
+		/>
+	)
+}
+
+export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
+	const context = usePlayerContext()
+	const viewState = context?.viewState || 'LARGE'
 	const dispatch = usePlayerDispatchContext()
 	const playerRef = useRef<AudioPlayer>(null)
 	const audioElementRef = playerRef.current?.audio
-	const currentTrack = getCurrentTrack(context)
-	const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack) : ''
+	const currentTrack = getCurrentTrack(context) || null
+	// const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack) : ''
 
 	useEffect(() => {
 		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
@@ -57,15 +100,6 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		}
 		return () => {}
 	}, [context, dispatch, playerRef])
-
-	const handleViewToggleClicked = () => {
-		console.log('handleViewToggleClicked', viewState)
-		setViewState(viewState === 'LARGE' ? 'SMALL' : 'LARGE')
-	}
-
-	const handleCloseButtonClicked = () => {
-		setViewState('HIDDEN')
-	}
 
 	const playerController: PlayerController = {
 		handlePlay: e => {
@@ -104,69 +138,55 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		},
 	}
 
-	const hidden = viewState === 'HIDDEN'
 	// console.log('MixdownPlayer', { playlist, viewState, hidden, currentTrack, currentTrackUrl })
 	return (
 		<>
-			<div className={cn(className, hidden ? 'invisible ' : '' + 'w-full bg-accent p-5')}>
+			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent p-5')}>
 				<div className="flex flex-col ">
 					<div className="flex">
 						<div className="grow text-left">
 							<>
-								<NavLink className="col-span-1" to={`/tracks/${currentTrack?.id}`}>
-									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
-										{currentTrack?.title}
-										{context?.player?.current?.isPlaying() ? '🔊' : '🔇'}
-									</CardTitle>
-								</NavLink>
-								<div className="text-xs">{currentTrackUrl}</div>
+								{/* <NavLink className="col-span-1" to={`/tracks/${currentTrack?.id}`}> */}
+								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
+									{currentTrack?.title}
+									{context?.player?.current?.isPlaying() ? '🔊' : '🔇'}
+								</CardTitle>
+								{/* </NavLink> */}
+								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
 							</>
 						</div>
-
-						<Button onClick={handleViewToggleClicked} variant="ghost" size="icon">
-							<InlineIcon
-								className="size-8 sm:size-6"
-								icon={`mdi:${viewState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`}
-							/>
-						</Button>
-
-						<Button onClick={handleCloseButtonClicked} variant={'ghost'} size="icon">
-							<InlineIcon className="size-8 sm:size-6" icon="mdi:close-circle" />
-						</Button>
+						<PlayButton size="lg" />
+						<PlayerViewStateToggleButton />
+						<PlayerCloseButton />
 					</div>
-					{viewState === 'LARGE' && (
-						<WaveForm
-							className="z-30 h-64 w-full"
-							audioElementRef={audioElementRef}
-							currentSrc={audioElementRef?.current?.currentSrc}
-						/>
-					)}
-					<AudioPlayer
-						onLoadStart={playerController.handleLoadStart}
-						onPlayError={playerController.handlePlayError}
-						onLoadedData={playerController.handleLoadedData}
-						onCanPlay={playerController.handleCanPlay}
-						onCanPlayThrough={playerController.handleCanPlayThrough}
-						onPlaying={playerController.handlePlaying}
-						onPlay={playerController.handlePlay}
-						onPause={playerController.handlePause}
-						onAbort={playerController.handleAborted}
-						onEnded={playerController.handleEnded}
-						onClickNext={playerController.handleNext}
-						onClickPrevious={playerController.handlePrev}
-						customAdditionalControls={[]}
-						showDownloadProgress={true}
-						showFilledProgress={true}
-						showJumpControls={false}
-						showFilledVolume={true}
-						showSkipControls={false}
-						src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
-						ref={playerRef}
-						// autoPlayAfterSrcChange={false}
-						// autoPlay={false}
-						customProgressBarSection={[]}
-					/>
 				</div>
+				<AudioPlayer
+					onLoadStart={playerController.handleLoadStart}
+					onPlayError={playerController.handlePlayError}
+					onLoadedData={playerController.handleLoadedData}
+					onCanPlay={playerController.handleCanPlay}
+					onCanPlayThrough={playerController.handleCanPlayThrough}
+					onPlaying={playerController.handlePlaying}
+					onPlay={playerController.handlePlay}
+					onPause={playerController.handlePause}
+					onAbort={playerController.handleAborted}
+					onEnded={playerController.handleEnded}
+					onClickNext={playerController.handleNext}
+					onClickPrevious={playerController.handlePrev}
+					showDownloadProgress={true}
+					showFilledProgress={true}
+					showJumpControls={false}
+					showFilledVolume={true}
+					showSkipControls={true}
+					src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
+					ref={playerRef}
+					// autoPlayAfterSrcChange={false}
+					// autoPlay={false}
+					customAdditionalControls={[]}
+					customVolumeControls={[]}
+					customProgressBarSection={[<WaveFormWrapper key="wf" />]}
+					customControlsSection={[]}
+				/>
 			</div>
 		</>
 	)
