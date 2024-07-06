@@ -35,7 +35,7 @@ export default function Route() {
 	}, [playerDispatch, tracks])
 
 	return (
-		<Card className="min-h-screen/2 border-none shadow-none">
+		<Card className="min-h-screen border-none shadow-none">
 			<CardHeader className="flex flex-row items-end justify-between px-0 py-1">
 				<Button asChild>
 					<Link

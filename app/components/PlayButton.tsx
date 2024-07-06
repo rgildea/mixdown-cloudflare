@@ -1,5 +1,3 @@
-// File: app/components/PlayButton.tsx
-
 import { getCurrentTrack, usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -20,9 +18,9 @@ const sizes = {
 	xl: 'size-12 sm:size-12 xl:size-12',
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ className, size }) => {
+const PlayButton: React.FC<PlayButtonProps> = ({ className, track, size }) => {
 	const context = usePlayerContext()
-	const track = getCurrentTrack(context)
+	track = track || getCurrentTrack(context)
 	const dispatch = usePlayerDispatchContext()
 	const nowPlayingTrack = getCurrentTrack(context)
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
@@ -35,9 +33,6 @@ const PlayButton: React.FC<PlayButtonProps> = ({ className, size }) => {
 
 	const handleClick = () => {
 		if (!track) return
-		console.log(
-			`${track.title} (${track.id})clicked. isThisTrackLoaded? ${isTrackLoaded} isPlaying? ${isPlaying}	nowPlayingTrack? ${nowPlayingTrack?.id}`,
-		)
 
 		if (!isTrackLoaded) {
 			dispatch({ type: 'PLAY_TRACK', track })

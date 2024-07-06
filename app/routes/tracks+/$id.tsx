@@ -77,7 +77,7 @@ export default function TrackRoute() {
 			<Card className="flex flex-col space-y-4 p-2 sm:w-3/4">
 				<CardTitle className="m-4 px-6">
 					<div className="flex h-max w-full justify-between">
-						<PlayButton size="large" track={track} />
+						<PlayButton size="lg" track={track} />
 						<div className="mr-3 text-4xl ">{track?.title}</div>
 						{
 							<Button

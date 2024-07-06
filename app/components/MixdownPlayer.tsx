@@ -46,16 +46,10 @@ const PlayerViewStateToggleButton = () => {
 	const context = usePlayerContext()
 	const dispatch = usePlayerDispatchContext()
 
-	const icon = `mdi-${context?.viewState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`
+	const icon = `mdi-${context?.viewSize === 'LARGE' ? 'chevron-down' : 'chevron-up'}`
 
 	return (
-		<Button
-			onClick={() =>
-				dispatch({ type: 'SET_VIEW_STATE', viewState: context?.viewState === 'LARGE' ? 'SMALL' : 'LARGE' })
-			}
-			variant="ghost"
-			size="icon"
-		>
+		<Button onClick={() => dispatch({ type: 'TOGGLE_VIEW_SIZE' })} variant="ghost" size="icon">
 			<InlineIcon className="size-8 sm:size-6" icon={icon} />
 		</Button>
 	)
@@ -72,7 +66,7 @@ const PlayerCloseButton = () => {
 
 const WaveFormWrapper = () => {
 	const context = usePlayerContext()
-	const viewState = context?.viewState || 'LARGE'
+	const viewState = context?.viewSize || 'LARGE'
 	const audioElementRef = context?.player?.current?.audio
 
 	return (
@@ -87,12 +81,11 @@ const WaveFormWrapper = () => {
 
 export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const context = usePlayerContext()
-	const viewState = context?.viewState || 'LARGE'
+	const viewState = context?.viewState
+	const viewSize = context?.viewSize
 	const dispatch = usePlayerDispatchContext()
 	const playerRef = useRef<AudioPlayer>(null)
-	const audioElementRef = playerRef.current?.audio
 	const currentTrack = getCurrentTrack(context) || null
-	// const currentTrackUrl = currentTrack ? getLatestVersionUrl(currentTrack) : ''
 
 	useEffect(() => {
 		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
@@ -121,14 +114,13 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 			dispatch({ type: 'PLAYBACK_ABORTED' })
 		},
 		handleNext: () => {
-			// TODO: Implement
 			dispatch({ type: 'PLAY_NEXT' })
 		},
 		handlePrev: () => {
 			dispatch({ type: 'PLAY_PREV' })
 		},
 		handleCanPlay: () => {
-			audioElementRef?.current?.play()
+			dispatch({ type: 'CAN_PLAY' })
 		},
 		handleCanPlayThrough: () => {
 			dispatch({ type: 'CAN_PLAY_THROUGH' })
@@ -138,7 +130,6 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		},
 	}
 
-	// console.log('MixdownPlayer', { playlist, viewState, hidden, currentTrack, currentTrackUrl })
 	return (
 		<>
 			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent p-5')}>
@@ -146,16 +137,14 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					<div className="flex">
 						<div className="grow text-left">
 							<>
-								{/* <NavLink className="col-span-1" to={`/tracks/${currentTrack?.id}`}> */}
 								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
 									{currentTrack?.title}
 									{context?.player?.current?.isPlaying() ? '🔊' : '🔇'}
 								</CardTitle>
-								{/* </NavLink> */}
 								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
 							</>
 						</div>
-						<PlayButton size="lg" />
+						<PlayButton className={viewSize !== 'SMALL' ? 'hidden' : ''} size="lg" />
 						<PlayerViewStateToggleButton />
 						<PlayerCloseButton />
 					</div>
@@ -175,19 +164,44 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					onClickPrevious={playerController.handlePrev}
 					showDownloadProgress={true}
 					showFilledProgress={true}
+					hasDefaultKeyBindings={true}
 					showJumpControls={false}
 					showFilledVolume={true}
 					showSkipControls={true}
 					src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
 					ref={playerRef}
-					// autoPlayAfterSrcChange={false}
-					// autoPlay={false}
+					autoPlayAfterSrcChange={false}
+					autoPlay={false}
 					customAdditionalControls={[]}
 					customVolumeControls={[]}
 					customProgressBarSection={[<WaveFormWrapper key="wf" />]}
-					customControlsSection={[]}
+					customControlsSection={[<ControlsSection key="cs" />]}
 				/>
 			</div>
 		</>
+	)
+}
+
+const ControlsSection = () => {
+	const dispatch = usePlayerDispatchContext()
+
+	const handleClickPrev = () => {
+		dispatch({ type: 'PLAY_PREV' })
+	}
+
+	const handleClickNext = () => {
+		dispatch({ type: 'PLAY_NEXT' })
+	}
+
+	return (
+		<div className="flex grow items-center justify-center">
+			<Button variant="playbutton" onClick={handleClickPrev}>
+				<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
+			</Button>
+			<PlayButton size="lg" />
+			<Button variant="playbutton" onClick={handleClickNext}>
+				<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
+			</Button>
+		</div>
 	)
 }
