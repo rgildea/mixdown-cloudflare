@@ -139,7 +139,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 							<>
 								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
 									{currentTrack?.title}
-									{context?.player?.current?.isPlaying() ? '🔊' : '🔇'}
+									{/* {context?.player?.current?.isPlaying() ? '🔊' : '🔇'} */}
 								</CardTitle>
 								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
 							</>
@@ -175,33 +175,22 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					customAdditionalControls={[]}
 					customVolumeControls={[]}
 					customProgressBarSection={[<WaveFormWrapper key="wf" />]}
-					customControlsSection={[<ControlsSection key="cs" />]}
+					customControlsSection={[
+						<div
+							key="row-controls"
+							className={cn(viewSize === 'SMALL' ? 'hidden' : '', 'flex grow items-center justify-center')}
+						>
+							<Button variant="playbutton" onClick={playerController.handlePrev}>
+								<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
+							</Button>
+							<PlayButton size="lg" />
+							<Button variant="playbutton" onClick={playerController.handleNext}>
+								<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
+							</Button>
+						</div>,
+					]}
 				/>
 			</div>
 		</>
-	)
-}
-
-const ControlsSection = () => {
-	const dispatch = usePlayerDispatchContext()
-
-	const handleClickPrev = () => {
-		dispatch({ type: 'PLAY_PREV' })
-	}
-
-	const handleClickNext = () => {
-		dispatch({ type: 'PLAY_NEXT' })
-	}
-
-	return (
-		<div className="flex grow items-center justify-center">
-			<Button variant="playbutton" onClick={handleClickPrev}>
-				<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
-			</Button>
-			<PlayButton size="lg" />
-			<Button variant="playbutton" onClick={handleClickNext}>
-				<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
-			</Button>
-		</div>
 	)
 }
