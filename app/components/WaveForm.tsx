@@ -16,8 +16,6 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 
 	useEffect(() => {
 		if (!currentSrc || !audioElementRef?.current || !containerRef?.current) return
-		console.log('Rebuilding Waveform')
-		console.log('Creating wavesurfer')
 		const canvas = document.createElement('canvas')
 		const ctx = canvas?.getContext('2d')
 		if (!ctx || !canvas) {
@@ -50,16 +48,16 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 			barWidth: 2,
 			media: audioElementRef.current,
 			mediaControls: false,
+			autoplay: false,
+			interact: false,
 		})
-		// Play/pause on click
-		waveSurfer.on('interaction', () => {
-			waveSurfer.playPause()
+
+		waveSurfer.on('click', relativeX => {
+			console.log('click', relativeX)
 		})
-		console.log('Loaded Waveform')
 
 		// Cleanup
 		return () => {
-			console.log('Destroying Waveform')
 			waveSurfer.destroy()
 		}
 	}, [audioElementRef, containerRef, currentSrc])

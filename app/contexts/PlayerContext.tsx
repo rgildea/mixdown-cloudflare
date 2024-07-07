@@ -1,21 +1,34 @@
-import { PlayerState, PlayerVisualState } from '#app/components/MixdownPlayer'
 import { TrackWithVersions } from '#app/utils/track.server'
-import React, { createContext } from 'react'
+import React, { createContext, useContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
+const DEFAULT_STATE: PlayerContextType = {
+	playlist: [],
+	currentTrackIndex: 0,
+	isPlaying: false,
+	viewState: 'HIDDEN',
+	viewSize: 'LARGE',
+}
+
 export type PlayerContextType = {
-	track?: TrackWithVersions | null
+	playlist: TrackWithVersions[]
+	currentTrackIndex?: number
+	isPlaying: boolean
 	player?: React.RefObject<AudioPlayer> | null
-	playerState?: PlayerState | null
-	audioRef?: React.RefObject<HTMLAudioElement> | null
-	visualState?: PlayerVisualState | null
+	viewState?: 'VISIBLE' | 'HIDDEN'
+	viewSize?: 'SMALL' | 'LARGE'
 } | null
 
-export const PlayerContext = createContext<PlayerContextType>({ playerState: 'INITIAL_STATE', visualState: 'HIDDEN' })
+export const PlayerContext = createContext<PlayerContextType>(DEFAULT_STATE)
+export const usePlayerContext = () => useContext(PlayerContext)
 export const PlayerDispatchContext = createContext<React.Dispatch<PlayerContextAction>>(() => {})
+export const usePlayerDispatchContext = () => useContext(PlayerDispatchContext)
+
 export type PlayerContextActionType =
-	| 'INIT_PLAYER'
-	| 'DESTROY_PLAYER'
+	| 'SET_PLAYER'
+	| 'SET_PLAYLIST'
+	| 'SET_VIEW_STATE'
+	| 'TOGGLE_VIEW_SIZE'
 	| 'LOAD_START'
 	| 'LOADED_DATA'
 	| 'CAN_PLAY'
@@ -26,132 +39,111 @@ export type PlayerContextActionType =
 	| 'PLAYBACK_ENDED'
 	| 'PLAYBACK_ABORTED'
 	| 'PLAY_TRACK'
-	| 'RESTART_TRACK'
 	| 'PAUSE'
-	| 'CLOSE_PLAYER'
-	| 'COLLAPSE_PLAYER'
-	| 'EXPAND_PLAYER'
-	| 'TOGGLE_VIEW'
+	| 'PLAY_NEXT'
+	| 'PLAY_PREV'
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
+	tracks?: TrackWithVersions[]
 	track?: TrackWithVersions | null
 	playerRef?: React.RefObject<AudioPlayer> | null
 	error?: string
+	viewSize?: 'SMALL' | 'LARGE'
+	viewState?: 'VISIBLE' | 'HIDDEN'
+}
+
+export const getCurrentTrack = (state: PlayerContextType): TrackWithVersions | null => {
+	if (!state?.playlist) {
+		return null
+	}
+
+	if (state?.currentTrackIndex === undefined || state?.currentTrackIndex < 0) {
+		return null
+	}
+
+	if (state?.currentTrackIndex >= state.playlist.length) {
+		return null
+	}
+
+	return state.playlist[state.currentTrackIndex]
+}
+
+export const getTrackIndex = (state: PlayerContextType, track: TrackWithVersions): number => {
+	if (!state?.playlist) {
+		return -1
+	}
+	const foundIndex = state.playlist.findIndex(t => t.id === track.id)
+	return foundIndex
 }
 
 export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
-	console.log(`PlayerContextReducer received ${action.type} ACTION`, action)
-	const player = state?.player?.current?.audio.current
+	state = state || DEFAULT_STATE
+	const currentTrackIndex = state.currentTrackIndex || 0
+	const audioElement = state.player?.current?.audio.current
+	const playlist = action?.tracks || state?.playlist || []
+	const isPlaying = state.player?.current?.isPlaying() || false
 
 	switch (action.type) {
-		case 'INIT_PLAYER':
-			if (player) {
-				console.log('Player already exists')
-				return state
-			}
-			return {
-				...state,
-				player: action.playerRef,
-				audioRef: action.playerRef?.current?.audio,
-				playerState: 'INITIAL_STATE',
-				visualState: 'LARGE',
-			}
-		case 'DESTROY_PLAYER':
-			// no-op
-			return state
-
-		case 'LOAD_START':
-			if (!action.track) {
-				console.log('TrackId missing from LOAD_START action')
-				return state
-			}
-			return { ...state, track: action.track, playerState: 'LOADING', audioRef: action.playerRef?.current?.audio }
-
-		case 'CAN_PLAY':
-			if (state?.playerState !== 'LOADING') {
-				return state
-			}
-			player?.play()
-			return { ...state, playerState: 'READY_TO_PLAY' }
-		case 'CAN_PLAY_THROUGH':
-			console.log('CAN_PLAY_THROUGH called')
-
-			if (state?.playerState !== 'LOADING') {
-				return state
-			}
-			return { ...state, playerState: 'READY_TO_PLAY' }
-
-		case 'LOADED_DATA':
-			console.log('LOADED_DATA event called')
-			return state
-		case 'PLAYBACK_STARTED':
-			return { ...state, playerState: 'PLAYING' }
-		case 'PLAYBACK_PAUSED':
-			return { ...state, playerState: 'PAUSED' }
-		case 'PLAYBACK_ERROR':
-			return { ...state, playerState: 'ERROR' }
-		case 'PLAYBACK_ENDED':
-			return { ...state, playerState: 'ENDED' }
-		case 'PLAYBACK_ABORTED':
-			return { ...state, playerState: 'ABORTED' }
-
-		// Important: we're setting track, audio ref, and player ref here by returning them
-		// in the state.
-		// This re-renders the Waveform component, re-creating the WaveSurfer instance
-		// with the updated audio element.
+		case 'SET_PLAYLIST':
+			audioElement?.addEventListener('canplay', () => {
+				audioElement?.play()
+				audioElement?.removeEventListener('canplay', () => {})
+			})
+			return { ...state, playlist, currentTrackIndex: 0 }
+		case 'SET_PLAYER':
+			return { ...state, player: action.playerRef }
+		case 'SET_VIEW_STATE':
+			return { ...state, viewState: action.viewState }
+		case 'TOGGLE_VIEW_SIZE':
+			return { ...state, viewSize: state.viewSize === 'LARGE' ? 'SMALL' : 'LARGE' }
 		case 'PLAY_TRACK':
-			if (!action.track) {
-				throw new Error('Track missing from PLAY_TRACK action')
+			if (!action?.track) throw new Error('Track missing from PLAY_TRACK action')
+			if (getCurrentTrack(state)?.id === action.track.id) {
+				if (isPlaying) {
+					audioElement?.pause()
+				} else {
+					audioElement?.play()
+				}
+			} else {
+				const newTrackIndex = getTrackIndex(state, action.track)
+				audioElement?.addEventListener('canplay', () => {
+					audioElement?.play()
+					audioElement?.removeEventListener('canplay', () => {})
+				})
+				state = { ...state, currentTrackIndex: newTrackIndex }
 			}
-
-			return {
-				...state,
-				player: action.playerRef,
-				track: action.track,
-				audioRef: action.playerRef?.current?.audio,
-				playerState: 'LOADING',
-			}
-
-		case 'RESTART_TRACK':
-			if (!state?.track) {
-				throw new Error('Track missing from RESTART_TRACK action')
-			}
-
-			return {
-				...state,
-				player: action.playerRef,
-				track: action.track,
-				audioRef: action.playerRef?.current?.audio,
-				playerState: 'LOADING',
-			}
-
-		case 'PAUSE':
-			if (!state?.track) {
-				throw new Error('Track missing from PAUSE action')
-			}
-			console.log('PAUSE called')
-			console.log('Player', player)
-			player?.pause()
 			return state
-		case 'CLOSE_PLAYER':
-			player?.pause()
-			// unsetting the track will cause the player to be hidden
-			return { ...state, track: undefined, visualState: 'HIDDEN', playerState: 'INITIAL_STATE' }
-		case 'COLLAPSE_PLAYER':
-			return { ...state, visualState: 'SMALL' }
-		case 'EXPAND_PLAYER':
-			if (!state?.track) {
-				console.log('No track to expand player with')
-				return state
-			}
-			return { ...state, visualState: 'LARGE' }
-		case 'TOGGLE_VIEW':
-			if (state?.visualState === 'LARGE') {
-				return { ...state, visualState: 'SMALL' }
-			}
-			return { ...state, visualState: 'LARGE' }
-
+		case 'PAUSE':
+			audioElement?.pause()
+			return state
+		case 'PLAY_PREV':
+			audioElement?.addEventListener('canplay', () => {
+				audioElement?.play()
+				audioElement?.removeEventListener('canplay', () => {})
+			})
+			return { ...state, currentTrackIndex: (currentTrackIndex - 1) % state.playlist.length }
+		case 'PLAY_NEXT':
+			audioElement?.addEventListener('canplay', () => {
+				audioElement?.play()
+				audioElement?.removeEventListener('canplay', () => {})
+			})
+			return { ...state, currentTrackIndex: (currentTrackIndex + 1) % state.playlist.length }
+		case 'PLAYBACK_STARTED':
+			console.log('PLAYBACK_STARTED action received')
+			return { ...state, isPlaying: true, viewState: 'VISIBLE' }
+		case 'PLAYBACK_ERROR':
+			console.warn('Playback error:', action.error)
+			return state
+		case 'PLAYBACK_PAUSED':
+			console.log('PLAYBACK_PAUSED action received')
+			return { ...state, isPlaying: false }
+		case 'PLAYBACK_ENDED':
+			console.log('PLAYBACK_ENDED action received')
+			return { ...state, isPlaying }
+		case 'PLAYBACK_ABORTED':
+			console.log('PLAYBACK_ABORTED action received')
+			return { ...state, isPlaying: false }
 		default:
 			return state
 	}

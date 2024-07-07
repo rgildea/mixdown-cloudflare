@@ -164,11 +164,17 @@
 @media only screen and (min-width: 768px) {
 	.rhap_play-pause-button {
 		@apply size-8 text-xl;
+		@apply hover:text-primary;
+		@apply focus:text-primary;
+		@apply active:text-primary;
 	}
 }
 
 .rhap_play-pause-button {
 	@apply size-10 text-4xl;
+	@apply hover:text-primary;
+	@apply focus:text-primary;
+	@apply active:text-primary;
 }
 
 .rhap_volume-controls {

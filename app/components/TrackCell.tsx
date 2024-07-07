@@ -1,4 +1,4 @@
-import { PlayerContext } from '#app/contexts/PlayerContext'
+import { getCurrentTrack, PlayerContext } from '#app/contexts/PlayerContext'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { Form, NavLink } from '@remix-run/react'
@@ -10,7 +10,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 	const audioFile = track.versions[0]?.audioFile
 	const trackUrl = `/storage/${audioFile?.fileKey}`
 	const playerState = useContext(PlayerContext)
-	const nowPlayingTrack = playerState?.track
+	const nowPlayingTrack = getCurrentTrack(playerState)
 
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
 
@@ -20,7 +20,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 				className={`${isTrackLoaded ? 'primary-foreground bg-primary' : ''} space-between group mx-0 flex h-20 w-full flex-nowrap items-center justify-between rounded-sm px-0  sm:h-16`}
 				data-tag="allowRowEvents"
 			>
-				<PlayButton size="medium" track={track} />
+				<PlayButton size="sm" track={track} />
 				<div
 					className="leading flex-1 font-sans text-body-sm font-medium group-hover:font-semibold group-hover:-tracking-tighter group-hover:text-white"
 					data-tag="allowRowEvents"

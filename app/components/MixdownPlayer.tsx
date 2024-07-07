@@ -1,91 +1,40 @@
-import WaveForm from '#app/components/WaveForm'
-import { PlayerContext, PlayerDispatchContext } from '#app/contexts/PlayerContext'
+import { getCurrentTrack, usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { NavLink } from '@remix-run/react'
-import { forwardRef, useContext, useEffect, useRef } from 'react'
-import AudioPlayer, { RHAP_UI } from 'react-h5-audio-player'
+import { useEffect, useRef } from 'react'
+import AudioPlayer from 'react-h5-audio-player'
+import PlayButton from './PlayButton'
 import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
+import WaveForm from './WaveForm'
 
-export const getLatestVersionUrl = (trackId: string, tracks: TrackWithVersions[]) => {
-	const found = tracks.find(track => track.id == trackId)
-	return found?.versions[0].audioFile?.url
+const getLatestVersionUrl = (track: TrackWithVersions) => {
+	return track?.versions[0]?.audioFile?.url || ''
 }
-
-export type PlayerState =
-	| 'INITIAL_STATE'
-	| 'LOADING'
-	| 'READY_TO_PLAY'
-	| 'PLAYING'
-	| 'PAUSED'
-	| 'ENDED'
-	| 'ABORTED'
-	| 'ERROR'
 
 export type PlayerVisualState = 'LARGE' | 'SMALL' | 'HIDDEN'
 
 export interface AudioPlayerProps {
-	visualState?: PlayerVisualState
 	url?: string
-	track?: TrackWithVersions
 	controller: PlayerController
 }
 
 export interface PlayerController {
-	handleLoadStart: (e: any) => void
-	handlePlayError: (e: any) => void
-	handleCanPlay: (e: any) => void
-	handleCanPlayThrough: (e: any) => void
-	handleLoadedData: (e: any) => void
-	handlePlay: (e: any) => void
-	handlePlaying: (e: any) => void
-	handlePause: (e: any) => void
-	handleNext: (e: any) => void
-	handlePrev: (e: any) => void
-	handleAbort: (e: any) => void
-	handleEnded: (e: any) => void
+	handleLoadStart?: (e: any) => void
+	handleLoadedData?: (e: any) => void
+	handleCanPlay?: (e: any) => void
+	handleCanPlayThrough?: (e: any) => void
+	handlePlay?: (e: any) => void
+	handlePlayError?: (e: any) => void
+	handlePlaying?: (e: any) => void
+	handlePause?: (e: any) => void
+	handleNext?: (e: any) => void
+	handlePrev?: (e: any) => void
+	handleAborted?: (e: any) => void
+	handleEnded?: (e: any) => void
 }
-
-// eslint-disable-next-line react/display-name
-const InternalPlayerComponent = forwardRef<AudioPlayer, AudioPlayerProps>(
-	({ url, controller, visualState }, playerRef) => {
-		let progressBarSection: RHAP_UI[] = []
-		if (visualState === 'LARGE') {
-			progressBarSection = [RHAP_UI.CURRENT_TIME, RHAP_UI.PROGRESS_BAR, RHAP_UI.DURATION]
-		}
-
-		return (
-			<AudioPlayer
-				onLoadStart={controller.handleLoadStart}
-				onPlayError={controller.handlePlayError}
-				onLoadedData={controller.handleLoadedData}
-				onCanPlay={controller.handleCanPlay}
-				onCanPlayThrough={controller.handleCanPlayThrough}
-				onPlay={controller.handlePlay}
-				onPlaying={controller.handlePlaying}
-				onPause={controller.handlePause}
-				onAbort={controller.handleAbort}
-				onEnded={controller.handleEnded}
-				onClickNext={controller.handleNext}
-				onClickPrevious={controller.handlePrev}
-				customAdditionalControls={[]}
-				showDownloadProgress={true}
-				showFilledProgress={true}
-				showJumpControls={false}
-				showFilledVolume={true}
-				showSkipControls={false}
-				src={url}
-				ref={playerRef}
-				autoPlayAfterSrcChange={false}
-				autoPlay={false}
-				customProgressBarSection={progressBarSection}
-			/>
-		)
-	},
-)
 
 export interface MixdownPlayerProps {
 	className?: string
@@ -93,120 +42,154 @@ export interface MixdownPlayerProps {
 	track?: TrackWithVersions
 }
 
-export default function MixdownPlayer({ url, className = '' }: MixdownPlayerProps) {
-	const playerState = useContext(PlayerContext)
-	const dispatch = useContext(PlayerDispatchContext)
-	const player = useRef<AudioPlayer>(null)
+const PlayerViewStateToggleButton = () => {
+	const context = usePlayerContext()
+	const dispatch = usePlayerDispatchContext()
+
+	const icon = `mdi-${context?.viewSize === 'LARGE' ? 'chevron-down' : 'chevron-up'}`
+
+	return (
+		<Button onClick={() => dispatch({ type: 'TOGGLE_VIEW_SIZE' })} variant="ghost" size="icon">
+			<InlineIcon className="size-8 sm:size-6" icon={icon} />
+		</Button>
+	)
+}
+
+const PlayerCloseButton = () => {
+	const dispatch = usePlayerDispatchContext()
+	return (
+		<Button onClick={() => dispatch({ type: 'SET_VIEW_STATE', viewState: 'HIDDEN' })} variant="ghost" size="icon">
+			<InlineIcon className="size-8 sm:size-6" icon="mdi:close" />
+		</Button>
+	)
+}
+
+const WaveFormWrapper = () => {
+	const context = usePlayerContext()
+	const viewState = context?.viewSize || 'LARGE'
+	const audioElementRef = context?.player?.current?.audio
+
+	return (
+		<WaveForm
+			key="waveform"
+			className={cn(viewState !== 'LARGE' ? 'hidden' : '', 'z-30 h-min w-full')}
+			audioElementRef={audioElementRef}
+			currentSrc={audioElementRef?.current?.currentSrc}
+		/>
+	)
+}
+
+export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
+	const context = usePlayerContext()
+	const viewState = context?.viewState
+	const viewSize = context?.viewSize
+	const dispatch = usePlayerDispatchContext()
+	const playerRef = useRef<AudioPlayer>(null)
+	const currentTrack = getCurrentTrack(context) || null
 
 	useEffect(() => {
-		if (!playerState?.player) {
-			dispatch({ type: 'INIT_PLAYER', playerRef: player })
+		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
+			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
-		return () => {
-			dispatch({ type: 'DESTROY_PLAYER' })
-		}
-	}, [dispatch, playerState?.player])
+		return () => {}
+	}, [context, dispatch, playerRef])
 
-	const { track, visualState } = playerState || {}
-	if (!track) return null
-
-	const handleViewToggleClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-		console.log('handleViewToggleClicked', e)
-		dispatch({ type: 'TOGGLE_VIEW' })
-	}
-
-	const handleCloseButtonClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-		console.log('handleCloseButtonClicked', e)
-		dispatch({ type: 'CLOSE_PLAYER' })
-	}
-
-	const newSourceUrl = url || getLatestVersionUrl(track.id, [track])
-	const audioElementRef = player.current?.audio
 	const playerController: PlayerController = {
-		handleLoadStart: e => {
-			console.info('onLoadStart', e)
-			dispatch({ type: 'LOAD_START', track: playerState?.track })
+		handlePlay: e => {
+			console.info('onPlay', e)
+			dispatch({ type: 'PLAYBACK_STARTED' })
 		},
 		handlePlayError: e => {
 			console.info('onPlayError', e)
 			dispatch({ type: 'PLAYBACK_ERROR', error: e.message })
 		},
-		handleCanPlay: e => {
-			console.info('onCanPlay', e)
-			dispatch({ type: 'CAN_PLAY' })
-		},
-		handleCanPlayThrough: e => {
-			console.info('onCanPlayThrough', e)
-			dispatch({ type: 'CAN_PLAY_THROUGH' })
-		},
-		handleLoadedData: e => {
-			console.info('onLoadedData', e)
-			dispatch({ type: 'LOADED_DATA' })
-		},
-		handlePlay: e => {
-			console.info('onPlay, starting to load and play', e)
-		},
-		handlePlaying: e => {
-			console.info('onPlaying', e)
-			if (e?.base) dispatch({ type: 'PLAYBACK_STARTED' })
-		},
 		handlePause: e => {
 			console.info('onPause', e)
 			dispatch({ type: 'PLAYBACK_PAUSED' })
 		},
-		handleEnded: e => {
-			console.info('onEnded', e)
+		handleEnded: () => {
 			dispatch({ type: 'PLAYBACK_ENDED' })
 		},
-		handleAbort: e => {
-			console.info('onAbort', e)
+		handleAborted: () => {
 			dispatch({ type: 'PLAYBACK_ABORTED' })
 		},
-		handleNext: e => {
-			console.info('onClickNext', e)
-			// TODO: Implement
+		handleNext: () => {
+			dispatch({ type: 'PLAY_NEXT' })
 		},
-		handlePrev: e => {
-			console.info('onClickPrevious', e)
-			// TODO: Implement
+		handlePrev: () => {
+			dispatch({ type: 'PLAY_PREV' })
+		},
+		handleCanPlay: () => {
+			dispatch({ type: 'CAN_PLAY' })
+		},
+		handleCanPlayThrough: () => {
+			dispatch({ type: 'CAN_PLAY_THROUGH' })
+		},
+		handleLoadedData: () => {
+			dispatch({ type: 'LOADED_DATA' })
 		},
 	}
 
 	return (
 		<>
-			<div className={cn(className, 'w-full bg-accent p-5')}>
+			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent p-5')}>
 				<div className="flex flex-col ">
 					<div className="flex">
 						<div className="grow text-left">
 							<>
-								<NavLink className="col-span-1" to={`/tracks/${track?.id}`}>
-									<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">{track?.title}</CardTitle>
-								</NavLink>
-								<div className="text-xs">{newSourceUrl}</div>
+								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
+									{currentTrack?.title}
+									{/* {context?.player?.current?.isPlaying() ? '🔊' : '🔇'} */}
+								</CardTitle>
+								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
 							</>
 						</div>
-
-						<Button onClick={handleViewToggleClicked} variant="ghost" size="icon">
-							<InlineIcon
-								className="size-8 sm:size-6"
-								icon={`mdi:${visualState === 'LARGE' ? 'chevron-down' : 'chevron-up'}`}
-							/>
-						</Button>
-
-						<Button onClick={handleCloseButtonClicked} variant={'ghost'} size="icon">
-							<InlineIcon className="size-8 sm:size-6" icon="mdi:close-circle" />
-						</Button>
+						<PlayButton className={viewSize !== 'SMALL' ? 'hidden' : ''} size="lg" />
+						<PlayerViewStateToggleButton />
+						<PlayerCloseButton />
 					</div>
-					{visualState === 'LARGE' && (
-						<WaveForm
-							className="z-30 h-64 w-full"
-							audioElementRef={audioElementRef}
-							currentSrc={audioElementRef?.current?.currentSrc}
-						/>
-					)}
-
-					<InternalPlayerComponent controller={playerController} url={newSourceUrl} ref={player} track={track} />
 				</div>
+				<AudioPlayer
+					onLoadStart={playerController.handleLoadStart}
+					onPlayError={playerController.handlePlayError}
+					onLoadedData={playerController.handleLoadedData}
+					onCanPlay={playerController.handleCanPlay}
+					onCanPlayThrough={playerController.handleCanPlayThrough}
+					onPlaying={playerController.handlePlaying}
+					onPlay={playerController.handlePlay}
+					onPause={playerController.handlePause}
+					onAbort={playerController.handleAborted}
+					onEnded={playerController.handleEnded}
+					onClickNext={playerController.handleNext}
+					onClickPrevious={playerController.handlePrev}
+					showDownloadProgress={true}
+					showFilledProgress={true}
+					hasDefaultKeyBindings={true}
+					showJumpControls={false}
+					showFilledVolume={true}
+					showSkipControls={true}
+					src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
+					ref={playerRef}
+					autoPlayAfterSrcChange={false}
+					autoPlay={false}
+					customAdditionalControls={[]}
+					customVolumeControls={[]}
+					customProgressBarSection={[<WaveFormWrapper key="wf" />]}
+					customControlsSection={[
+						<div
+							key="row-controls"
+							className={cn(viewSize === 'SMALL' ? 'hidden' : '', 'flex grow items-center justify-center')}
+						>
+							<Button variant="playbutton" onClick={playerController.handlePrev}>
+								<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
+							</Button>
+							<PlayButton size="lg" />
+							<Button variant="playbutton" onClick={playerController.handleNext}>
+								<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
+							</Button>
+						</div>,
+					]}
+				/>
 			</div>
 		</>
 	)

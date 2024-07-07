@@ -1,6 +1,7 @@
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardHeader } from '#app/components/ui/card'
+import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -13,11 +14,10 @@ export const action: ActionFunction = async () => {
 }
 
 export default function Route() {
-	// const playerState = useContext(PlayerContext)
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
-	// const playerDispatch = useContext(PlayerDispatchContext)
+	const playerDispatch = useContext(PlayerDispatchContext)
 	const titleDispatch = useContext(TitleDispatchContext)
 
 	const { tracks } = loaderData
@@ -28,16 +28,14 @@ export default function Route() {
 		return () => {}
 	})
 
-	// // load the first track if there is no track loaded
-	// useEffect(() => {
-	// 	if (!playerState?.track) {
-	// 		playerDispatch({ type: 'PLAY_TRACK', track: tracks[0] })
-	// 	}
-	// 	return () => {}
-	// }, [playerState?.track, playerDispatch, tracks])
+	// load the playlist into the player context
+	useEffect(() => {
+		playerDispatch({ type: 'SET_PLAYLIST', tracks })
+		return () => {}
+	}, [playerDispatch, tracks])
 
 	return (
-		<Card className="min-h-screen/2 border-none shadow-none">
+		<Card className="min-h-screen border-none shadow-none">
 			<CardHeader className="flex flex-row items-end justify-between px-0 py-1">
 				<Button asChild>
 					<Link
