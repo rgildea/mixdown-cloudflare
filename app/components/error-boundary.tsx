@@ -1,6 +1,6 @@
-import { type ErrorResponse, isRouteErrorResponse, useParams, useRouteError, MetaFunction } from '@remix-run/react'
-// import { captureRemixErrorBoundaryError } from '@sentry/remix'
 import { getErrorMessage } from '#app/utils/misc.tsx'
+import { type ErrorResponse, isRouteErrorResponse, MetaFunction, useParams, useRouteError } from '@remix-run/react'
+import { captureRemixErrorBoundaryError } from '@sentry/remix'
 
 type StatusHandler = (info: { error: ErrorResponse; params: Record<string, string | undefined> }) => JSX.Element | null
 
@@ -18,7 +18,7 @@ export function GeneralErrorBoundary({
 	unexpectedErrorHandler?: (error: unknown) => JSX.Element | null
 }) {
 	const error = useRouteError()
-	// captureRemixErrorBoundaryError(error)
+	captureRemixErrorBoundaryError(error)
 	const params = useParams()
 
 	if (typeof document !== 'undefined') {

@@ -5,7 +5,7 @@ compatibility_flags = [ "nodejs_compat" ]
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
 [vars]
-ENVIRONMENT_NAME="development"
+MODE="development"
 COOKIE_SECRET = "C-IS-FOR-COOKIE"
 HONEYPOT_SECRET = "POOH-LIKES-HONEY"
 MOCKS = false
