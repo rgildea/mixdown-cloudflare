@@ -29,9 +29,9 @@ export function init() {
 	const parsed = schema.safeParse(cfProcess.env)
 
 	if (parsed.success === false) {
-		console.error('❌ Invalid environment variables:', parsed.error.errors)
+		console.error(`❌ Invalid environment variables: ${JSON.stringify(parsed.error.flatten().fieldErrors)}`)
 
-		throw new Error('Invalid environment variables')
+		throw new Error(`Invalid environment variables: ${JSON.stringify(parsed.error.flatten().fieldErrors)}`)
 	}
 }
 
