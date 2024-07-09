@@ -9,10 +9,10 @@ import type { AppLoadContext, EntryContext } from '@remix-run/cloudflare'
 import { RemixServer } from '@remix-run/react'
 import { isbot } from 'isbot'
 import { renderToReadableStream } from 'react-dom/server'
-import { init as initEnv } from './utils/env.server'
+// import { init as initEnv } from './utils/env.server'
 import * as Monitoring from './utils/monitoring.server.ts'
 
-initEnv()
+// initEnv()
 
 export const handleError = Sentry.sentryHandleError
 
