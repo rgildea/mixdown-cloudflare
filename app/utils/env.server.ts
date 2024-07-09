@@ -6,7 +6,7 @@ const schema = z.object({
 	DATABASE_URL: z.string(),
 	DIRECT_URL: z.string().optional(),
 	HONEYPOT_SECRET: z.string(),
-	MOCKS: z.any(),
+	MOCKS: z.any().optional(),
 	MODE: z.enum(['production', 'development', 'preview', 'test'] as const),
 	RESEND_API_KEY: z.string(),
 	SENTRY_AUTH_TOKEN: z.string(),
