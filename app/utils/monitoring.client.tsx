@@ -42,4 +42,7 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 	})
 
 	console.log('Sentry initialized')
+	setTimeout(() => {
+		throw new Error('This is a production client test error')
+	}, 3000)
 }
