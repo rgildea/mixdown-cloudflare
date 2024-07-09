@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/remix'
 
 export function init({
 	context: {
-		storageContext,
 		cloudflare: {
 			env: { SENTRY_DSN, MODE },
 		},

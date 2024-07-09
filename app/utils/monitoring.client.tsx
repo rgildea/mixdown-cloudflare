@@ -1,4 +1,6 @@
 import { useLocation, useMatches } from '@remix-run/react'
+import * as SentryReplay from '@sentry-internal/replay'
+import * as SentryBrowser from '@sentry/browser'
 import * as Sentry from '@sentry/remix'
 import { useEffect } from 'react'
 import { getEnv } from './env.server'
@@ -24,8 +26,8 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 				useMatches,
 			}),
 			// Replay is only available in the client
-			Sentry.replayIntegration(),
-			Sentry.browserProfilingIntegration(),
+			SentryReplay.replayIntegration(),
+			SentryBrowser.browserProfilingIntegration(),
 		],
 
 		// Set tracesSampleRate to 1.0 to capture 100%

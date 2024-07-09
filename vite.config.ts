@@ -6,8 +6,6 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { getLoadContext } from './load-context'
 import remixConfig from './remix.config'
 
-const MODE = process.env.NODE_ENV
-
 export default defineConfig({
 	plugins: [
 		remixCloudflareDevProxy({
