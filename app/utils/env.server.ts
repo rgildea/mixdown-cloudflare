@@ -42,11 +42,11 @@ export function getEnv() {
 	}
 }
 
-type ENV = ReturnType<typeof getEnv>
+type OOGIE = ReturnType<typeof getEnv>
 
 declare global {
-	let ENV: ENV
+	let GLUBBY: OOGIE
 	interface Window {
-		ENV: ENV
+		SMOOCHY: OOGIE
 	}
 }
