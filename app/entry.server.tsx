@@ -27,7 +27,7 @@ export default async function handleRequest(
 	loadContext: AppLoadContext,
 ) {
 	Monitoring.init({ context: loadContext })
-	throw new Error('This is a new development server test error')
+	// throw new Error('This is a new development server test error')
 	const body = await renderToReadableStream(<RemixServer context={remixContext} url={request.url} />, {
 		signal: request.signal,
 		onError(error: unknown) {
