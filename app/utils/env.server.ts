@@ -4,17 +4,17 @@ import { z } from 'zod'
 const schema = z.object({
 	COOKIE_SECRET: z.string(),
 	DATABASE_URL: z.string(),
-	DIRECT_URL: z.string(),
+	DIRECT_URL: z.string().optional(),
 	HONEYPOT_SECRET: z.string(),
 	MOCKS: z.any(),
 	MODE: z.enum(['production', 'development', 'preview', 'test'] as const),
 	RESEND_API_KEY: z.string(),
 	SENTRY_AUTH_TOKEN: z.string(),
-	SENTRY_DSN: z.string(),
-	SENTRY_ORG: z.string(),
-	SENTRY_PROJECT: z.string(),
+	SENTRY_DSN: z.string().optional(),
+	SENTRY_ORG: z.string().optional(),
+	SENTRY_PROJECT: z.string().optional(),
 	SESSION_SECRET: z.string(),
-	STORAGE_BUCKET: z.any(),
+	STORAGE_BUCKET: z.any().optional(),
 })
 
 declare global {
