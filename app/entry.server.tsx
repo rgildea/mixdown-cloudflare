@@ -9,7 +9,10 @@ import type { AppLoadContext, EntryContext } from '@remix-run/cloudflare'
 import { RemixServer } from '@remix-run/react'
 import { isbot } from 'isbot'
 import { renderToReadableStream } from 'react-dom/server'
+import { init as initEnv } from './utils/env.server'
 import * as Monitoring from './utils/monitoring.server.ts'
+
+initEnv()
 
 export const handleError = Sentry.sentryHandleError
 
@@ -24,7 +27,7 @@ export default async function handleRequest(
 	loadContext: AppLoadContext,
 ) {
 	Monitoring.init({ context: loadContext })
-	throw new Error('This is a production server test error')
+	throw new Error('This is a new development server test error')
 	const body = await renderToReadableStream(<RemixServer context={remixContext} url={request.url} />, {
 		signal: request.signal,
 		onError(error: unknown) {

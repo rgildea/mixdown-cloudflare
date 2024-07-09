@@ -17,7 +17,6 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Env {
 	COOKIE_SECRET?: string
-	ENVIRONMENT_NAME?: string
 	DATABASE_URL?: string
 	HONEYPOT_SECRET: string
 	MOCKS: boolean
@@ -45,7 +44,6 @@ type GetLoadContext = (args: {
 	context: { cloudflare: Cloudflare } // load context _before_ augmentation
 }) => AppLoadContext
 
-// Shared implementation compatible with Vite, Wrangler, and Cloudflare Pages
 export const getLoadContext: GetLoadContext = ({ context }) => {
 	const { COOKIE_SECRET, MODE, DATABASE_URL, SESSIONS } = context.cloudflare.env
 	if (!SESSIONS) throw new Error('SESSIONS is not defined in the environment variables.')

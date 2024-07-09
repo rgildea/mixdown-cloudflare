@@ -2,11 +2,19 @@ import * as cfProcess from 'node:process'
 import { z } from 'zod'
 
 const schema = z.object({
-	MODE: z.enum(['production', 'development', 'preview', 'test'] as const),
-	SESSION_SECRET: z.string(),
+	COOKIE_SECRET: z.string(),
+	DATABASE_URL: z.string(),
+	DIRECT_URL: z.string(),
 	HONEYPOT_SECRET: z.string(),
-	SENTRY_DSN: z.string(),
+	MOCKS: z.any(),
+	MODE: z.enum(['production', 'development', 'preview', 'test'] as const),
 	RESEND_API_KEY: z.string(),
+	SENTRY_AUTH_TOKEN: z.string(),
+	SENTRY_DSN: z.string(),
+	SENTRY_ORG: z.string(),
+	SENTRY_PROJECT: z.string(),
+	SESSION_SECRET: z.string(),
+	STORAGE_BUCKET: z.any(),
 })
 
 declare global {
@@ -17,10 +25,11 @@ declare global {
 }
 
 export function init() {
+	console.log('🔧 Validating environment variables...')
 	const parsed = schema.safeParse(cfProcess.env)
 
 	if (parsed.success === false) {
-		console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors)
+		console.error('❌ Invalid environment variables:', parsed.error.errors)
 
 		throw new Error('Invalid environment variables')
 	}
@@ -36,17 +45,24 @@ export function init() {
  * @returns all public ENV variables
  */
 export function getEnv() {
-	return {
-		MODE: cfProcess.env.MODE,
-		SENTRY_DSN: cfProcess.env.SENTRY_DSN,
-	}
+	return cfProcess.env as Pick<
+		z.infer<typeof schema>,
+		| 'COOKIE_SECRET'
+		| 'HONEYPOT_SECRET'
+		| 'MODE'
+		| 'MOCKS'
+		| 'SENTRY_AUTH_TOKEN'
+		| 'SENTRY_DSN'
+		| 'SENTRY_ORG'
+		| 'SENTRY_PROJECT'
+	>
 }
 
-type OOGIE = ReturnType<typeof getEnv>
+export type EnvironmentConfig = ReturnType<typeof getEnv>
 
 declare global {
-	let GLUBBY: OOGIE
+	let ENV: EnvironmentConfig
 	interface Window {
-		SMOOCHY: OOGIE
+		ENV: EnvironmentConfig
 	}
 }
