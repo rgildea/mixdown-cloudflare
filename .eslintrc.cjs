@@ -5,6 +5,7 @@ module.exports = {
 		browser: true,
 		commonjs: true,
 		es6: true,
+		node: true,
 	},
 	overrides: [
 		// React
@@ -17,6 +18,10 @@ module.exports = {
 				'plugin:react-hooks/recommended',
 				'plugin:jsx-a11y/recommended',
 			],
+			parserOptions: {
+				ecmaVersion: 2020,
+				sourceType: 'module',
+			},
 			settings: {
 				react: {
 					version: 'detect',

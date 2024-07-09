@@ -1,4 +1,5 @@
 import Logo from '#app/components/Logo'
+import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
@@ -23,16 +24,11 @@ import {
 	useLoaderData,
 	useSubmit,
 } from '@remix-run/react'
-import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import { z } from 'zod'
-import leagueSpartanFontStyleSheetUrl from './styles/font-league_spartan.css?url'
-import nourdFontStyleSheetUrl from './styles/font-nourd.css?url'
-import pixerFontStyleSheetUrl from './styles/font-pixer.css?url'
-import tailwindStyleSheetUrl from './styles/tailwind.css?url'
-
-import { getFormProps, useForm } from '@conform-to/react'
+import { withSentry } from '@sentry/remix'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useReducer, useRef } from 'react'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { z } from 'zod'
 import MixdownPlayer from './components/MixdownPlayer.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
@@ -50,8 +46,13 @@ import { Icon } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
 import { PlayerContext, PlayerContextReducer, PlayerDispatchContext } from './contexts/PlayerContext.tsx'
 import { TitleContext, TitleContextReducer, TitleDispatchContext } from './contexts/TitleContext.tsx'
+import leagueSpartanFontStyleSheetUrl from './styles/font-league_spartan.css?url'
+import nourdFontStyleSheetUrl from './styles/font-nourd.css?url'
+import pixerFontStyleSheetUrl from './styles/font-pixer.css?url'
+import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 import { getUserId, logout } from './utils/auth.server'
 import { ClientHintCheck, getHints, useHints } from './utils/client-hints.tsx'
+import { getEnv } from './utils/env.server.ts'
 import { getHoneypot } from './utils/honeypot.server.ts'
 import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
@@ -159,12 +160,13 @@ export async function loader({
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),
+
 				path: new URL(request.url).pathname,
 				userPrefs: {
 					theme: getTheme(request),
 				},
 			},
-			// ENV: getEnv(),
+			ENV: getEnv(),
 			toast,
 			honeyProps,
 		},
@@ -210,6 +212,7 @@ function Document({
 	theme?: Theme
 	env?: Record<string, string>
 }) {
+	const data = useLoaderData<typeof loader>()
 	return (
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
 			<head>
@@ -219,15 +222,14 @@ function Document({
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<Links />
 			</head>
-			{/* <body className="m-0 h-full overflow-hidden bg-background text-foreground"> */}
 			<body className="m-0 h-full overflow-hidden bg-background text-foreground">
 				{children}
-				{/* <script
+				<script
 					nonce={nonce}
 					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
+						__html: `window.ENV = ${JSON.stringify(data.ENV)}`,
 					}}
-				/> */}
+				/>
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>
@@ -331,7 +333,7 @@ function App() {
 	)
 }
 
-export default function AppWithProviders() {
+function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	return (
 		<HoneypotProvider {...data.honeyProps}>
@@ -339,6 +341,8 @@ export default function AppWithProviders() {
 		</HoneypotProvider>
 	)
 }
+
+export default withSentry(AppWithProviders)
 
 function UserDropdown() {
 	const user = useUser()

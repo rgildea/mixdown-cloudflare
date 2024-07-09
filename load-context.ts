@@ -16,14 +16,18 @@ import {
 // even if no `wrangler.toml` exists.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Env {
-	COOKIE_SECRET: string
-	ENVIRONMENT_NAME: string
-	DATABASE_URL: string
-	RESEND_API_KEY: string
-	MOCKS: boolean
+	COOKIE_SECRET?: string
+	DATABASE_URL?: string
 	HONEYPOT_SECRET: string
-	STORAGE_BUCKET: R2Bucket
+	MOCKS: boolean
+	RESEND_API_KEY?: string
 	SESSIONS: KVNamespace
+	STORAGE_BUCKET: R2Bucket
+	SENTRY_AUTH_TOKEN: string
+	SENTRY_DSN: string
+	SENTRY_ORG: string
+	SENTRY_PROJECT: string
+	MODE: 'production' | 'development' | 'test' | 'preview'
 }
 
 type Cloudflare = Omit<PlatformProxy<Env>, 'dispose'>
@@ -40,14 +44,18 @@ type GetLoadContext = (args: {
 	context: { cloudflare: Cloudflare } // load context _before_ augmentation
 }) => AppLoadContext
 
-// Shared implementation compatible with Vite, Wrangler, and Cloudflare Pages
 export const getLoadContext: GetLoadContext = ({ context }) => {
-	const { COOKIE_SECRET, ENVIRONMENT_NAME, DATABASE_URL, SESSIONS } = context.cloudflare.env
-	const database = db(DATABASE_URL)
-	const authSessionStorage = createAuthSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
-	const verificationSessionStorage = createVerificationSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
-	const toastSessionStorage = createToastSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
-	const connectionSessionStorage = createConnectionSessionStorage(COOKIE_SECRET, ENVIRONMENT_NAME, SESSIONS)
+	const { COOKIE_SECRET, MODE, DATABASE_URL, SESSIONS } = context.cloudflare.env
+	if (!SESSIONS) throw new Error('SESSIONS is not defined in the environment variables.')
+	if (!COOKIE_SECRET) throw new Error('COOKIE_SECRET is not defined in the environment variables.')
+	if (!MODE) throw new Error('MODE is not defined in the environment variables.')
+
+	const database = db(DATABASE_URL || '')
+
+	const authSessionStorage = createAuthSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
+	const verificationSessionStorage = createVerificationSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
+	const toastSessionStorage = createToastSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
+	const connectionSessionStorage = createConnectionSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
 	const storageContext: StorageContext = {
 		db: database,
 		authSessionStorage,

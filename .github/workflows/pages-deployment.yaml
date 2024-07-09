@@ -34,15 +34,15 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
 
       - name: ⎔ Setup node
-        uses: actions/setup-node@v4.0.2
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1.10.2
+        uses: bahmutov/npm-install@v1
 
       - name: 🔎 Type check
         run: npm run typecheck --if-present
@@ -55,13 +55,13 @@ jobs:
     name: 🚀 Deploy to Cloudflare Pages
     steps:
       - name: ⬇️ Checkout Repo
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
 
       - name: 🏗 Build
         run: npm install && npm run build
 
       - name: 🚀 Publish
-        uses: cloudflare/wrangler-action@v3.6.1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
