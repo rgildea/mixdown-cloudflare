@@ -52,6 +52,7 @@ import pixerFontStyleSheetUrl from './styles/font-pixer.css?url'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 import { getUserId, logout } from './utils/auth.server'
 import { ClientHintCheck, getHints, useHints } from './utils/client-hints.tsx'
+import { getEnv } from './utils/env.server.ts'
 import { getHoneypot } from './utils/honeypot.server.ts'
 import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
@@ -159,12 +160,13 @@ export async function loader({
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),
+
 				path: new URL(request.url).pathname,
 				userPrefs: {
 					theme: getTheme(request),
 				},
 			},
-			ENV: getClientEnv(),
+			ENV: getEnv(),
 			toast,
 			honeyProps,
 		},
@@ -210,6 +212,7 @@ function Document({
 	theme?: Theme
 	env?: Record<string, string>
 }) {
+	const data = useLoaderData<typeof loader>()
 	return (
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
 			<head>
@@ -219,15 +222,14 @@ function Document({
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<Links />
 			</head>
-			{/* <body className="m-0 h-full overflow-hidden bg-background text-foreground"> */}
 			<body className="m-0 h-full overflow-hidden bg-background text-foreground">
 				{children}
-				{/* <script
+				<script
 					nonce={nonce}
 					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
+						__html: `window.ENV = ${JSON.stringify(data.ENV)}`,
 					}}
-				/> */}
+				/>
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>

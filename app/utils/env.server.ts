@@ -1,4 +1,3 @@
-import { getEnv } from '#app/entry.server'
 import * as cfProcess from 'node:process'
 import { z } from 'zod'
 
@@ -26,8 +25,20 @@ export function init() {
 	}
 }
 
-export function getServerEnv() {
-	return process.env
+/**
+ * This is used in both `entry.server.ts` and `root.tsx` to ensure that
+ * the environment variables are set and globally available before the app is
+ * started.
+ *
+ * NOTE: Do *not* add any environment variables in here that you do not wish to
+ * be included in the client.
+ * @returns all public ENV variables
+ */
+export function getEnv() {
+	return {
+		MODE: cfProcess.env.MODE,
+		SENTRY_DSN: cfProcess.env.SENTRY_DSN,
+	}
 }
 
 type ENV = ReturnType<typeof getEnv>

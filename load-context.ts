@@ -22,8 +22,8 @@ interface Env {
 	HONEYPOT_SECRET: string
 	MOCKS: boolean
 	RESEND_API_KEY?: string
-	SESSIONS?: KVNamespace
-	STORAGE_BUCKET?: R2Bucket
+	SESSIONS: KVNamespace
+	STORAGE_BUCKET: R2Bucket
 	SENTRY_AUTH_TOKEN: string
 	SENTRY_DSN: string
 	SENTRY_ORG: string

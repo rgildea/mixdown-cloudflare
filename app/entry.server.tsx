@@ -43,33 +43,3 @@ export default async function handleRequest(
 		status: responseStatusCode,
 	})
 }
-
-/**
- * This is used in both `entry.server.ts` and `root.tsx` to ensure that
- * the environment variables are set and globally available before the app is
- * started.
- *
- * NOTE: Do *not* add any environment variables in here that you do not wish to
- * be included in the client.
- * @returns all public ENV variables
- */
-export function getEnv() {
-	return {
-		MODE: process.env.NODE_ENV,
-		SENTRY_DSN: process.env.SENTRY_DSN,
-		SENTRY_ORG: process.env.SENTRY_ORG,
-		SENTRY_PROJECT: process.env.SENTRY_PROJECT,
-		SENTRY_API_TOKEN: 'redacted',
-		MOCKS: false,
-		RESEND_API_KEY: 'redacted',
-		HONEYPOT_SECRET: process.env.HONEYPOT_SECRET,
-	}
-}
-type ENV = ReturnType<typeof getEnv>
-
-declare global {
-	var ENV: ENV
-	interface Window {
-		ENV: ENV
-	}
-}

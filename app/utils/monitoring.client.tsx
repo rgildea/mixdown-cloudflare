@@ -1,9 +1,9 @@
 import { useLocation, useMatches } from '@remix-run/react'
 import * as Sentry from '@sentry/remix'
 import { useEffect } from 'react'
-import { getClientEnv } from './env.client'
+import { getEnv } from './env.server'
 
-export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof getClientEnv> }) {
+export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof getEnv> }) {
 	Sentry.init({
 		dsn: SENTRY_DSN,
 		environment: MODE,
@@ -38,4 +38,6 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 		replaysSessionSampleRate: 0.1,
 		replaysOnErrorSampleRate: 1.0,
 	})
+
+	console.log('Sentry initialized')
 }

@@ -12,6 +12,7 @@ export function init({
 }: {
 	context: AppLoadContext
 }) {
+	console.log('Initializing Sentry', { SENTRY_DSN, MODE })
 	Sentry.init({
 		dsn: SENTRY_DSN,
 		environment: MODE,
@@ -27,4 +28,6 @@ export function init({
 			/\/site\.webmanifest/,
 		],
 	})
+
+	console.log('Sentry initialized')
 }
