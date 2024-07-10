@@ -1,13 +1,15 @@
 import * as cfProcess from 'node:process'
 import { z } from 'zod'
 
+export const validEnvironments = ['production', 'development', 'preview', 'test'] as const
+
 const schema = z.object({
 	COOKIE_SECRET: z.string(),
 	DATABASE_URL: z.string(),
 	DIRECT_URL: z.string().optional(),
 	HONEYPOT_SECRET: z.string(),
 	MOCKS: z.any().optional(),
-	MODE: z.enum(['production', 'development', 'preview', 'test'] as const),
+	MODE: z.enum(validEnvironments),
 	RESEND_API_KEY: z.string(),
 	SENTRY_AUTH_TOKEN: z.string(),
 	SENTRY_DSN: z.string().optional(),

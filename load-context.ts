@@ -1,3 +1,4 @@
+import { validEnvironments } from '#app/utils/env.server'
 import { AppLoadContext } from '@remix-run/cloudflare'
 import { type PlatformProxy } from 'wrangler'
 import { StorageContext } from './app/utils/auth.server'
@@ -27,7 +28,7 @@ interface Env {
 	SENTRY_DSN: string
 	SENTRY_ORG: string
 	SENTRY_PROJECT: string
-	MODE: 'production' | 'development' | 'test' | 'preview'
+	MODE: (typeof validEnvironments)[number]
 }
 
 type Cloudflare = Omit<PlatformProxy<Env>, 'dispose'>

@@ -1,14 +1,13 @@
-import { useLocation, useMatches } from '@remix-run/react'
 import * as SentryReplay from '@sentry-internal/replay'
 import * as SentryBrowser from '@sentry/browser'
 import * as Sentry from '@sentry/remix'
-import { useEffect } from 'react'
 import { getEnv } from './env.server'
 
 export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof getEnv> }) {
 	Sentry.init({
 		dsn: SENTRY_DSN,
 		environment: MODE,
+		autoInstrumentRemix: true,
 		beforeSend(event) {
 			if (event.request?.url) {
 				const url = new URL(event.request.url)
@@ -17,14 +16,14 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 					return null
 				}
 			}
+			// Check if it is an exception, and if so, show the report dialog
+			if (event.exception && event.event_id) {
+				SentryBrowser.showReportDialog({ eventId: event.event_id })
+			}
 			return event
 		},
 		integrations: [
-			Sentry.browserTracingIntegration({
-				useEffect,
-				useLocation,
-				useMatches,
-			}),
+			...Sentry.getRemixDefaultIntegrations({}),
 			// Replay is only available in the client
 			SentryReplay.replayIntegration(),
 			SentryBrowser.browserProfilingIntegration(),
@@ -33,7 +32,7 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 		// Set tracesSampleRate to 1.0 to capture 100%
 		// of transactions for performance monitoring.
 		// We recommend adjusting this value in production
-		tracesSampleRate: 1.0,
+		tracesSampleRate: 1.0, //MODE === 'production' ? 1 : 0,
 
 		// Capture Replay for 10% of all sessions,
 		// plus for 100% of sessions with an error
@@ -41,9 +40,10 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 		replaysOnErrorSampleRate: 1.0,
 	})
 
-	console.log('Sentry initialized')
+	// console.log('Sentry initialized')
 
-	// setTimeout(() => {
-	// 	throw new Error('This is a production client test error')
-	// }, 3000)
+	// 	setTimeout(() => {
+	// 		throw new Error(`This is a ${MODE} client test error`)
+	// 	}, 3000)
+	// }
 }
