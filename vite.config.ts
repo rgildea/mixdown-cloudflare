@@ -6,6 +6,8 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { getLoadContext } from './load-context'
 import remixConfig from './remix.config'
 
+console.log(process.env.SENTRY_AUTH_TOKEN)
+
 export default defineConfig({
 	plugins: [
 		remixCloudflareDevProxy({

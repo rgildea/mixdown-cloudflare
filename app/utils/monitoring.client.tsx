@@ -26,6 +26,7 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 			...Sentry.getRemixDefaultIntegrations({}),
 			// Replay is only available in the client
 			SentryReplay.replayIntegration(),
+			Sentry.debugIntegration(),
 			SentryBrowser.browserProfilingIntegration(),
 		],
 

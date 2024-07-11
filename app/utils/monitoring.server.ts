@@ -10,22 +10,27 @@ export function init({
 }) {
 	console.log('Initializing Sentry')
 	console.log('Sentry DSN:', env.SENTRY_DSN)
-	Sentry.init({
-		dsn: env.SENTRY_DSN,
-		environment: env.MODE,
-		tracesSampleRate: env.MODE === 'production' ? 1 : 0,
-		integrations: [...Sentry.getRemixDefaultIntegrations({}), Sentry.prismaIntegration()],
-		denyUrls: [
-			/\/resources\/healthcheck/,
-			// TODO: be smarter about the public assets...
-			/\/build\//,
-			/\/favicons\//,
-			/\/img\//,
-			/\/fonts\//,
-			/\/favicon.ico/,
-			/\/site\.webmanifest/,
-		],
-	})
+
+	try {
+		Sentry.init({
+			dsn: env.SENTRY_DSN,
+			environment: env.MODE,
+			tracesSampleRate: env.MODE === 'production' ? 1 : 0,
+			integrations: [...Sentry.getRemixDefaultIntegrations({}), Sentry.debugIntegration(), Sentry.prismaIntegration()],
+			denyUrls: [
+				/\/resources\/healthcheck/,
+				// TODO: be smarter about the public assets...
+				/\/build\//,
+				/\/favicons\//,
+				/\/img\//,
+				/\/fonts\//,
+				/\/favicon.ico/,
+				/\/site\.webmanifest/,
+			],
+		})
+	} catch (err) {
+		console.error('❌ Failed to initialize Sentry:', err)
+	}
 
 	console.log('Sentry initialized')
 }
