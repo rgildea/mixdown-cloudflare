@@ -8,7 +8,8 @@ export function init({
 }: {
 	context: AppLoadContext
 }) {
-	console.log('Initializing Sentry', env)
+	console.log('Initializing Sentry')
+	console.log('Sentry DSN:', env.SENTRY_DSN)
 	Sentry.init({
 		dsn: env.SENTRY_DSN,
 		environment: env.MODE,
