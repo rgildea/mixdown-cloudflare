@@ -12,18 +12,18 @@ export function init({
 	console.log('Sentry DSN:', env.SENTRY_DSN)
 
 	try {
-		console.log('Loading Sentry integrations')
+		// console.log('Loading Sentry integrations')
 		// const debugIntegration = Sentry.debugIntegration()
-		const prismaIntegration = Sentry.prismaIntegration()
-		console.log('✅ Loaded Sentry integrations')
+		// const prismaIntegration = Sentry.prismaIntegration()
+		// console.log('✅ Loaded Sentry integrations')
 		Sentry.init({
 			dsn: env.SENTRY_DSN,
 			environment: env.MODE,
 			tracesSampleRate: env.MODE === 'production' ? 1 : 0,
-			integrations: [
-				prismaIntegration,
-				// , debugIntegration
-			],
+			// integrations: [
+			// 	prismaIntegration,
+			// 	// , debugIntegration
+			// ],
 			denyUrls: [
 				/\/resources\/healthcheck/,
 				// TODO: be smarter about the public assets...
