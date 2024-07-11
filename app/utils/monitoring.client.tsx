@@ -1,9 +1,15 @@
-import * as SentryReplay from '@sentry-internal/replay'
 import * as SentryBrowser from '@sentry/browser'
 import * as Sentry from '@sentry/remix'
 import { getEnv } from './env.server'
 
 export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof getEnv> }) {
+	console.log('Initializing Sentry')
+	console.log('Sentry DSN:', SENTRY_DSN)
+	console.log('Loading Sentry integrations')
+	// const debugIntegration = Sentry.debugIntegration()
+	const browserProfilingIntegration = SentryBrowser.browserProfilingIntegration()
+	console.log('✅ Loaded Sentry integrations')
+
 	Sentry.init({
 		dsn: SENTRY_DSN,
 		environment: MODE,
@@ -22,13 +28,7 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 			}
 			return event
 		},
-		integrations: [
-			...Sentry.getRemixDefaultIntegrations({}),
-			// Replay is only available in the client
-			SentryReplay.replayIntegration(),
-			Sentry.debugIntegration(),
-			SentryBrowser.browserProfilingIntegration(),
-		],
+		integrations: [browserProfilingIntegration], // debugIntegration
 
 		// Set tracesSampleRate to 1.0 to capture 100%
 		// of transactions for performance monitoring.
@@ -41,10 +41,9 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 		replaysOnErrorSampleRate: 1.0,
 	})
 
-	// console.log('Sentry initialized')
+	console.log('Sentry initialized')
 
-	// 	setTimeout(() => {
-	// 		throw new Error(`This is a ${MODE} client test error`)
-	// 	}, 3000)
-	// }
+	// setTimeout(() => {
+	// 	throw new Error(`This is a ${MODE} client test error`)
+	// }, 3000)
 }
