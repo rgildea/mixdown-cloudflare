@@ -10,10 +10,15 @@ if (window.ENV.SENTRY_DSN) {
 globalThis.Buffer = Buffer as unknown as BufferConstructor
 
 startTransition(() => {
-	hydrateRoot(
-		document,
-		// <StrictMode>
-		<RemixBrowser />,
-		// </StrictMode>,
-	)
+	const rootElement = document // Ensure this ID matches your root element
+	if (rootElement) {
+		startTransition(() => {
+			hydrateRoot(
+				rootElement,
+				// <StrictMode>
+				<RemixBrowser />,
+				// </StrictMode>,
+			)
+		})
+	}
 })

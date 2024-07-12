@@ -15,18 +15,6 @@ export interface TitleContextAction {
 	icon: string | ReactElement | null
 }
 
-// export const TitleContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-// 	const [TitleState, dispatch] = useReducer<
-// 		(state: TitleContextType, action: TitleContextAction) => TitleContextType
-// 	>(TitleContextReducer, null)
-
-// 	return (
-// 		<TitleContext.Provider value={TitleState}>
-// 			<TitleDispatchContext.Provider value={dispatch}>{children}</TitleDispatchContext.Provider>
-// 		</TitleContext.Provider>
-// 	)
-// }
-
 export const TitleContextReducer = (state: TitleContextType, action: TitleContextAction): TitleContextType => {
 	// console.log(`TitleContextReducer received ${action.type} ACTION`, action)
 	switch (action.type) {

@@ -3,6 +3,7 @@ import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { NavLink } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 import PlayButton from './PlayButton'
@@ -34,6 +35,8 @@ export interface PlayerController {
 	handlePrev?: (e: any) => void
 	handleAborted?: (e: any) => void
 	handleEnded?: (e: any) => void
+	handleSeeking?: (e: any) => void
+	handleSeeked?: (e: any) => void
 }
 
 export interface MixdownPlayerProps {
@@ -70,20 +73,18 @@ const WaveFormWrapper = () => {
 	const audioElementRef = context?.player?.current?.audio
 
 	return (
-		<>
-			<div>{context?.player?.current?.audio?.current?.currentTime}</div>
-			<WaveForm
-				key="waveform"
-				className={cn(viewState !== 'LARGE' ? 'hidden' : '', 'z-30 h-min w-full')}
-				audioElementRef={audioElementRef}
-				currentSrc={audioElementRef?.current?.currentSrc}
-			/>
-		</>
+		<WaveForm
+			key="waveform"
+			className={cn(viewState !== 'LARGE' ? 'hidden' : '', 'z-30 h-min w-full')}
+			audioElementRef={audioElementRef}
+			currentSrc={audioElementRef?.current?.currentSrc}
+		/>
 	)
 }
 
 export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const context = usePlayerContext()
+	const isLoading = context?.isLoading || true
 	const viewState = context?.viewState
 	const viewSize = context?.viewSize
 	const dispatch = usePlayerDispatchContext()
@@ -91,13 +92,21 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const currentTrack = getCurrentTrack(context) || null
 
 	useEffect(() => {
-		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
+		if (!context?.player?.current) {
+			console.log('setting playerRef in context')
+			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
+		} else if (context?.player?.current !== playerRef.current) {
+			console.log('CHANGING TO NEW playerRef in context')
 			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
 		return () => {}
 	}, [context, dispatch, playerRef])
 
 	const playerController: PlayerController = {
+		handleLoadStart: e => {
+			console.info('onLoadStart', e)
+			dispatch({ type: 'LOAD_START' })
+		},
 		handlePlay: e => {
 			console.info('onPlay', e)
 			dispatch({ type: 'PLAYBACK_STARTED' })
@@ -108,6 +117,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		},
 		handlePause: e => {
 			console.info('onPause', e)
+			console.log(context)
 			dispatch({ type: 'PLAYBACK_PAUSED' })
 		},
 		handleEnded: () => {
@@ -128,32 +138,46 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		handleCanPlayThrough: () => {
 			dispatch({ type: 'CAN_PLAY_THROUGH' })
 		},
-		handleLoadedData: () => {
+		handleLoadedData: e => {
+			console.info('onLoadedData', e)
 			dispatch({ type: 'LOADED_DATA' })
 		},
+		handlePlaying: () => {
+			dispatch({ type: 'PLAYBACK_STARTED' })
+		},
+		handleSeeking: () => {
+			dispatch({ type: 'SEEKING' })
+		},
+		handleSeeked: () => {
+			dispatch({ type: 'SEEKED' })
+		},
 	}
-
-	console.log('creating new player')
 	return (
 		<>
-			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent p-5')}>
-				<div className="flex flex-col ">
+			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent')}>
+				<div className="flex flex-col">
 					<div className="flex">
 						<div className="grow text-left">
-							<>
+							<NavLink to={`/tracks/${currentTrack?.id}`}>
 								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
 									{currentTrack?.title}
-									{/* {context?.player?.current?.isPlaying() ? '🔊' : '🔇'} */}
 								</CardTitle>
 								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
-							</>
+							</NavLink>
 						</div>
+						{isLoading && (
+							<div className="flex items-center justify-center">
+								<InlineIcon className="animate-spin" icon={'mdi:loading'} />
+								<div className="text-xs">{`Loading...`}</div>
+							</div>
+						)}
 						<PlayButton className={viewSize !== 'SMALL' ? 'hidden' : ''} size="lg" />
 						<PlayerViewStateToggleButton />
 						<PlayerCloseButton />
 					</div>
 				</div>
 				<AudioPlayer
+					preload={'none'}
 					onLoadStart={playerController.handleLoadStart}
 					onPlayError={playerController.handlePlayError}
 					onLoadedData={playerController.handleLoadedData}
@@ -164,6 +188,8 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					onPause={playerController.handlePause}
 					onAbort={playerController.handleAborted}
 					onEnded={playerController.handleEnded}
+					onSeeking={playerController.handleSeeking}
+					onSeeked={playerController.handleSeeked}
 					onClickNext={playerController.handleNext}
 					onClickPrevious={playerController.handlePrev}
 					showDownloadProgress={true}
@@ -174,7 +200,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					showSkipControls={true}
 					src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
 					ref={playerRef}
-					autoPlayAfterSrcChange={false}
+					autoPlayAfterSrcChange={true}
 					autoPlay={false}
 					customAdditionalControls={[]}
 					customVolumeControls={[]}
