@@ -70,12 +70,15 @@ const WaveFormWrapper = () => {
 	const audioElementRef = context?.player?.current?.audio
 
 	return (
-		<WaveForm
-			key="waveform"
-			className={cn(viewState !== 'LARGE' ? 'hidden' : '', 'z-30 h-min w-full')}
-			audioElementRef={audioElementRef}
-			currentSrc={audioElementRef?.current?.currentSrc}
-		/>
+		<>
+			<div>{context?.player?.current?.audio?.current?.currentTime}</div>
+			<WaveForm
+				key="waveform"
+				className={cn(viewState !== 'LARGE' ? 'hidden' : '', 'z-30 h-min w-full')}
+				audioElementRef={audioElementRef}
+				currentSrc={audioElementRef?.current?.currentSrc}
+			/>
+		</>
 	)
 }
 
@@ -130,6 +133,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		},
 	}
 
+	console.log('creating new player')
 	return (
 		<>
 			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent p-5')}>

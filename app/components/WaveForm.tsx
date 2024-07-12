@@ -1,5 +1,5 @@
 import { cn } from '#app/utils/misc'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { default as WaveSurfer } from 'wavesurfer.js'
 
 interface WaveformProps {
@@ -10,9 +10,9 @@ interface WaveformProps {
 
 const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => {
 	const containerRef = useRef<HTMLDivElement>(null)
-	// const hoverRef = useRef<HTMLDivElement>(null)
-	// const [duration, setDuration] = useState('0:00')
-	// const [currentTime, setCurrentTime] = useState('0:00')
+	const hoverRef = useRef<HTMLDivElement>(null)
+	const [duration, setDuration] = useState('0:00')
+	const [currentTime, setCurrentTime] = useState('0:00')
 
 	useEffect(() => {
 		if (!currentSrc || !audioElementRef?.current || !containerRef?.current) return
@@ -49,12 +49,31 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 			media: audioElementRef.current,
 			mediaControls: false,
 			autoplay: false,
-			interact: false,
+			dragToSeek: true,
 		})
 
-		waveSurfer.on('click', relativeX => {
-			console.log('click', relativeX)
+		// Play/pause on click
+		waveSurfer.on('interaction', () => {
+			waveSurfer.playPause()
 		})
+
+		// Hover effect
+		const onPointerMove = (e: PointerEvent): void => {
+			if (!hoverRef.current) return
+			hoverRef.current.style.width = `${e.offsetX}px`
+		}
+		containerRef.current.addEventListener('pointermove', onPointerMove)
+
+		// Current time & duration
+		const formatTime = (seconds: number) => {
+			const minutes = Math.floor(seconds / 60)
+			const secondsRemainder = Math.round(seconds) % 60
+			const paddedSeconds = `0${secondsRemainder}`.slice(-2)
+			return `${minutes}:${paddedSeconds}`
+		}
+
+		waveSurfer.on('decode', duration => setDuration(formatTime(duration)))
+		waveSurfer.on('timeupdate', currentTime => setCurrentTime(formatTime(currentTime)))
 
 		// Cleanup
 		return () => {
@@ -62,34 +81,19 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 		}
 	}, [audioElementRef, containerRef, currentSrc])
 
-	return <div className={cn(className, 'z-50 h-full w-full')} id="wavecontainer" ref={containerRef} />
-}
-
-export default Waveform
-
-// // Hover effect
-// const onPointerMove = (e: PointerEvent): void => {
-// 	if (!hoverRef.current) return
-// 	hoverRef.current.style.width = `${e.offsetX}px`
-// }
-// containerRef.current.addEventListener('pointermove', onPointerMove)
-
-// Current time & duration
-// const formatTime = (seconds: number) => {
-// 	const minutes = Math.floor(seconds / 60)
-// 	const secondsRemainder = Math.round(seconds) % 60
-// 	const paddedSeconds = `0${secondsRemainder}`.slice(-2)
-// 	return `${minutes}:${paddedSeconds}`
-// }
-
-// waveSurfer.on('decode', duration => setDuration(formatTime(duration)))
-// waveSurfer.on('timeupdate', currentTime => setCurrentTime(formatTime(currentTime)))
-/* <div
-				id="hover"
-				ref={hoverRef}
-				className="pointer-events-none z-10 h-full w-0 bg-white/50 opacity-0 mix-blend-overlay transition-opacity duration-200 ease-linear hover:opacity-100"
-			/>
+	return (
+		<>
+			<div className={cn(className, 'z-50 h-full w-full')} id="wavecontainer" ref={containerRef} />
 			<div className="flex justify-between">
 				<div>{currentTime}</div>
 				<div>{duration}</div>
-			</div> */
+				<div
+					id="hover"
+					ref={hoverRef}
+					className="pointer-events-none z-10 h-full w-0 bg-white/50 opacity-0 mix-blend-overlay transition-opacity duration-200 ease-linear hover:opacity-100"
+				/>
+			</div>
+		</>
+	)
+}
+export default Waveform
