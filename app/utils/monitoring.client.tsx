@@ -3,13 +3,7 @@ import * as Sentry from '@sentry/remix'
 import { getEnv } from './env.server'
 
 export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof getEnv> }) {
-	console.log('Initializing Sentry')
-	console.log('Sentry DSN:', SENTRY_DSN)
-	console.log('Loading Sentry integrations')
-	// const debugIntegration = Sentry.debugIntegration()
 	const browserProfilingIntegration = SentryBrowser.browserProfilingIntegration()
-	console.log('✅ Loaded Sentry integrations')
-
 	Sentry.init({
 		dsn: SENTRY_DSN,
 		environment: MODE,
@@ -40,10 +34,4 @@ export function init({ env: { SENTRY_DSN, MODE } }: { env: ReturnType<typeof get
 		replaysSessionSampleRate: 0.1,
 		replaysOnErrorSampleRate: 1.0,
 	})
-
-	console.log('Sentry initialized')
-
-	// setTimeout(() => {
-	// 	throw new Error(`This is a ${MODE} client test error`)
-	// }, 3000)
 }

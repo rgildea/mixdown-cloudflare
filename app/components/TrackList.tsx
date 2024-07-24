@@ -18,8 +18,8 @@ function TrackList({ tracks }: TrackListProps) {
 	const dispatch = useContext(PlayerDispatchContext)
 	const isPending = useIsPending()
 
-	const handlePlayButtonClicked = (track: TrackWithVersions) => {
-		dispatch({ type: 'PLAY_TRACK', track })
+	const handlePlayButtonClicked = (track: TrackWithVersions, e: React.SyntheticEvent) => {
+		dispatch({ type: 'PLAY_TRACK', track, event: e })
 	}
 
 	const customStyles = {
@@ -77,8 +77,8 @@ function TrackList({ tracks }: TrackListProps) {
 			highlightOnHover
 			pointerOnHover
 			striped
-			onRowClicked={row => {
-				handlePlayButtonClicked(row)
+			onRowClicked={(row, e) => {
+				handlePlayButtonClicked(row, e)
 			}}
 			columns={cols}
 			data={tracks}

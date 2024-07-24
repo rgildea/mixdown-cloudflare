@@ -16,7 +16,6 @@ export interface TitleContextAction {
 }
 
 export const TitleContextReducer = (state: TitleContextType, action: TitleContextAction): TitleContextType => {
-	// console.log(`TitleContextReducer received ${action.type} ACTION`, action)
 	switch (action.type) {
 		case 'SET_TITLE':
 			return { title: action.title, icon: action.icon }

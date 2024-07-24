@@ -26,7 +26,9 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 	headers.set('etag', object.httpEtag)
 	headers.delete('httpEtag')
 	headers.set('filename', customMetadata.filename || 'unknown')
+	headers.set('accept-ranges', 'bytes')
 	headers.set('Content-Length', object.size.toString())
+	headers.set('Content-Range', `bytes 0-${object.size - 1}/${object.size}`)
 	headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream')
 	headers.set('Cache-Control', 'public, max-age=31536000') // 1 year
 	headers
