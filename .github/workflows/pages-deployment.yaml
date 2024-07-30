@@ -11,6 +11,9 @@ permissions:
   actions: write
   contents: read
 
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GH_READ_PACKAGE_TOKEN }}
+
 jobs:
   lint:
     runs-on: ubuntu-latest
