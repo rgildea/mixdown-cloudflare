@@ -15,3 +15,6 @@ node_modules
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# NPM Config File
+.npmrc

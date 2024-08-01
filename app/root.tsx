@@ -260,34 +260,17 @@ function App() {
 					<PlayerDispatchContext.Provider value={playerDispatch}>
 						<Document nonce={nonce} theme={theme} env={{}}>
 							<AnimatePresence>
-								{/* <motion.div layout className="flex min-h-dvh flex-col"> */}
 								<motion.div key="main" layout="size" className="min-h-dvh">
 									<header className="container mt-1 h-12 shrink-0 grow-0 pb-0  ">
 										<nav className="grid grid-cols-3 items-center">
-											{/* <Button
-										className={`p-0.5 ${!shouldShowBackButton ? 'hidden' : ''}`}
-										onClick={() => {
-											navigate('..')
-											}}
-											variant="ghost"
-										size="sm"
-										>
-										<InlineIcon className="vertical-align-0 size-12" icon="mdi:chevron-left" />
-										</Button> */}
 											<Link className="col-span-2" to="/">
 												<CardTitle className="flex flex-nowrap items-center text-4xl text-card-foreground">
-													{/* {icon && <InlineIcon className="shrink-0" icon={icon as unknown as string} />} */}
 													{icon && <Icon name="mixdown-initials" />}
 													{title}
 												</CardTitle>
 											</Link>
-											{/* <div className="col-span-1 mx-auto justify-center">
-												<Logo size="sm" className="invisible" />
-											</div> */}
-											{/* <div className="ml-auto max-w-sm flex-1 sm:block">{searchBar}</div> */}
 											<div className="col-span-1 flex justify-end space-x-1">
 												<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-
 												{user ? (
 													<UserDropdown />
 												) : (
@@ -318,8 +301,6 @@ function App() {
 											</Link>
 										</div>
 									</div>
-									{/* <Spacer className="min-h-[442px] shrink-0 grow-0" size="player" /> */}
-
 									<MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />
 								</motion.div>
 							</AnimatePresence>

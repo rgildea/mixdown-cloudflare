@@ -3,24 +3,29 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "bin": {
+    "db": "./other/prisma.js"
+  },
   "scripts": {
     "build": "run-s build:*",
-    "build:db": "prisma generate",
     "build:icons": "tsx ./other/build-icons.ts",
     "build:remix": "remix vite:build",
+    "cm": "git add . && cz",
+    "database": "node ./other/prisma.js",
+    "db:browser": "npm run database studio",
+    "db:format": "npm run database format",
+    "db:generate": "npm run database generate",
+    "db:migrate:deploy": "npm run database migrate deploy",
+    "db:migrate:dev": "npm run database migrate dev",
+    "db:migrate:status": "npm run database migrate status",
+    "db:seed": "npm run database db seed",
+    "db:setup": "npm run database migrate reset --force",
     "deploy": "wrangler pages deploy ./build/client",
     "dev": "remix vite:dev",
-    "db:format": "prisma format",
-    "db:generate": "prisma generate",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed": "prisma db seed",
-    "db:setup": "prisma migrate reset --force",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "prisma:studio": "prisma studio",
     "start": "wrangler pages dev ./build/client",
-    "setup": "run-s npm:install db:generate",
+    "test": "vitest",
     "typecheck": "tsc",
     "typegen": "wrangler types"
   },
@@ -38,8 +43,7 @@
     "@neondatabase/serverless": "^0.9.4",
     "@paralleldrive/cuid2": "^2.2.2",
     "@prisma/adapter-neon": "^5.16.1",
-    "@prisma/client": "^5.15.0",
-    "@prisma/extension-accelerate": "^1.0.0",
+    "@prisma/client": "^5.17.0",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -54,6 +58,7 @@
     "@remix-run/cloudflare": "^2.9.2",
     "@remix-run/cloudflare-pages": "^2.9.2",
     "@remix-run/react": "^2.9.2",
+    "@rgildea/mixdown-database": "^0.6.8-alpha",
     "@sentry/remix": "^8.15.0",
     "@sentry/vite-plugin": "^2.20.1",
     "@uppy/dashboard": "^3.8.3",
@@ -109,6 +114,7 @@
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "autoprefixer": "^10.4.18",
+    "commitizen": "^4.3.0",
     "concurrently": "^8.2.2",
     "cva": "npm:class-variance-authority@^0.7.0",
     "eslint": "^8.38.0",
@@ -127,22 +133,27 @@
     "postcss-nested": "^6.0.1",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.12",
-    "prisma": "^5.15.0",
     "spin-delay": "^1.2.0",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.1.6",
     "vite": "^5.1.0",
     "vite-tsconfig-paths": "^4.2.1",
+    "vitest": "^2.0.4",
     "wrangler": "^3.61.0"
   },
   "engines": {
     "node": ">=18.20.3"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.18.0"
+  },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.18.0"
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

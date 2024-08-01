@@ -1,11 +1,14 @@
+/* eslint-disable no-fallthrough */
 import { TrackWithVersions } from '#app/utils/track.server'
 import React, { createContext, useContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
 const DEFAULT_STATE: PlayerContextType = {
 	playlist: [],
-	currentTrackIndex: 0,
+	currentTrackIndex: undefined,
 	isPlaying: false,
+	isLoading: false,
+	isSeeking: false,
 	viewState: 'HIDDEN',
 	viewSize: 'LARGE',
 }
@@ -14,6 +17,8 @@ export type PlayerContextType = {
 	playlist: TrackWithVersions[]
 	currentTrackIndex?: number
 	isPlaying: boolean
+	isLoading: boolean
+	isSeeking: boolean
 	player?: React.RefObject<AudioPlayer> | null
 	viewState?: 'VISIBLE' | 'HIDDEN'
 	viewSize?: 'SMALL' | 'LARGE'
@@ -40,8 +45,13 @@ export type PlayerContextActionType =
 	| 'PLAYBACK_ABORTED'
 	| 'PLAY_TRACK'
 	| 'PAUSE'
+	| 'JUMP_BACKWARD'
+	| 'JUMP_FORWARD'
 	| 'PLAY_NEXT'
 	| 'PLAY_PREV'
+	| 'SEEK'
+	| 'SEEKING'
+	| 'SEEKED'
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
@@ -51,6 +61,8 @@ export interface PlayerContextAction {
 	error?: string
 	viewSize?: 'SMALL' | 'LARGE'
 	viewState?: 'VISIBLE' | 'HIDDEN'
+	time?: number
+	event?: React.SyntheticEvent | null
 }
 
 export const getCurrentTrack = (state: PlayerContextType): TrackWithVersions | null => {
@@ -82,68 +94,96 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 	const currentTrackIndex = state.currentTrackIndex || 0
 	const audioElement = state.player?.current?.audio.current
 	const playlist = action?.tracks || state?.playlist || []
-	const isPlaying = state.player?.current?.isPlaying() || false
+	const player = state.player?.current
 
+	console.log('PlayerContextReducer:', action.type, action)
 	switch (action.type) {
 		case 'SET_PLAYLIST':
-			audioElement?.addEventListener('canplay', () => {
-				audioElement?.play()
-				audioElement?.removeEventListener('canplay', () => {})
-			})
-			return { ...state, playlist, currentTrackIndex: 0 }
+			return { ...state, playlist, currentTrackIndex: 0, isLoading: true }
 		case 'SET_PLAYER':
 			return { ...state, player: action.playerRef }
 		case 'SET_VIEW_STATE':
 			return { ...state, viewState: action.viewState }
 		case 'TOGGLE_VIEW_SIZE':
 			return { ...state, viewSize: state.viewSize === 'LARGE' ? 'SMALL' : 'LARGE' }
+		case 'LOAD_START':
+			return { ...state, isLoading: true }
+		case 'PAUSE':
+			if (!action?.event) throw new Error('Event missing from PAUSE action')
+			player?.togglePlay(action?.event)
+			return state
 		case 'PLAY_TRACK':
 			if (!action?.track) throw new Error('Track missing from PLAY_TRACK action')
+			if (!action?.event) throw new Error('Event missing from PLAY_TRACK action')
+
 			if (getCurrentTrack(state)?.id === action.track.id) {
-				if (isPlaying) {
-					audioElement?.pause()
-				} else {
-					audioElement?.play()
-				}
+				player?.togglePlay(action.event)
 			} else {
 				const newTrackIndex = getTrackIndex(state, action.track)
-				audioElement?.addEventListener('canplay', () => {
-					audioElement?.play()
-					audioElement?.removeEventListener('canplay', () => {})
-				})
+				if (newTrackIndex === -1) {
+					console.error('Track not found in playlist')
+					return state
+				}
 				state = { ...state, currentTrackIndex: newTrackIndex }
 			}
 			return state
-		case 'PAUSE':
-			audioElement?.pause()
-			return state
 		case 'PLAY_PREV':
-			audioElement?.addEventListener('canplay', () => {
-				audioElement?.play()
-				audioElement?.removeEventListener('canplay', () => {})
-			})
+			audioElement?.addEventListener(
+				'canplay',
+				() => {
+					const promise = audioElement?.play()
+					if (promise) {
+						promise.catch(err => console.error(err))
+					}
+				},
+				{ once: true },
+			)
 			return { ...state, currentTrackIndex: (currentTrackIndex - 1) % state.playlist.length }
 		case 'PLAY_NEXT':
-			audioElement?.addEventListener('canplay', () => {
-				audioElement?.play()
-				audioElement?.removeEventListener('canplay', () => {})
-			})
+			audioElement?.addEventListener(
+				'canplay',
+				() => {
+					audioElement?.play()
+					audioElement?.removeEventListener('canplay', () => {})
+				},
+				{ once: true },
+			)
 			return { ...state, currentTrackIndex: (currentTrackIndex + 1) % state.playlist.length }
+		case 'SEEK':
+			if (audioElement && action.time) {
+				audioElement.currentTime = action.time
+			}
+			return { ...state, isSeeking: true }
+		case 'SEEKING':
+			return { ...state, isSeeking: true }
+		case 'SEEKED':
+			return { ...state, isSeeking: false }
 		case 'PLAYBACK_STARTED':
-			console.log('PLAYBACK_STARTED action received')
 			return { ...state, isPlaying: true, viewState: 'VISIBLE' }
 		case 'PLAYBACK_ERROR':
 			console.warn('Playback error:', action.error)
 			return state
 		case 'PLAYBACK_PAUSED':
-			console.log('PLAYBACK_PAUSED action received')
 			return { ...state, isPlaying: false }
 		case 'PLAYBACK_ENDED':
-			console.log('PLAYBACK_ENDED action received')
-			return { ...state, isPlaying }
-		case 'PLAYBACK_ABORTED':
-			console.log('PLAYBACK_ABORTED action received')
 			return { ...state, isPlaying: false }
+		case 'PLAYBACK_ABORTED':
+			return { ...state, isPlaying: false }
+		case 'CAN_PLAY':
+			return { ...state, isLoading: false }
+		case 'CAN_PLAY_THROUGH':
+			return { ...state, isLoading: false }
+		case 'LOADED_DATA':
+			return { ...state, isLoading: true }
+		case 'JUMP_BACKWARD':
+			if (!audioElement) return state
+			audioElement.currentTime = Math.max(audioElement.currentTime - 10, 0)
+
+			return state
+		case 'JUMP_FORWARD':
+			if (!audioElement) return state
+			audioElement.currentTime = Number(Math.min(audioElement.currentTime + 10, audioElement.duration))
+			return state
 		default:
 			return state
 	}

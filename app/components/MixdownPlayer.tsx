@@ -3,6 +3,7 @@ import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { NavLink } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 import PlayButton from './PlayButton'
@@ -34,6 +35,11 @@ export interface PlayerController {
 	handlePrev?: (e: any) => void
 	handleAborted?: (e: any) => void
 	handleEnded?: (e: any) => void
+	handleSeeking?: (e: any) => void
+	handleSeeked?: (e: any) => void
+	handleJumpBackward?: (e: any) => void
+	handleJumpForward?: (e: any) => void
+	handleChangeCurrentTimeError?: () => void
 }
 
 export interface MixdownPlayerProps {
@@ -81,30 +87,37 @@ const WaveFormWrapper = () => {
 
 export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 	const context = usePlayerContext()
+	const isLoading = context?.isLoading ?? true
+	const isSeeking = context?.isSeeking ?? true
 	const viewState = context?.viewState
 	const viewSize = context?.viewSize
 	const dispatch = usePlayerDispatchContext()
 	const playerRef = useRef<AudioPlayer>(null)
 	const currentTrack = getCurrentTrack(context) || null
+	const loadCounter = useRef(0)
 
 	useEffect(() => {
-		if (!context?.player?.current || context?.player?.current !== playerRef.current) {
+		if (!context?.player?.current) {
+			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
+		} else if (context?.player?.current !== playerRef.current) {
 			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
+		loadCounter.current++
+		console.log('Player loadCounter:', loadCounter.current)
 		return () => {}
-	}, [context, dispatch, playerRef])
+	}, [dispatch, playerRef, context?.player])
 
 	const playerController: PlayerController = {
-		handlePlay: e => {
-			console.info('onPlay', e)
+		handleLoadStart: () => {
+			dispatch({ type: 'LOAD_START' })
+		},
+		handlePlay: () => {
 			dispatch({ type: 'PLAYBACK_STARTED' })
 		},
 		handlePlayError: e => {
-			console.info('onPlayError', e)
 			dispatch({ type: 'PLAYBACK_ERROR', error: e.message })
 		},
-		handlePause: e => {
-			console.info('onPause', e)
+		handlePause: () => {
 			dispatch({ type: 'PLAYBACK_PAUSED' })
 		},
 		handleEnded: () => {
@@ -128,21 +141,46 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 		handleLoadedData: () => {
 			dispatch({ type: 'LOADED_DATA' })
 		},
+		handlePlaying: () => {
+			dispatch({ type: 'PLAYBACK_STARTED' })
+		},
+		handleSeeking: e => {
+			dispatch({ type: 'SEEKING', event: e })
+		},
+		handleSeeked: e => {
+			dispatch({ type: 'SEEKED', event: e })
+		},
+		handleJumpBackward: () => {
+			dispatch({ type: 'JUMP_BACKWARD' })
+		},
+		handleJumpForward: () => {
+			dispatch({ type: 'JUMP_FORWARD' })
+		},
+		handleChangeCurrentTimeError: () => {
+			console.error('handleChangeCurrentTimeError')
+		},
 	}
-
 	return (
 		<>
-			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent p-5')}>
-				<div className="flex flex-col ">
+			<div className={cn(className, viewState === 'HIDDEN' ? 'hidden ' : '' + 'w-full bg-accent')}>
+				{isLoading ||
+					(isSeeking && (
+						<div className="absolute z-[100] w-full bg-[rgb(255,255,255)]/75">
+							<div className="flex h-full w-full items-center justify-center">
+								<InlineIcon className="size-16 animate-spin text-primary" icon={'mdi:loading'} />
+							</div>
+							<div className="text-xs">{`Loading...`}</div>
+						</div>
+					))}
+				<div className="flex flex-col">
 					<div className="flex">
 						<div className="grow text-left">
-							<>
+							<NavLink to={`/tracks/${currentTrack?.id}`}>
 								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
 									{currentTrack?.title}
-									{/* {context?.player?.current?.isPlaying() ? '🔊' : '🔇'} */}
 								</CardTitle>
 								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
-							</>
+							</NavLink>
 						</div>
 						<PlayButton className={viewSize !== 'SMALL' ? 'hidden' : ''} size="lg" />
 						<PlayerViewStateToggleButton />
@@ -150,6 +188,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					</div>
 				</div>
 				<AudioPlayer
+					preload="auto"
 					onLoadStart={playerController.handleLoadStart}
 					onPlayError={playerController.handlePlayError}
 					onLoadedData={playerController.handleLoadedData}
@@ -160,8 +199,11 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					onPause={playerController.handlePause}
 					onAbort={playerController.handleAborted}
 					onEnded={playerController.handleEnded}
+					onSeeking={playerController.handleSeeking}
+					onSeeked={playerController.handleSeeked}
 					onClickNext={playerController.handleNext}
 					onClickPrevious={playerController.handlePrev}
+					onChangeCurrentTimeError={playerController.handleChangeCurrentTimeError}
 					showDownloadProgress={true}
 					showFilledProgress={true}
 					hasDefaultKeyBindings={true}
@@ -178,12 +220,18 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 					customControlsSection={[
 						<div
 							key="row-controls"
-							className={cn(viewSize === 'SMALL' ? 'hidden' : '', 'flex grow items-center justify-center')}
+							className={cn(viewSize === 'SMALL' ? 'hidden' : 'flex', 'grow items-center justify-center')}
 						>
 							<Button variant="playbutton" onClick={playerController.handlePrev}>
 								<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
 							</Button>
+							<Button variant="playbutton" onClick={playerController.handleJumpBackward}>
+								<InlineIcon className="h-full w-full" icon={'mdi-rewind'} />
+							</Button>
 							<PlayButton size="lg" />
+							<Button variant="playbutton" onClick={playerController.handleJumpForward}>
+								<InlineIcon className="h-full w-full" icon={'mdi-fast-forward'} />
+							</Button>
 							<Button variant="playbutton" onClick={playerController.handleNext}>
 								<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
 							</Button>

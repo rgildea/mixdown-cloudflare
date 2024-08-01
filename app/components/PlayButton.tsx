@@ -31,20 +31,18 @@ const PlayButton: React.FC<PlayButtonProps> = ({ className, track, size }) => {
 
 	icon = `mdi:${isTrackLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`
 
-	const handleClick = () => {
+	const handleClick = (e: React.SyntheticEvent) => {
 		if (!track) return
 
-		if (!isTrackLoaded) {
-			dispatch({ type: 'PLAY_TRACK', track })
+		if (!isTrackLoaded || (isTrackLoaded && !isPlaying)) {
+			dispatch({ type: 'PLAY_TRACK', track, event: e })
 			return
 		}
 
 		if (isPlaying) {
-			dispatch({ type: 'PAUSE' })
+			dispatch({ type: 'PAUSE', event: e })
 			return
 		}
-
-		dispatch({ type: 'PLAY_TRACK', track })
 	}
 
 	return (

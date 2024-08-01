@@ -11,6 +11,9 @@ permissions:
   actions: write
   contents: read
 
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GH_READ_PACKAGE_TOKEN }}
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -22,6 +25,8 @@ jobs:
         uses: actions/setup-node@v4.0.2
         with:
           node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@rgildea'
 
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1.10.2
@@ -40,6 +45,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@rgildea'
 
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
@@ -57,6 +64,13 @@ jobs:
       - name: ⬇️ Checkout Repo
         uses: actions/checkout@v4
 
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@rgildea'
+
       - name: 🏗 Build
         run: npm install && npm run build
 
@@ -71,4 +85,4 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-        run: npx prisma migrate deploy
+        run: npm run db:migrate:deploy
