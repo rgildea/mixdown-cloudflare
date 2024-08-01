@@ -3,19 +3,31 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "bin": {
+    "db": "./other/prisma.js"
+  },
   "scripts": {
-    "cm": "git add . && cz",
     "build": "run-s build:*",
     "build:icons": "tsx ./other/build-icons.ts",
     "build:remix": "remix vite:build",
+    "cm": "git add . && cz",
+    "database": "node ./other/prisma.js",
+    "db:browser": "npm run database studio",
+    "db:format": "npm run database format",
+    "db:generate": "npm run database generate",
+    "db:migrate:deploy": "npm run database migrate deploy",
+    "db:migrate:dev": "npm run database migrate dev",
+    "db:migrate:status": "npm run database migrate status",
+    "db:seed": "npm run database db seed",
+    "db:setup": "npm run database migrate reset --force",
     "deploy": "wrangler pages deploy ./build/client",
     "dev": "remix vite:dev",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "wrangler pages dev ./build/client",
+    "test": "vitest",
     "typecheck": "tsc",
-    "typegen": "wrangler types",
-    "test": "vitest"
+    "typegen": "wrangler types"
   },
   "dependencies": {
     "@cloudflare/pages-plugin-sentry": "^1.1.3",

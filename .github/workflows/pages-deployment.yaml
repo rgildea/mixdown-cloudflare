@@ -85,4 +85,4 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-        run: npx @rgildea/mixdown-database migrate deploy
+        run: npm run db:migrate:deploy
