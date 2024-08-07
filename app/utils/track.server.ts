@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client/edge'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { StorageContext } from './auth.server'
 
 const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({

@@ -1,4 +1,4 @@
-import { Connection, Password, Prisma, PrismaClient, User } from '@prisma/client/edge'
+import { Connection, Password, Prisma, PrismaClient, User } from '@prisma/client'
 import { redirect } from '@remix-run/cloudflare'
 import bcrypt from 'bcryptjs'
 import { safeRedirect } from 'remix-utils/safe-redirect'

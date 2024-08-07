@@ -22,6 +22,7 @@ import {
 	useFetcher,
 	useFetchers,
 	useLoaderData,
+	useMatches,
 	useSubmit,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
@@ -29,8 +30,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useReducer, useRef } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
-import MixdownPlayer from './components/MixdownPlayer.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import MixdownPlayer from './components/MixdownPlayer.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from './components/toaster.tsx'
 import { Button } from './components/ui/button.tsx'
@@ -248,6 +249,9 @@ function App() {
 	// const navigate = useNavigate()
 	// const location = useLocation()
 	// const shouldShowBackButton = location.pathname !== '/' && location.pathname !== '/dashboard'
+	const matches = useMatches()
+	const routesWithoutPlayer = ['/tracks', '/tracks+/$id', '/tracks+']
+	const shouldRenderPlayer = !matches.some(match => routesWithoutPlayer.includes(match.pathname))
 	const [playerState, playerDispatch] = useReducer(PlayerContextReducer, null)
 	const [titleState, titleDispatch] = useReducer(TitleContextReducer, null)
 	const title = titleState?.title ?? ''
@@ -301,7 +305,9 @@ function App() {
 											</Link>
 										</div>
 									</div>
-									<MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />
+									{shouldRenderPlayer && (
+										<MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />
+									)}
 								</motion.div>
 							</AnimatePresence>
 							<EpicToaster closeButton position="top-center" theme={theme} />

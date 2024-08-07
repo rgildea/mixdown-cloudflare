@@ -121,7 +121,10 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			} else {
 				const newTrackIndex = getTrackIndex(state, action.track)
 				if (newTrackIndex === -1) {
-					console.error('Track not found in playlist')
+					console.info('Track not found in playlist')
+					// reset playlist
+					state = { ...state, playlist: [action.track], currentTrackIndex: 0 }
+
 					return state
 				}
 				state = { ...state, currentTrackIndex: newTrackIndex }

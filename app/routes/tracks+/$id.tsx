@@ -3,13 +3,15 @@ import EditTrackModal from '#app/components/EditTrackModal'
 import PlayButton from '#app/components/PlayButton'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '#app/components/ui/card'
+import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { requireUserId } from '#app/utils/auth.server'
 import { TrackWithVersions, getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
 import { parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
 import { Link, useLoaderData, useNavigate, useRevalidator, useSearchParams } from '@remix-run/react'
-import { useState } from 'react'
+import { LoremIpsum } from 'lorem-ipsum'
+import { useContext, useEffect, useState } from 'react'
 
 export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
 	const userId = await requireUserId(storageContext, request)
@@ -56,7 +58,43 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 		console.warn('No track found')
 		return notFoundResponse
 	}
+
+	generateRandomVersions(track)
+
 	return json({ track })
+}
+
+function generateRandomVersions(track: TrackWithVersions) {
+	const lorem = new LoremIpsum({
+		sentencesPerParagraph: {
+			max: 8,
+			min: 4,
+		},
+		wordsPerSentence: {
+			max: 16,
+			min: 4,
+		},
+	})
+	const versions = track?.versions || []
+	// tmp make more versions
+	const randomTimes = Math.floor(Math.random() * 4) + 2 // Random number between 2 and 5
+	let newVersions = versions
+
+	for (let i = 1; i < randomTimes; i++) {
+		newVersions = newVersions.concat(
+			versions.map((v, j) => ({
+				...v,
+				id: (newVersions.length + j).toString(),
+				title: lorem
+					.generateWords(5)
+					.split(' ')
+					.map(w => w.charAt(0).toUpperCase() + w.slice(1))
+					.join(' '),
+			})),
+		)
+	}
+	//
+	track.versions = newVersions.sort((a, b) => b.id.localeCompare(a.id))
 }
 
 export default function TrackRoute() {
@@ -66,10 +104,26 @@ export default function TrackRoute() {
 	const [isModalOpen, setModalOpen] = useState(isEditing)
 	const navigate = useNavigate()
 	const { revalidate } = useRevalidator()
+	const titleDispatch = useContext(TitleDispatchContext)
+
+	// set the title and icon for the page
+	useEffect(() => {
+		titleDispatch({ type: 'SET_TITLE', title: track.title ?? 'Mixdown!', icon: 'mdi:home' })
+		return () => {}
+	})
 
 	const handleDismiss = () => {
 		navigate('..', { replace: true, unstable_flushSync: true })
 	}
+
+	const versions = track?.versions || []
+
+	const versionItems = versions.map(v => (
+		<div key={v.id} className="justify-left flex items-center">
+			<PlayButton size="sm" track={track} />
+			<div className="ml-2">{v.title}</div>
+		</div>
+	))
 
 	return (
 		<>
@@ -100,12 +154,10 @@ export default function TrackRoute() {
 					</div>
 				</CardTitle>
 				<CardDescription className="px-6">
-					{track?.versions.length} version{track?.versions.length > 1 ? 's' : ''}
+					{versions.length} version{track?.versions.length > 1 ? 's' : ''}
 				</CardDescription>
 				<CardContent>
-					<div className="text-sm font-medium leading-none">{track.title}</div>
-					{`isModalOpen: ${isModalOpen}`} <br />
-					{`isEditing: ${isEditing}`}
+					<div className="text-sm font-medium leading-none">{versionItems}</div>
 				</CardContent>
 				<CardFooter></CardFooter>
 			</Card>
