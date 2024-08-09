@@ -5,7 +5,8 @@ const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({
 	id: true,
 	title: true,
 	description: true,
-	versions: {
+	activeTrackVersion: true,
+	trackVersions: {
 		select: {
 			id: true,
 			title: true,
@@ -29,7 +30,7 @@ export async function createTrack(storageContext: StorageContext, userId: string
 		data: {
 			title,
 			creatorId: userId,
-			versions: {
+			trackVersions: {
 				create: {
 					title: `${title} version 1`,
 					version: 1,
@@ -87,7 +88,7 @@ export async function getTrackByAudioFile(storageContext: StorageContext, audioF
 	const track = await db.track.findFirst({
 		select: trackWithVersionsSelect,
 		where: {
-			versions: {
+			trackVersions: {
 				some: {
 					audioFile: {
 						fileKey: audioFileKey,

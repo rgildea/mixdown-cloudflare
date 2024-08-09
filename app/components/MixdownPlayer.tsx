@@ -12,7 +12,7 @@ import { CardTitle } from './ui/card'
 import WaveForm from './WaveForm'
 
 const getLatestVersionUrl = (track: TrackWithVersions) => {
-	return track?.versions[0]?.audioFile?.url || ''
+	return track?.trackVersions[0]?.audioFile?.url || ''
 }
 
 export type PlayerVisualState = 'LARGE' | 'SMALL' | 'HIDDEN'
@@ -179,7 +179,7 @@ export default function MixdownPlayer({ className = '' }: MixdownPlayerProps) {
 								<CardTitle className="flex flex-nowrap items-center text-2xl sm:text-sm">
 									{currentTrack?.title}
 								</CardTitle>
-								<div className="text-xs">{currentTrack?.versions[0]?.title}</div>
+								<div className="text-xs">{currentTrack?.trackVersions[0]?.title}</div>
 							</NavLink>
 						</div>
 						<PlayButton className={viewSize !== 'SMALL' ? 'hidden' : ''} size="lg" />

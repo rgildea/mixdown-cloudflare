@@ -7,7 +7,7 @@ import PlayButton from './PlayButton'
 import { Button } from './ui/button'
 
 const TrackCell = ({ track }: { track: TrackWithVersions }) => {
-	const audioFile = track.versions[0]?.audioFile
+	const audioFile = track.trackVersions[0]?.audioFile
 	const trackUrl = `/storage/${audioFile?.fileKey}`
 	const playerState = useContext(PlayerContext)
 	const nowPlayingTrack = getCurrentTrack(playerState)
