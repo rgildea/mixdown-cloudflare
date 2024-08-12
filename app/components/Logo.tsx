@@ -27,7 +27,6 @@ export default function Logo({
 	size = 'default',
 }: React.PropsWithChildren<{ className?: string; size: Size }>) {
 	return (
-
 		<div className={cn('w-min', className)}>
 			<Link to="/" className="group flex flex-col font-nourd tracking-tight">
 				<div className="animate w-min text-3xl tracking-wide transition group-hover:-translate-x-1">Mixdown</div>

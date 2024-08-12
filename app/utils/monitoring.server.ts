@@ -1,4 +1,4 @@
-import {AppLoadContext} from '@remix-run/cloudflare'
+import { AppLoadContext } from '@remix-run/cloudflare'
 import * as Sentry from '@sentry/remix'
 
 export function init({
@@ -8,7 +8,6 @@ export function init({
 }: {
 	context: AppLoadContext
 }) {
-
 	try {
 		Sentry.init({
 			dsn: env.SENTRY_DSN,
@@ -32,6 +31,4 @@ export function init({
 	} catch (err) {
 		console.error('❌ Failed to initialize Sentry:', err)
 	}
-
-	// console.log('Sentry initialized')
 }

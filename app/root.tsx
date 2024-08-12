@@ -266,8 +266,8 @@ function App() {
 							<AnimatePresence>
 								<motion.div key="main" layout="size" className="min-h-dvh">
 									<header className="container mt-1 h-12 shrink-0 grow-0 pb-0  ">
-										<nav className="grid grid-cols-3 items-center">
-											<Link className="col-span-2" to="/">
+										<nav className="flex items-center justify-between">
+											<Link className="" to="/">
 												<CardTitle className="flex flex-nowrap items-center text-4xl text-card-foreground">
 													{icon && <Icon name="mixdown-initials" />}
 													{title}
@@ -287,7 +287,7 @@ function App() {
 										</nav>
 									</header>
 
-									<div className="flex grow flex-col items-center overflow-y-scroll p-2 md:overflow-auto">
+									<div className="flex grow flex-col items-center gap-2 overflow-y-scroll p-2 md:overflow-auto">
 										<div className="mx-auto flex w-full flex-col ">
 											<Outlet />
 										</div>
