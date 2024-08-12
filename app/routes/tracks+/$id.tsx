@@ -75,18 +75,15 @@ export const action = async ({ request, params, context: { storageContext } }: A
 export async function loader({ params, context }: LoaderFunctionArgs) {
 	const notFoundResponse = new Response('Not found', { status: 404 })
 	const trackId = params.id as string
-	console.info(params)
-	console.info('Found trackId in loader', trackId)
 
 	if (!trackId) {
-		console.warn('No trackId')
+		console.error('No trackId')
 		return notFoundResponse
 	}
-	console.info('querying for track')
 	const track: TrackWithVersions = await getTrackWithVersionsByTrackId(context.storageContext, trackId)
 
 	if (!track) {
-		console.warn('No track found')
+		console.error('No track found')
 		return notFoundResponse
 	}
 
