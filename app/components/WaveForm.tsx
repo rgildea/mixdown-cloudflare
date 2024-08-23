@@ -19,7 +19,7 @@ interface WaveformProps {
 
 const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => {
 	const waveformRenderCounter = useRef(0)
-	const redrawCount = useRef(0)
+	// const redrawCount = useRef(0)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const hoverRef = useRef<HTMLDivElement>(null)
 	const [duration, setDuration] = useState('0:00')
@@ -57,19 +57,19 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 
 		// Error handling
 		if (!canvas) {
-			console.log('Error: Canvas element is missing.')
+			console.error('Error: Canvas element is missing.')
 		}
 		if (!ctx) {
-			console.log('Error: Canvas context is missing.')
+			console.error('Error: Canvas context is missing.')
 		}
 		if (!audioElementRef) {
-			console.log('Error: Audio element is missing.')
+			console.error('Error: Audio element is missing.')
 		}
 		if (!containerRef.current) {
-			console.log('Error: Container is missing.')
+			console.error('Error: Container is missing.')
 		}
 		if (!hoverRef.current) {
-			console.log('Error: Hover element is missing.')
+			console.error('Error: Hover element is missing.')
 		}
 
 		const waveSurfer = WaveSurfer.create({
@@ -84,24 +84,19 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 		})
 
 		waveformRenderCounter.current += 1
-		console.log('Creating Waveform component', waveformRenderCounter.current)
+		// console.info('Creating Waveform component', waveformRenderCounter.current)
 
 		if (!waveSurfer) {
-			console.log('Error: Wavesurfer is not initialized properly.')
+			console.error('Error: Wavesurfer is not initialized properly.')
 		} else {
-			console.log('Wavesurfer is initialized properly.')
+			// console.info('Wavesurfer is initialized properly.')
 		}
 
 		const onClick = (e: number) => {
-			// if (!playerDispatch) return
+			if (!playerDispatch) return
 			if (!audioElementRef.current) return
 			const seekPosition = +(e * waveSurfer.getDuration()).toFixed(2)
-			console.log('1. onClick Start seeking to', seekPosition)
-			console.log('Before', audioElementRef.current.currentTime)
 			audioElementRef.current.currentTime = seekPosition
-			console.log('After', audioElementRef.current.currentTime)
-
-			// playerDispatch({ type: 'SEEK', time: seekPosition })
 		}
 		waveSurfer.on('click', onClick)
 
@@ -112,16 +107,16 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 		}
 		containerRef.current.addEventListener('pointermove', onPointerMove)
 
-		waveSurfer.on('redraw', () => {
-			console.log('Waveform is redrawing')
-		})
-		waveSurfer.on('redrawcomplete', () => {
-			redrawCount.current++
-			console.log('Waveform redraw complete', redrawCount.current)
-		})
-		waveSurfer.on('seeking', e => {
-			console.log('Waveform seeking handler Player is seeking', e)
-		})
+		// waveSurfer.on('redraw', () => {
+		// 	console.info('Waveform is redrawing')
+		// })
+		// waveSurfer.on('redrawcomplete', () => {
+		// 	redrawCount.current++
+		// 	console.info('Waveform redraw complete', redrawCount.current)
+		// })
+		// waveSurfer.on('seeking', e => {
+		// 	console.info('Waveform seeking handler Player is seeking', e)
+		// })
 
 		waveSurfer.on('timeupdate', currentTime => setCurrentTime(formatTime(currentTime)))
 

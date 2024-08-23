@@ -53,7 +53,7 @@ const tracksWithVersions = Prisma.validator<Prisma.TrackDefaultArgs>()({
 	select: {
 		id: true,
 		title: true,
-		versions: {
+		trackVersions: {
 			select: trackVersionWithAudioFile.select,
 			orderBy: { version: 'desc' },
 		},

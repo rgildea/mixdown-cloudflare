@@ -3,7 +3,7 @@ import { TrackWithVersions } from '#app/utils/track.server'
 import React, { createContext, useContext } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
 
-const DEFAULT_STATE: PlayerContextType = {
+const DEFAULT_STATE: PlayerContextData = {
 	playlist: [],
 	currentTrackIndex: undefined,
 	isPlaying: false,
@@ -13,18 +13,18 @@ const DEFAULT_STATE: PlayerContextType = {
 	viewSize: 'LARGE',
 }
 
-export type PlayerContextType = {
+export type PlayerContextData = {
 	playlist: TrackWithVersions[]
 	currentTrackIndex?: number
 	isPlaying: boolean
 	isLoading: boolean
 	isSeeking: boolean
 	player?: React.RefObject<AudioPlayer> | null
-	viewState?: 'VISIBLE' | 'HIDDEN'
+	viewState?: 'VISIBLE' | 'HIDDEN' | undefined
 	viewSize?: 'SMALL' | 'LARGE'
 } | null
 
-export const PlayerContext = createContext<PlayerContextType>(DEFAULT_STATE)
+export const PlayerContext = createContext<PlayerContextData>(DEFAULT_STATE)
 export const usePlayerContext = () => useContext(PlayerContext)
 export const PlayerDispatchContext = createContext<React.Dispatch<PlayerContextAction>>(() => {})
 export const usePlayerDispatchContext = () => useContext(PlayerDispatchContext)
@@ -65,7 +65,7 @@ export interface PlayerContextAction {
 	event?: React.SyntheticEvent | null
 }
 
-export const getCurrentTrack = (state: PlayerContextType): TrackWithVersions | null => {
+export const getCurrentTrack = (state: PlayerContextData): TrackWithVersions | null => {
 	if (!state?.playlist) {
 		return null
 	}
@@ -81,7 +81,7 @@ export const getCurrentTrack = (state: PlayerContextType): TrackWithVersions | n
 	return state.playlist[state.currentTrackIndex]
 }
 
-export const getTrackIndex = (state: PlayerContextType, track: TrackWithVersions): number => {
+export const getTrackIndex = (state: PlayerContextData, track: TrackWithVersions): number => {
 	if (!state?.playlist) {
 		return -1
 	}
@@ -89,7 +89,7 @@ export const getTrackIndex = (state: PlayerContextType, track: TrackWithVersions
 	return foundIndex
 }
 
-export const PlayerContextReducer = (state: PlayerContextType, action: PlayerContextAction): PlayerContextType => {
+export const PlayerContextReducer = (state: PlayerContextData, action: PlayerContextAction): PlayerContextData => {
 	state = state || DEFAULT_STATE
 	const currentTrackIndex = state.currentTrackIndex || 0
 	const audioElement = state.player?.current?.audio.current
@@ -113,21 +113,33 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 			player?.togglePlay(action?.event)
 			return state
 		case 'PLAY_TRACK':
+			if (!state.player) throw new Error('Player missing, cannot play track !')
 			if (!action?.track) throw new Error('Track missing from PLAY_TRACK action')
 			if (!action?.event) throw new Error('Event missing from PLAY_TRACK action')
-
 			if (getCurrentTrack(state)?.id === action.track.id) {
+				console.log('Toggling Play')
 				player?.togglePlay(action.event)
 			} else {
 				const newTrackIndex = getTrackIndex(state, action.track)
+				console.log('New Track Index:', newTrackIndex)
 				if (newTrackIndex === -1) {
 					console.info('Track not found in playlist')
 					// reset playlist
-					state = { ...state, playlist: [action.track], currentTrackIndex: 0 }
-
-					return state
+					state = { ...state, viewState: 'VISIBLE', playlist: [action.track], currentTrackIndex: 0 }
+					console.log('Resetting Playlist and Playing new track:', action.track)
+				} else {
+					console.log('Playing track:', newTrackIndex, action.track)
+					state = { ...state, viewState: 'VISIBLE', currentTrackIndex: newTrackIndex }
 				}
-				state = { ...state, currentTrackIndex: newTrackIndex }
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				audioElement?.addEventListener(
+					'canplay',
+					() => {
+						audioElement?.play()
+						audioElement?.removeEventListener('canplay', () => {})
+					},
+					{ once: true },
+				)
 			}
 			return state
 		case 'PLAY_PREV':
@@ -136,7 +148,7 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 				() => {
 					const promise = audioElement?.play()
 					if (promise) {
-						promise.catch(err => console.error(err))
+						promise.then(() => console.log('Playing Previous Track')).catch(err => console.error(err))
 					}
 				},
 				{ once: true },
@@ -181,7 +193,6 @@ export const PlayerContextReducer = (state: PlayerContextType, action: PlayerCon
 		case 'JUMP_BACKWARD':
 			if (!audioElement) return state
 			audioElement.currentTime = Math.max(audioElement.currentTime - 10, 0)
-
 			return state
 		case 'JUMP_FORWARD':
 			if (!audioElement) return state

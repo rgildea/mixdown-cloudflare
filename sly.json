@@ -4,11 +4,7 @@
     {
       "name": "material-design-icons",
       "directory": "other/svg-icons",
-      "postinstall": [
-        "npm",
-        "run",
-        "build-icons"
-      ],
+      "postinstall": ["npm", "run", "build-icons"],
       "transformers": []
     }
   ]

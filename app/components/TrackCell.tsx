@@ -17,7 +17,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 	return (
 		trackUrl && (
 			<div
-				className={`${isTrackLoaded ? 'primary-foreground bg-primary' : ''} space-between group mx-0 flex h-20 w-full flex-nowrap items-center justify-between rounded-sm px-0  sm:h-16`}
+				className={`${isTrackLoaded ? 'primary-foreground bg-primary-foreground' : ''} group mx-0 flex h-12 w-full flex-nowrap items-center justify-between rounded-sm sm:h-8`}
 				data-tag="allowRowEvents"
 			>
 				<PlayButton size="sm" track={track} />
@@ -27,14 +27,14 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 				>
 					{track.title}
 				</div>
-				<Button variant="playbutton" size={'trackrow'} asChild>
+				<Button className="invisible group-hover:visible" variant="playbutton" size={'trackrow'} asChild>
 					<NavLink to={`/tracks/${track.id}?edit`}>
 						<InlineIcon className="size-4 sm:size-6" icon="mdi:pencil" />
 					</NavLink>
 				</Button>
 				<Form key={track.id} method="DELETE" action={trackUrl}>
 					<Button
-						className="ml-auto p-0 text-button focus-visible:ring-0"
+						className="invisible ml-auto p-0 text-button focus-visible:ring-0 group-hover:visible"
 						type="submit"
 						variant="playbutton-destructive"
 						onClick={e => {
@@ -44,7 +44,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 							e.preventDefault()
 						}}
 					>
-						<InlineIcon className="size-6 sm:size-4" icon="mdi:delete" />
+						<InlineIcon className="invisible size-6 group-hover:visible sm:size-4" icon="mdi:delete" />
 					</Button>{' '}
 				</Form>
 			</div>
