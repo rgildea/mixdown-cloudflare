@@ -3,6 +3,7 @@ import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
+import { TrackVersion } from '@prisma/client'
 import { NavLink } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
@@ -39,6 +40,7 @@ export interface MixdownPlayerProps {
 	className?: string
 	url?: string
 	track?: TrackWithVersions
+	trackVersion?: TrackVersion
 	embed?: boolean
 }
 

@@ -7,12 +7,13 @@ import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { requireUserId } from '#app/utils/auth.server'
 import { cn, getUserImgSrc } from '#app/utils/misc'
-import { TrackWithVersions, getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
+import { getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
 import { useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/cloudflare'
+import { ActionFunction, ActionFunctionArgs, json, LoaderFunction, redirect } from '@remix-run/cloudflare'
 import { Form, Link, useActionData, useLoaderData } from '@remix-run/react'
 import { useContext, useEffect, useRef, useState } from 'react'
+import invariant from 'tiny-invariant'
 import { z } from 'zod'
 
 // Define a schema to validate the form input
@@ -21,7 +22,7 @@ const schema = z.object({
 	description: z.string().max(255, 'Description must be less than 255 characters').optional(),
 })
 
-export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
+export const action = (async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
 	const formData = await request.formData()
 	console.log('formData:', formData)
 	const submission = parseWithZod(formData, { schema })
@@ -60,28 +61,37 @@ export const action = async ({ request, params, context: { storageContext } }: A
 	}
 
 	return redirect(`/tracks/${track.id}`)
-}
+}) satisfies ActionFunction
 
-export async function loader({ params, context }: LoaderFunctionArgs) {
-	const notFoundResponse = new Response('Not found', { status: 404 })
+export const loader = (async ({ params, context }) => {
+	invariant(params.id, 'No trackId')
 	const trackId = params.id as string
+	const notFoundResponse = new Response('Not found', { status: 404 })
 
-	if (!trackId) {
-		console.error('No trackId')
-		return notFoundResponse
-	}
-	const track: TrackWithVersions = await getTrackWithVersionsByTrackId(context.storageContext, trackId)
-
+	const track = await context.storageContext.db.track.findUnique({
+		where: {
+			id: trackId,
+		},
+		include: {
+			trackVersions: {
+				orderBy: {
+					created_at: 'desc',
+				},
+			},
+			creator: true,
+			activeTrackVersion: true,
+		},
+	})
 	if (!track) {
 		console.error('No track found')
-		return notFoundResponse
+		throw notFoundResponse
 	}
 
-	return { track }
-}
+	return json({ track })
+}) satisfies LoaderFunction
 
 export default function TrackRoute() {
-	const { track } = useLoaderData<typeof loader>() as { track: TrackWithVersions }
+	const { track } = useLoaderData<typeof loader>() // get the track from the loader data
 	const titleDispatch = useContext(TitleDispatchContext)
 	const lastResult = useActionData<typeof action>()
 	const playerDispatch = useContext(PlayerDispatchContext)
@@ -268,7 +278,12 @@ export default function TrackRoute() {
 				</form>
 			</div>
 			<CardContent className="px-0">
-				<MixdownPlayer track={track} key="player" embed={true} />
+				<MixdownPlayer
+					track={track}
+					trackVersion={track.trackVersions.find(version => version.id === selectedVersionId)}
+					key="player"
+					embed={true}
+				/>
 				<Form method="post" className="flex flex-col gap-2">
 					<div className="font-medium leading-none">{versionItems}</div>
 				</Form>

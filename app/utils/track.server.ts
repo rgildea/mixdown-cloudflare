@@ -1,22 +1,25 @@
 import { Prisma, PrismaClient } from '@prisma/client'
 import { StorageContext } from './auth.server'
 
-const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({
+const trackVersionWithAudioFileSelect = {
+	id: true,
+	version: true,
+	title: true,
+	audioFile: {
+		select: {
+			id: true,
+			fileKey: true,
+			url: true,
+		},
+	},
+}
+
+const trackWithVersionsSelect = {
 	id: true,
 	title: true,
 	description: true,
 	activeTrackVersion: {
-		select: {
-			id: true,
-			title: true,
-			version: true,
-			audioFile: {
-				select: {
-					fileKey: true,
-					url: true,
-				},
-			},
-		},
+		select: trackVersionWithAudioFileSelect,
 	},
 	creator: {
 		select: {
@@ -26,20 +29,10 @@ const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({
 		},
 	},
 	trackVersions: {
-		select: {
-			id: true,
-			title: true,
-			version: true,
-			audioFile: {
-				select: {
-					fileKey: true,
-					url: true,
-				},
-			},
-		},
+		select: trackVersionWithAudioFileSelect,
 		orderBy: { version: 'desc' },
 	},
-})
+} satisfies Prisma.TrackSelect
 
 export type TrackWithVersions = Prisma.TrackGetPayload<{ select: typeof trackWithVersionsSelect }>
 
@@ -136,9 +129,6 @@ export async function getTrackByAudioFile(storageContext: StorageContext, audioF
 		},
 	})
 
-	// if (!track) {
-	// 	throw new Error('Track not found')
-	// }
 	return track
 }
 export class TrackNotFoundError extends Error {
