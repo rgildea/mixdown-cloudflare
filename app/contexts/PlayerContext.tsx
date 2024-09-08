@@ -135,6 +135,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 				audioElement?.addEventListener(
 					'canplay',
 					() => {
+						console.log('Playing new track:', action.track)
 						audioElement?.play()
 						audioElement?.removeEventListener('canplay', () => {})
 					},
@@ -177,6 +178,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			return { ...state, isPlaying: true, viewState: 'VISIBLE' }
 		case 'PLAYBACK_ERROR':
 			console.warn('Playback error:', action.error)
+			console.log('Current Source in player:', state.player?.current?.audio.current?.currentSrc)
 			return state
 		case 'PLAYBACK_PAUSED':
 			return { ...state, isPlaying: false }

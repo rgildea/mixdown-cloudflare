@@ -19,13 +19,13 @@ interface WaveformProps {
 
 const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => {
 	const waveformRenderCounter = useRef(0)
-	// const redrawCount = useRef(0)
+	const redrawCount = useRef(0)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const hoverRef = useRef<HTMLDivElement>(null)
 	const [duration, setDuration] = useState('0:00')
 	const [currentTime, setCurrentTime] = useState('0:00')
 	const playerDispatch = usePlayerDispatchContext()
-
+	console.log('Waveform:', currentSrc)
 	useEffect(() => {
 		if (!currentSrc || !audioElementRef?.current || !containerRef?.current) return
 		const canvas = document.createElement('canvas')
@@ -84,12 +84,12 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 		})
 
 		waveformRenderCounter.current += 1
-		// console.info('Creating Waveform component', waveformRenderCounter.current)
+		console.info('Creating Waveform component', waveformRenderCounter.current)
 
 		if (!waveSurfer) {
 			console.error('Error: Wavesurfer is not initialized properly.')
 		} else {
-			// console.info('Wavesurfer is initialized properly.')
+			console.info('Wavesurfer is initialized properly.')
 		}
 
 		const onClick = (e: number) => {
@@ -107,16 +107,16 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 		}
 		containerRef.current.addEventListener('pointermove', onPointerMove)
 
-		// waveSurfer.on('redraw', () => {
-		// 	console.info('Waveform is redrawing')
-		// })
-		// waveSurfer.on('redrawcomplete', () => {
-		// 	redrawCount.current++
-		// 	console.info('Waveform redraw complete', redrawCount.current)
-		// })
-		// waveSurfer.on('seeking', e => {
-		// 	console.info('Waveform seeking handler Player is seeking', e)
-		// })
+		waveSurfer.on('redraw', () => {
+			console.info('Waveform is redrawing')
+		})
+		waveSurfer.on('redrawcomplete', () => {
+			redrawCount.current++
+			console.info('Waveform redraw complete', redrawCount.current)
+		})
+		waveSurfer.on('seeking', e => {
+			console.info('Waveform seeking handler Player is seeking', e)
+		})
 
 		waveSurfer.on('timeupdate', currentTime => setCurrentTime(formatTime(currentTime)))
 

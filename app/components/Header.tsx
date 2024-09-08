@@ -20,10 +20,10 @@ const Header = () => {
 	const finalIcon = titleContext?.icon ?? null
 
 	return (
-		<header className="container mt-1 h-12 shrink-0 grow-0 pb-0  ">
-			<nav className="flex items-center justify-between">
+		<header className="mx-auto h-8 w-full">
+			<nav className="flex shrink-0 grow-0 justify-between align-top">
 				<Link className="" to="/">
-					<CardTitle className="flex flex-nowrap items-center text-4xl text-card-foreground">
+					<CardTitle className="flex flex-nowrap items-center font-nourd text-2xl font-normal tracking-wide text-card-foreground">
 						{finalIcon && <Icon name="mixdown-initials" />}
 						{finalTitle}
 					</CardTitle>
@@ -33,7 +33,7 @@ const Header = () => {
 					{user ? (
 						<UserDropdown />
 					) : (
-						<Button asChild variant="default" size="lg">
+						<Button asChild variant="default" className="size-7">
 							<Link to="/login">Log In</Link>
 						</Button>
 					)}

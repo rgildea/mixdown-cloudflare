@@ -1,9 +1,8 @@
 import { getCurrentTrack, usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
-import { TrackWithVersions } from '#app/utils/track.server'
+import { TrackVersionWithAudioFile, TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { TrackVersion } from '@prisma/client'
 import { NavLink } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
 import AudioPlayer from 'react-h5-audio-player'
@@ -13,7 +12,16 @@ import { CardTitle } from './ui/card'
 import WaveForm from './WaveForm'
 
 const getLatestVersionUrl = (track: TrackWithVersions) => {
-	return track?.activeTrackVersion?.audioFile?.url || ''
+	let version = track?.activeTrackVersion
+
+	if (!version) {
+		// version = track.trackVersions?.reduce((max, current) => {
+		// 	return current.version > max.version ? current : max
+		// }, track.trackVersions[0])
+		version = track.trackVersions[0]
+	}
+	console.log('getLatestVersionUrl:', version.audioFile?.url)
+	return version.audioFile?.url
 }
 
 export interface PlayerController {
@@ -40,7 +48,7 @@ export interface MixdownPlayerProps {
 	className?: string
 	url?: string
 	track?: TrackWithVersions
-	trackVersion?: TrackVersion
+	trackVersion?: TrackVersionWithAudioFile
 	embed?: boolean
 }
 

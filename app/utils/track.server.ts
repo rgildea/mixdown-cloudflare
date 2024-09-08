@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client'
 import { StorageContext } from './auth.server'
+import { userBasicSelect } from './user.server'
 
 const trackVersionWithAudioFileSelect = {
 	id: true,
@@ -12,7 +13,7 @@ const trackVersionWithAudioFileSelect = {
 			url: true,
 		},
 	},
-}
+} satisfies Prisma.TrackVersionSelect
 
 const trackWithVersionsSelect = {
 	id: true,
@@ -22,19 +23,18 @@ const trackWithVersionsSelect = {
 		select: trackVersionWithAudioFileSelect,
 	},
 	creator: {
-		select: {
-			id: true,
-			username: true,
-			image: undefined,
-		},
+		select: userBasicSelect,
 	},
 	trackVersions: {
 		select: trackVersionWithAudioFileSelect,
-		orderBy: { version: 'desc' },
+		orderBy: { created_at: 'desc' },
 	},
 } satisfies Prisma.TrackSelect
 
 export type TrackWithVersions = Prisma.TrackGetPayload<{ select: typeof trackWithVersionsSelect }>
+export type TrackVersionWithAudioFile = Prisma.TrackVersionGetPayload<{
+	select: typeof trackVersionWithAudioFileSelect
+}>
 
 // this creates the track via creating a track version
 export async function createTrack(storageContext: StorageContext, userId: string, title: string) {
@@ -177,23 +177,42 @@ export async function deleteTrackById(storageContext: StorageContext, trackId: s
 	}
 }
 
+export async function updateTrackActiveVersion(storageContext: StorageContext, trackId: string, versionId: string) {
+	const { db } = storageContext
+
+	try {
+		const updatedTrack = await db.track.update({
+			where: { id: trackId },
+			data: {
+				activeTrackVersion: {
+					connect: {
+						id: versionId,
+					},
+				},
+			},
+			select: trackWithVersionsSelect,
+		})
+
+		return updatedTrack
+	} catch (error) {
+		console.error(error)
+		throw new Error('Failed to update track active version')
+	}
+}
+
 export async function updateTrack(
 	storageContext: StorageContext,
 	trackId: string,
 	title: string,
+	activeTrackVersion?: TrackVersionWithAudioFile,
 	description?: string,
-	creatorId?: string,
 ) {
 	const { db } = storageContext
 	try {
-		const where = creatorId ? { id: trackId, creatorId: creatorId } : { id: trackId }
-
 		const updatedTrack = await db.track.update({
-			where,
-			data: {
-				title,
-				description,
-			},
+			where: { id: trackId },
+			data: { title, description, activeTrackVersion: { connect: { id: activeTrackVersion?.id } } },
+			select: trackWithVersionsSelect,
 		})
 
 		return updatedTrack

@@ -26,7 +26,7 @@ const TrackTile: React.FC<TrackTileProps> = ({ showPlaybutton, className, track,
 	return (
 		<div
 			className={cn(
-				'size-md m-1 mb-4 mr-4 grid shrink-0 grow-0 items-center rounded-sm bg-gray-300',
+				'size-md mb-4 mr-4 grid shrink-0 grow-0 items-center rounded-sm bg-gray-300',
 				size ? sizes[size] : sizes.default,
 				className,
 			)}

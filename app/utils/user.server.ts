@@ -1,3 +1,9 @@
+export const userBasicSelect = {
+	id: true,
+	username: true,
+	image: { select: { id: true } },
+}
+
 export const UserSelect = {
 	id: true,
 	name: true,
