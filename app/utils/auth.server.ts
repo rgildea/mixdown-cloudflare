@@ -1,4 +1,4 @@
-import { Connection, Password, Prisma, PrismaClient, User } from '@prisma/client/edge'
+import { Connection, Password, Prisma, PrismaClient, User } from '@prisma/client'
 import { redirect } from '@remix-run/cloudflare'
 import bcrypt from 'bcryptjs'
 import { safeRedirect } from 'remix-utils/safe-redirect'
@@ -53,7 +53,7 @@ const tracksWithVersions = Prisma.validator<Prisma.TrackDefaultArgs>()({
 	select: {
 		id: true,
 		title: true,
-		versions: {
+		trackVersions: {
 			select: trackVersionWithAudioFile.select,
 			orderBy: { version: 'desc' },
 		},

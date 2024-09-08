@@ -1,7 +1,7 @@
+import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
-import { Card, CardContent, CardHeader } from '#app/components/ui/card'
-import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
+import { getCurrentTrack, PlayerDispatchContext, usePlayerContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -14,12 +14,12 @@ export const action: ActionFunction = async () => {
 }
 
 export default function Route() {
+	const playerState = usePlayerContext()
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
 	const playerDispatch = useContext(PlayerDispatchContext)
 	const titleDispatch = useContext(TitleDispatchContext)
-
 	const { tracks } = loaderData
 
 	// set the title and icon for the page
@@ -35,27 +35,26 @@ export default function Route() {
 	}, [playerDispatch, tracks])
 
 	return (
-		<Card className="min-h-screen border-none shadow-none">
-			<CardHeader className="flex flex-row items-end justify-between px-0 py-1">
-				<Button asChild>
-					<Link
-						className="leading font-sans text-body-sm font-medium hover:font-semibold hover:text-white"
-						to="?new=true"
-					>
-						<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
-						&nbsp; Add Track
-					</Link>
-				</Button>
-				{/* <Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
+		<div className="flex grow flex-col items-start gap-1 px-0">
+			<Button asChild>
+				<Link
+					className="leading font-sans text-body-sm font-medium hover:font-semibold hover:text-white"
+					to="?new=true"
+				>
+					<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
+					&nbsp; Add Track
+				</Link>
+			</Button>
+			{/* <Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
 					<Link to="?new=true">
-						<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
-						&nbsp; Add Track
+					<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
+					&nbsp; Add Track
 					</Link>
-				</Button> */}
-			</CardHeader>
-			<CardContent className="grow px-0">
-				<TrackList tracks={tracks || []} />
-			</CardContent>
-		</Card>
+					</Button> */}
+
+			<MixdownPlayer track={getCurrentTrack(playerState) ?? undefined} key="player" embed={true} />
+			{/* <MixdownPlayer embed className="fixed bottom-0 left-0 mt-auto shrink-0 grow-0" key="player" /> */}
+			<TrackList tracks={tracks || []} />
+		</div>
 	)
 }

@@ -1,8 +1,6 @@
-import Logo from '#app/components/Logo'
-import { getFormProps, useForm } from '@conform-to/react'
+import Header from '#app/components/Header'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import {
 	ActionFunctionArgs,
 	HeadersFunction,
@@ -11,38 +9,14 @@ import {
 	MetaFunction,
 	json,
 } from '@remix-run/cloudflare'
-import {
-	Form,
-	Link,
-	Links,
-	Meta,
-	Outlet,
-	Scripts,
-	ScrollRestoration,
-	useFetcher,
-	useFetchers,
-	useLoaderData,
-	useSubmit,
-} from '@remix-run/react'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useReducer, useRef } from 'react'
+import { useReducer } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import { z } from 'zod'
-import MixdownPlayer from './components/MixdownPlayer.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Footer from './components/Footer.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from './components/toaster.tsx'
-import { Button } from './components/ui/button.tsx'
-import { CardTitle } from './components/ui/card.tsx'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuPortal,
-	DropdownMenuTrigger,
-} from './components/ui/dropdown-menu.tsx'
-import { Icon } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
 import { PlayerContext, PlayerContextReducer, PlayerDispatchContext } from './contexts/PlayerContext.tsx'
 import { TitleContext, TitleContextReducer, TitleDispatchContext } from './contexts/TitleContext.tsx'
@@ -51,16 +25,15 @@ import nourdFontStyleSheetUrl from './styles/font-nourd.css?url'
 import pixerFontStyleSheetUrl from './styles/font-pixer.css?url'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 import { getUserId, logout } from './utils/auth.server'
-import { ClientHintCheck, getHints, useHints } from './utils/client-hints.tsx'
+import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { getEnv } from './utils/env.server.ts'
 import { getHoneypot } from './utils/honeypot.server.ts'
-import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
+import { combineHeaders, getDomainUrl } from './utils/misc.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
-import { useRequestInfo } from './utils/request-info.ts'
-import { Theme, getTheme, setTheme } from './utils/theme.server.ts'
+import { Theme, ThemeFormSchema, getTheme, setTheme, useTheme } from './utils/theme'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server'
-import { useOptionalUser, useUser } from './utils/user.ts'
+import { UserSelect } from './utils/user.server.ts'
 
 export const links: LinksFunction = () => {
 	return [
@@ -119,21 +92,7 @@ export async function loader({
 		? await time(
 				() =>
 					storageContext.db.user.findUniqueOrThrow({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							email: true,
-							image: { select: { id: true } },
-							roles: {
-								select: {
-									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
-									},
-								},
-							},
-						},
+						select: UserSelect,
 						where: { id: userId },
 					}),
 				{ timings, type: 'find user', desc: 'find user in root' },
@@ -181,10 +140,6 @@ export const headers: HeadersFunction = ({ loaderHeaders }) => {
 	}
 	return headers
 }
-
-const ThemeFormSchema = z.object({
-	theme: z.enum(['system', 'light', 'dark']),
-})
 
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()
@@ -240,18 +195,13 @@ function Document({
 function App() {
 	const data = useLoaderData<typeof loader>()
 	const nonce = useNonce()
-	const user = useOptionalUser()
 	const theme = useTheme()
 	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	// const searchBar = null //isOnSearchPage ? null : <SearchBar status="idle" /> // Change the variable name to 'searchBar'
 	useToast(data.toast)
-	// const navigate = useNavigate()
-	// const location = useLocation()
-	// const shouldShowBackButton = location.pathname !== '/' && location.pathname !== '/dashboard'
+
 	const [playerState, playerDispatch] = useReducer(PlayerContextReducer, null)
 	const [titleState, titleDispatch] = useReducer(TitleContextReducer, null)
-	const title = titleState?.title ?? ''
-	const icon = titleState?.icon
 
 	return (
 		<TitleContext.Provider value={titleState}>
@@ -259,51 +209,16 @@ function App() {
 				<PlayerContext.Provider value={playerState}>
 					<PlayerDispatchContext.Provider value={playerDispatch}>
 						<Document nonce={nonce} theme={theme} env={{}}>
-							<AnimatePresence>
-								<motion.div key="main" layout="size" className="min-h-dvh">
-									<header className="container mt-1 h-12 shrink-0 grow-0 pb-0  ">
-										<nav className="grid grid-cols-3 items-center">
-											<Link className="col-span-2" to="/">
-												<CardTitle className="flex flex-nowrap items-center text-4xl text-card-foreground">
-													{icon && <Icon name="mixdown-initials" />}
-													{title}
-												</CardTitle>
-											</Link>
-											<div className="col-span-1 flex justify-end space-x-1">
-												<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-												{user ? (
-													<UserDropdown />
-												) : (
-													<Button asChild variant="default" size="lg">
-														<Link to="/login">Log In</Link>
-													</Button>
-												)}
-											</div>
-											{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
-										</nav>
-									</header>
+							<div className="flex grow flex-col items-center gap-2 overflow-y-scroll p-2 md:overflow-auto">
+								<Header />
+								<div className="mx-auto flex w-full flex-col ">
+									<Outlet />
+								</div>
+								<Footer />
+							</div>
 
-									<div className="flex grow flex-col items-center overflow-y-scroll p-2 md:overflow-auto">
-										<div className="mx-auto flex w-full flex-col ">
-											<Outlet />
-										</div>
+							{/* {shouldRenderPlayer && <MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />} */}
 
-										<Logo size="sm" className="visible text-foreground" />
-										<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">
-											<Link to="https://www.ryangildea.com">© {new Date().getFullYear()} Ryan Gildea</Link>
-											&nbsp;
-											<Link to="https://github.com/rgildea/">
-												<InlineIcon className="size-3" icon="mdi:github" />
-											</Link>{' '}
-											&nbsp;
-											<Link target="_blank" to="https://www.linkedin.com/in/ryangildea/" rel="noreferrer">
-												<InlineIcon className="size-3" icon="mdi:linkedin" />
-											</Link>
-										</div>
-									</div>
-									<MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />
-								</motion.div>
-							</AnimatePresence>
 							<EpicToaster closeButton position="top-center" theme={theme} />
 							<EpicProgress />
 						</Document>
@@ -324,143 +239,6 @@ function AppWithProviders() {
 }
 
 export default withSentry(AppWithProviders)
-
-function UserDropdown() {
-	const user = useUser()
-	const submit = useSubmit()
-	const formRef = useRef<HTMLFormElement>(null)
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button asChild variant="ghost">
-					<Link
-						to={`/users/${user.username}`}
-						// this is for progressive enhancement
-						onClick={e => e.preventDefault()}
-						className="flex items-center gap-2"
-					>
-						<img
-							className="h-8 w-8 rounded-full object-cover"
-							alt={user.name ?? user.username}
-							src={getUserImgSrc(user.image?.id)}
-						/>
-						{/* <span className="text-body-sm font-bold">{user.name ?? user.username}</span> */}
-					</Link>
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuPortal>
-				<DropdownMenuContent sideOffset={8} align="start">
-					<DropdownMenuItem asChild>
-						{/* <Link prefetch="intent" to={`/users/${user.username}`}> */}
-						<>
-							<Icon className="text-body-md" name="avatar">
-								<span className="text-xs text-muted-foreground">
-									{user.name ?? user.username} ({user.email}){' '}
-								</span>
-							</Icon>
-						</>
-						{/* </Link> */}
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/tracks`}>
-							<Icon className="text-body-md" name="pencil-2">
-								Tracks
-							</Icon>
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem
-						asChild
-						// this prevents the menu from closing before the form submission is completed
-						onSelect={event => {
-							event.preventDefault()
-							submit(formRef.current)
-						}}
-					>
-						<Form action="/logout" method="POST" ref={formRef}>
-							<Icon className="text-body-md" name="exit">
-								<button type="submit">Logout</button>
-							</Icon>
-						</Form>
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenuPortal>
-		</DropdownMenu>
-	)
-}
-
-/**
- * @returns the user's theme preference, or the client hint theme if the user
- * has not set a preference.
- */
-export function useTheme() {
-	const hints = useHints()
-	const requestInfo = useRequestInfo()
-	const optimisticMode = useOptimisticThemeMode()
-	if (optimisticMode) {
-		return optimisticMode === 'system' ? hints.theme : optimisticMode
-	}
-	return requestInfo.userPrefs.theme ?? hints.theme
-}
-
-/**
- * If the user's changing their theme mode preference, this will return the
- * value it's being changed to.
- */
-export function useOptimisticThemeMode() {
-	const fetchers = useFetchers()
-	const themeFetcher = fetchers.find(f => f.formAction === '/')
-
-	if (themeFetcher && themeFetcher.formData) {
-		const submission = parseWithZod(themeFetcher.formData, {
-			schema: ThemeFormSchema,
-		})
-
-		if (submission.status === 'success') {
-			return submission.value.theme
-		}
-	}
-}
-
-function ThemeSwitch({ userPreference }: { userPreference?: Theme | null }) {
-	const fetcher = useFetcher<typeof action>()
-
-	const [form] = useForm({
-		id: 'theme-switch',
-		lastResult: fetcher.data?.result,
-	})
-
-	const optimisticMode = useOptimisticThemeMode()
-	const mode = optimisticMode ?? userPreference ?? 'system'
-	const nextMode = mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system'
-	const modeLabel = {
-		light: (
-			<Icon name="sun">
-				<span className="sr-only">Light</span>
-			</Icon>
-		),
-		dark: (
-			<Icon name="moon">
-				<span className="sr-only">Dark</span>
-			</Icon>
-		),
-		system: (
-			<Icon name="laptop">
-				<span className="sr-only">System</span>
-			</Icon>
-		),
-	}
-
-	return (
-		<fetcher.Form method="POST" {...getFormProps(form)}>
-			<input type="hidden" name="theme" value={nextMode} />
-			<div className="flex gap-2">
-				<button type="submit" className="primary flex h-8 w-8 cursor-pointer items-center justify-center">
-					{modeLabel[mode]}
-				</button>
-			</div>
-		</fetcher.Form>
-	)
-}
 
 export function ErrorBoundary() {
 	// the nonce doesn't rely on the loader so we can access that

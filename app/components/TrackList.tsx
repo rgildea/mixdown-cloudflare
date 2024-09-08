@@ -1,10 +1,8 @@
 import DataTable from '#app/components/DataTableBase'
-import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { useIsPending } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { Link } from '@remix-run/react'
-import { useContext } from 'react'
+import { Link, useNavigate } from '@remix-run/react'
 import TrackCell from './TrackCell'
 import { Button } from './ui/button'
 
@@ -15,12 +13,12 @@ interface TrackListProps {
 }
 
 function TrackList({ tracks }: TrackListProps) {
-	const dispatch = useContext(PlayerDispatchContext)
+	// const dispatch = useContext(PlayerDispatchContext)
 	const isPending = useIsPending()
 
-	const handlePlayButtonClicked = (track: TrackWithVersions, e: React.SyntheticEvent) => {
-		dispatch({ type: 'PLAY_TRACK', track, event: e })
-	}
+	// const handlePlayButtonClicked = (track: TrackWithVersions, e: React.SyntheticEvent) => {
+	// 	dispatch({ type: 'PLAY_TRACK', track, event: e })
+	// }
 
 	const customStyles = {
 		rows: {
@@ -70,15 +68,17 @@ function TrackList({ tracks }: TrackListProps) {
 		</div>
 	)
 
+	const navigate = useNavigate()
+
 	return (
 		<DataTable
 			progressPending={isPending}
 			noDataComponent={noDataComponent}
 			highlightOnHover
 			pointerOnHover
-			striped
-			onRowClicked={(row, e) => {
-				handlePlayButtonClicked(row, e)
+			onRowClicked={row => {
+				navigate(`/tracks/${row.id}`)
+				// handlePlayButtonClicked(row, e)
 			}}
 			columns={cols}
 			data={tracks}

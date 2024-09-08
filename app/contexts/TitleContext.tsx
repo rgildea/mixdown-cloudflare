@@ -1,4 +1,4 @@
-import React, { ReactElement, createContext } from 'react'
+import React, { ReactElement, createContext, useContext } from 'react'
 
 export type TitleContextType = {
 	title: string
@@ -6,7 +6,10 @@ export type TitleContextType = {
 } | null
 
 export const TitleContext = createContext<TitleContextType>({ title: 'Mixdown', icon: null })
+export const useTitleContext = () => useContext(TitleContext)
 export const TitleDispatchContext = createContext<React.Dispatch<TitleContextAction>>(() => {})
+export const useTitleDispatchContext = () => useContext(TitleDispatchContext)
+
 export type TitleContextActionType = 'SET_TITLE'
 
 export interface TitleContextAction {

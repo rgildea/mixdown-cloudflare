@@ -27,6 +27,10 @@ const PlayButton: React.FC<PlayButtonProps> = ({ className, track, size }) => {
 	const isPlaying = context?.player?.current?.isPlaying() || false
 	let icon = 'mdi:exclamation'
 
+	// console.log('PlayButton.tsx: PlayButton: className:', className)
+	// console.log('PlayButton.tsx: PlayButton: track:', track)
+	// console.log('PlayButton.tsx: PlayButton: size:', size)
+
 	if (!track) return <></>
 
 	icon = `mdi:${isTrackLoaded ? (isPlaying ? 'pause-circle' : 'play-circle') : 'play-circle-outline'}`

@@ -1,42 +1,74 @@
-import { Prisma, PrismaClient } from '@prisma/client/edge'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { StorageContext } from './auth.server'
+import { userBasicSelect } from './user.server'
 
-const trackWithVersionsSelect = Prisma.validator<Prisma.TrackSelect>()({
+const trackVersionWithAudioFileSelect = {
+	id: true,
+	version: true,
+	title: true,
+	audioFile: {
+		select: {
+			id: true,
+			fileKey: true,
+			url: true,
+		},
+	},
+} satisfies Prisma.TrackVersionSelect
+
+const trackWithVersionsSelect = {
 	id: true,
 	title: true,
 	description: true,
-	versions: {
-		select: {
-			id: true,
-			title: true,
-			version: true,
-			audioFile: {
-				select: {
-					fileKey: true,
-					url: true,
-				},
-			},
-		},
-		orderBy: { version: 'desc' },
+	activeTrackVersion: {
+		select: trackVersionWithAudioFileSelect,
 	},
-})
+	creator: {
+		select: userBasicSelect,
+	},
+	trackVersions: {
+		select: trackVersionWithAudioFileSelect,
+		orderBy: { created_at: 'desc' },
+	},
+} satisfies Prisma.TrackSelect
 
 export type TrackWithVersions = Prisma.TrackGetPayload<{ select: typeof trackWithVersionsSelect }>
+export type TrackVersionWithAudioFile = Prisma.TrackVersionGetPayload<{
+	select: typeof trackVersionWithAudioFileSelect
+}>
 
+// this creates the track via creating a track version
 export async function createTrack(storageContext: StorageContext, userId: string, title: string) {
 	const { db } = storageContext
-	const track = await db.track.create({
+	const trackVersion = await db.trackVersion.create({
 		data: {
 			title,
-			creatorId: userId,
-			versions: {
+			track: {
 				create: {
-					title: `${title} version 1`,
-					version: 1,
+					title,
+					creator: {
+						connect: {
+							id: userId,
+						},
+					},
 				},
 			},
 		},
 	})
+
+	const track = db.track.update({
+		where: {
+			id: trackVersion.trackId,
+		},
+		data: {
+			activeTrackVersion: {
+				connect: {
+					id: trackVersion.id,
+				},
+			},
+		},
+		select: trackWithVersionsSelect,
+	})
+
 	return track
 }
 
@@ -87,7 +119,7 @@ export async function getTrackByAudioFile(storageContext: StorageContext, audioF
 	const track = await db.track.findFirst({
 		select: trackWithVersionsSelect,
 		where: {
-			versions: {
+			trackVersions: {
 				some: {
 					audioFile: {
 						fileKey: audioFileKey,
@@ -97,9 +129,6 @@ export async function getTrackByAudioFile(storageContext: StorageContext, audioF
 		},
 	})
 
-	// if (!track) {
-	// 	throw new Error('Track not found')
-	// }
 	return track
 }
 export class TrackNotFoundError extends Error {
@@ -148,23 +177,42 @@ export async function deleteTrackById(storageContext: StorageContext, trackId: s
 	}
 }
 
+export async function updateTrackActiveVersion(storageContext: StorageContext, trackId: string, versionId: string) {
+	const { db } = storageContext
+
+	try {
+		const updatedTrack = await db.track.update({
+			where: { id: trackId },
+			data: {
+				activeTrackVersion: {
+					connect: {
+						id: versionId,
+					},
+				},
+			},
+			select: trackWithVersionsSelect,
+		})
+
+		return updatedTrack
+	} catch (error) {
+		console.error(error)
+		throw new Error('Failed to update track active version')
+	}
+}
+
 export async function updateTrack(
 	storageContext: StorageContext,
 	trackId: string,
 	title: string,
+	activeTrackVersion?: TrackVersionWithAudioFile,
 	description?: string,
-	creatorId?: string,
 ) {
 	const { db } = storageContext
 	try {
-		const where = creatorId ? { id: trackId, creatorId: creatorId } : { id: trackId }
-
 		const updatedTrack = await db.track.update({
-			where,
-			data: {
-				title,
-				description,
-			},
+			where: { id: trackId },
+			data: { title, description, activeTrackVersion: { connect: { id: activeTrackVersion?.id } } },
+			select: trackWithVersionsSelect,
 		})
 
 		return updatedTrack
@@ -192,7 +240,8 @@ export const createAudioFileRecord = async (
 				url: `/storage/${key}`,
 				version: {
 					create: {
-						title: `version of ${filename}`,
+						version: 1,
+						title: `version 1 of ${filename}`,
 						track: {
 							create: {
 								title: filename,
@@ -214,12 +263,32 @@ export const createAudioFileRecord = async (
 						track: {
 							select: {
 								id: true, // id of the track
+								activeTrackVersion: {
+									select: {
+										id: true, // id of the active version
+									},
+								},
 							},
 						},
 					},
 				},
 			},
 		})
+
+		const updateResult = await db.track.update({
+			where: {
+				id: result?.version?.track.id,
+			},
+			data: {
+				activeTrackVersion: {
+					connect: {
+						id: result?.version?.id,
+					},
+				},
+			},
+		})
+
+		console.log('Update Result', updateResult)
 
 		return result
 	} catch (error) {

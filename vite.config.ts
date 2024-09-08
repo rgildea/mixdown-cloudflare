@@ -15,6 +15,7 @@ export default defineConfig({
 		remix(remixConfig),
 		tsconfigPaths(),
 		sentryVitePlugin({
+			telemetry: false,
 			authToken: process.env.SENTRY_AUTH_TOKEN,
 			org: process.env.SENTRY_ORG,
 			project: process.env.SENTRY_PROJECT,

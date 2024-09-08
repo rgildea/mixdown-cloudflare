@@ -1,13 +1,13 @@
+import { action } from '#app/routes/tracks+/$id'
+import { useIsPending } from '#app/utils/misc'
+import { TrackWithVersions } from '#app/utils/track.server'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import { Field } from './forms'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Form, useActionData } from '@remix-run/react'
 import z from 'zod'
-import { TrackWithVersions } from '#app/utils/track.server'
-import { StatusButton } from './ui/status-button'
-import { useIsPending } from '#app/utils/misc'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { action } from '#app/routes/tracks+/$id'
+import { Field } from './forms'
 import { Button } from './ui/button'
+import { StatusButton } from './ui/status-button'
 
 export const TrackSchema = z.object({
 	title: z.string({ required_error: 'Title is required' }).min(3).max(100),
@@ -27,7 +27,7 @@ function EditTrackForm({ track, onCancelButtonClicked, onSubmitButtonClicked }: 
 	const [form, fields] = useForm({
 		id: 'edit-track',
 		constraint: getZodConstraint(TrackSchema),
-		lastResult: actionData?.result,
+		lastResult: actionData,
 		defaultValue: track as TrackWithVersions,
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: TrackSchema })
@@ -44,9 +44,7 @@ function EditTrackForm({ track, onCancelButtonClicked, onSubmitButtonClicked }: 
 			<div id={form.errorId} className="text-s h-2 font-semibold text-input-invalid">
 				{form.errors}
 			</div>
-			<div className="text-s h-2 font-semibold text-orange-500">
-				{actionData?.result?.status === 'success' && 'Success!'}
-			</div>
+			<div className="text-s h-2 font-semibold text-orange-500">{actionData?.status === 'success' && 'Success!'}</div>
 
 			<Field
 				labelProps={{ htmlFor: fields.title.id, children: 'Title' }}
