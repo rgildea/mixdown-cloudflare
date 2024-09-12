@@ -1,7 +1,7 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
-import { PlayerDispatchContext, usePlayerContext } from '#app/contexts/PlayerContext'
+import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -14,7 +14,6 @@ export const action: ActionFunction = async () => {
 }
 
 export default function Route() {
-	const playerState = usePlayerContext()
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
