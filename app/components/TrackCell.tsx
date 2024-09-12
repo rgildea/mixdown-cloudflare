@@ -28,7 +28,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 					{track.title}
 				</div>
 				<Button className="invisible group-hover:visible" variant="playbutton" size={'trackrow'} asChild>
-					<NavLink to={`/tracks/${track.id}?edit`}>
+					<NavLink to={`/tracks/${track.id}`}>
 						<InlineIcon className="size-4 sm:size-6" icon="mdi:pencil" />
 					</NavLink>
 				</Button>
