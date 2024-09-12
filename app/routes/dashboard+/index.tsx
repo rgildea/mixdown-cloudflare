@@ -1,7 +1,7 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
-import { getCurrentTrack, PlayerDispatchContext, usePlayerContext } from '#app/contexts/PlayerContext'
+import { PlayerDispatchContext, usePlayerContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -45,15 +45,7 @@ export default function Route() {
 					&nbsp; Add Track
 				</Link>
 			</Button>
-			{/* <Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
-					<Link to="?new=true">
-					<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
-					&nbsp; Add Track
-					</Link>
-					</Button> */}
-
-			<MixdownPlayer track={getCurrentTrack(playerState) ?? undefined} key="player" embed={true} />
-			{/* <MixdownPlayer embed className="fixed bottom-0 left-0 mt-auto shrink-0 grow-0" key="player" /> */}
+			<MixdownPlayer key="player" embed={true} />
 			<TrackList tracks={tracks || []} />
 		</div>
 	)

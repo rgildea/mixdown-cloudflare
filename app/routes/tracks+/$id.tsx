@@ -85,11 +85,11 @@ export const action = async ({ request, params, context: { storageContext } }: A
 
 		const trackId = track.id
 		if (!trackId) {
-			return new Response('Not found', { status: 404 })
+			throw new Response('Not found', { status: 404 })
 		}
 
 		if (!track) {
-			return new Response('Not found', { status: 404 })
+			throw new Response('Not found', { status: 404 })
 		}
 
 		const { title } = submission.value
@@ -106,7 +106,7 @@ export const action = async ({ request, params, context: { storageContext } }: A
 		}
 	}
 
-	return redirect(`/tracks/${trackId}`)
+	return submission.reply()
 }
 
 export const loader = (async ({ params, context }) => {
