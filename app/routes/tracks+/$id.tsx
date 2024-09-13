@@ -10,8 +10,9 @@ import { SubmissionResult, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunctionArgs, json, LoaderFunction, redirect } from '@remix-run/cloudflare'
-import { Link, useActionData, useFetcher, useLoaderData, useSearchParams } from '@remix-run/react'
+import { Link, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
 import { useEffect, useState } from 'react'
+import player from 'wavesurfer.js/dist/player.js'
 import { z } from 'zod'
 
 export type TrackFormAction = 'set-active-version' | 'edit-title'
@@ -128,14 +129,12 @@ const TrackRoute: React.FC = () => {
 	const versions = track.trackVersions
 	const activeTrackVersionId = track.activeTrackVersion?.id
 	const lastResult = useActionData<typeof action>() as SubmissionResult // get the last action result
-	const [searchParams, setSearchParams] = useSearchParams()
-	const selectedVersionId = searchParams.get('v')
+	const [selectedVersionId, setSelectedVersionId] = useState('')
 	const playerDispatch = usePlayerDispatchContext() // get the player dispatch function
 	const titleDispatch = useTitleDispatchContext() // get the title dispatch function
 
 	// get the version from the search params, or the active track version, or the first version
-	const initialTrackVersionId =
-		selectedVersionId ?? activeTrackVersionId ?? (versions.length ? versions[0]?.id : undefined)
+	const initialTrackVersionId = selectedVersionId || activeTrackVersionId || versions[0]?.id
 	if (!initialTrackVersionId) {
 		throw new Error('There are no track versions. Weird...')
 	}
@@ -179,17 +178,7 @@ const TrackRoute: React.FC = () => {
 	const versionItems = track.trackVersions.map(v => {
 		const icon = `mdi:star${v.id === activeTrackVersionId ? '' : '-outline'}`
 		return (
-			<button
-				className={`justify-left hover:bg-gray-300/60' mx-auto flex w-full flex-grow items-center gap-2 rounded-sm py-3 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
-				type="submit"
-				key={v.id}
-				onClick={() => {
-					console.log('submitting', v.id)
-					// set search paraam to update url on default selected track version
-					searchParams.set('v', v.id)
-					setSearchParams(searchParams)
-				}}
-			>
+			<div className="flex flex-row items-center gap-2" key={v.id}>
 				<fetcher.Form method="post">
 					<input type="hidden" name="_action" value="set-active" />
 					<input type="hidden" name="trackId" value={track.id} />
@@ -198,7 +187,7 @@ const TrackRoute: React.FC = () => {
 						type="button"
 						className="m-0 hidden size-5 appearance-none"
 						onClick={e => {
-							console.log('submitting')
+							console.log('submitting form action "set-active" for track', track.id, v.id)
 							e.currentTarget.form?.submit()
 						}}
 					/>
@@ -207,9 +196,20 @@ const TrackRoute: React.FC = () => {
 						icon={icon}
 					/>
 				</fetcher.Form>
-				{/* <ActiveTrackVersionButton track={track} versionId={v.id} /> */}
-				<span className="ml-2 hover:cursor-pointer">{v.title}</span>
-			</button>
+				<button
+					className={`hover:bg-gray-300/60' mx-auto flex w-full flex-grow items-center gap-2 rounded-sm py-3 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
+					type="submit"
+					key={v.id}
+					onClick={() => {
+						console.log('Updating selected Version ', v.id)
+						setSelectedVersionId(v.id)
+						player
+						// playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
+					}}
+				>
+					<span className="ml-2 hover:cursor-pointer">{v.title}</span>
+				</button>
+			</div>
 		)
 	})
 
@@ -245,11 +245,19 @@ const TrackRoute: React.FC = () => {
 									onBlur={e => {
 										setIsTitleEditable(false)
 										const currentValue = e.currentTarget.value
-										if (currentValue !== fields.title.initialValue) {
-											console.log('submitting')
+										if (currentValue !== track.title) {
 											e.currentTarget.form?.submit()
-										} else {
-											console.log('not submitting')
+										}
+									}}
+									onKeyDown={e => {
+										if (e.key === 'Enter') {
+											setIsTitleEditable(false)
+											e.currentTarget.form?.submit()
+										}
+										if (e.key === 'Escape') {
+											setIsTitleEditable(false)
+											e.currentTarget.form?.reset()
+											e.currentTarget.blur()
 										}
 									}}
 								/>
