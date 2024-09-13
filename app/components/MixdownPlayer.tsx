@@ -182,30 +182,28 @@ export default function MixdownPlayer({ embed = false, className = '' }: Mixdown
 	if (!currentTrack.activeTrackVersion) return <></>
 	const currentTrackVersionToPlay = context?.currentTrackVersionId || currentTrack.activeTrackVersion.id
 
-	const controls =
-		// embed
-		// 	? []
-		// 	:
-		[
-			<div
-				key="row-controls"
-				className={cn(viewSize === 'SMALL' ? 'hidden' : 'flex', 'grow items-center justify-center')}
-			>
-				<Button variant="playbutton" onClick={playerController.handlePrev}>
-					<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
-				</Button>
-				<Button variant="playbutton" onClick={playerController.handleJumpBackward}>
-					<InlineIcon className="h-full w-full" icon={'mdi-rewind'} />
-				</Button>
-				<PlayButton size="lg" />
-				<Button variant="playbutton" onClick={playerController.handleJumpForward}>
-					<InlineIcon className="h-full w-full" icon={'mdi-fast-forward'} />
-				</Button>
-				<Button variant="playbutton" onClick={playerController.handleNext}>
-					<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
-				</Button>
-			</div>,
-		]
+	const controls = embed
+		? []
+		: [
+				<div
+					key="row-controls"
+					className={cn(viewSize === 'SMALL' ? 'hidden' : 'flex', 'grow items-center justify-center')}
+				>
+					<Button variant="playbutton" onClick={playerController.handlePrev}>
+						<InlineIcon className="h-full w-full" icon={'mdi-skip-previous'} />
+					</Button>
+					<Button variant="playbutton" onClick={playerController.handleJumpBackward}>
+						<InlineIcon className="h-full w-full" icon={'mdi-rewind'} />
+					</Button>
+					<PlayButton size="lg" />
+					<Button variant="playbutton" onClick={playerController.handleJumpForward}>
+						<InlineIcon className="h-full w-full" icon={'mdi-fast-forward'} />
+					</Button>
+					<Button variant="playbutton" onClick={playerController.handleNext}>
+						<InlineIcon className="h-full w-full" icon={'mdi-skip-next'} />
+					</Button>
+				</div>,
+			]
 
 	return (
 		<>

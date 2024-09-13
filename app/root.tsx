@@ -161,13 +161,14 @@ function Document({
 	children,
 	nonce,
 	theme = 'light',
+	data,
 }: {
 	children: React.ReactNode
 	nonce: string
 	theme?: Theme
+	data?: ReturnType<typeof useLoaderData<typeof loader>>
 	env?: Record<string, string>
 }) {
-	const data = useLoaderData<typeof loader>()
 	return (
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
 			<head>
@@ -208,7 +209,7 @@ function App() {
 			<TitleDispatchContext.Provider value={titleDispatch}>
 				<PlayerContext.Provider value={playerState}>
 					<PlayerDispatchContext.Provider value={playerDispatch}>
-						<Document nonce={nonce} theme={theme} env={{}}>
+						<Document nonce={nonce} theme={theme} data={data} env={{}}>
 							<div className="flex grow flex-col items-center gap-2 overflow-y-scroll p-2 md:overflow-auto">
 								<Header />
 								<div className="mx-auto flex w-full flex-col ">
@@ -216,9 +217,6 @@ function App() {
 								</div>
 								<Footer />
 							</div>
-
-							{/* {shouldRenderPlayer && <MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />} */}
-
 							<EpicToaster closeButton position="top-center" theme={theme} />
 							<EpicProgress />
 						</Document>

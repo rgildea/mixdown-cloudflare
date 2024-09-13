@@ -150,8 +150,9 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			return { ...state, isLoading: true }
 		case 'PAUSE':
 			if (!action?.event) throw new Error('Event missing from PAUSE action')
-			player?.togglePlay(action?.event)
-			return state
+			if (!player) throw new Error('Player missing, cannot pause track !')
+			player.togglePlay(action.event)
+			return { ...state, isPlaying: false }
 		case 'PLAY_TRACK':
 			if (!state.player) throw new Error('Player missing, cannot play track !')
 			if (!action?.track) throw new Error('Track missing from PLAY_TRACK action')
