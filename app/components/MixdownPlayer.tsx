@@ -45,6 +45,8 @@ export interface MixdownPlayerProps {
 	className?: string
 	url?: string
 	embed?: boolean
+	track?: TrackWithVersions
+	currentTrackVersionId?: string
 }
 
 const PlayerViewStateToggleButton = () => {
@@ -104,12 +106,17 @@ const MiniPlayer = () => {
 	)
 }
 
-export default function MixdownPlayer({ embed = false, className = '' }: MixdownPlayerProps) {
+export default function MixdownPlayer({
+	embed = false,
+	className = '',
+	track,
+	currentTrackVersionId,
+}: MixdownPlayerProps) {
 	const context = usePlayerContext()
 	const { isLoading = true, isSeeking = true, viewSize = 'LARGE' } = context || {}
 	const dispatch = usePlayerDispatchContext()
 	const playerRef = useRef<AudioPlayer>(null)
-	const currentTrack = getCurrentTrack(context)
+	const currentTrack = track
 	const loadCounter = useRef(0)
 
 	useEffect(() => {
@@ -180,7 +187,8 @@ export default function MixdownPlayer({ embed = false, className = '' }: Mixdown
 
 	if (!currentTrack) return <></>
 	if (!currentTrack.activeTrackVersion) return <></>
-	const currentTrackVersionToPlay = context?.currentTrackVersionId || currentTrack.activeTrackVersion.id
+	// const currentTrackVersionToPlay = context?.currentTrackVersionId || currentTrack.activeTrackVersion.id
+	const currentTrackVersionToPlay = currentTrackVersionId || currentTrack.activeTrackVersion.id
 
 	const controls = embed
 		? []

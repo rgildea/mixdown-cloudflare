@@ -2,7 +2,7 @@ import { ThemeSwitch } from '#app/components/ThemeSwitch'
 import { Button } from '#app/components/ui/button'
 import { CardTitle } from '#app/components/ui/card'
 import { Icon } from '#app/components/ui/icon'
-import { useTitleContext } from '#app/contexts/TitleContext'
+// import { useTitleContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/root'
 import { useOptionalUser } from '#app/utils/user'
 import { Link, useRouteLoaderData } from '@remix-run/react'
@@ -12,12 +12,14 @@ const Header = () => {
 	const data = useRouteLoaderData<typeof loader>('root')
 
 	// Get the title state from the context
-	const titleContext = useTitleContext()
+	// const titleContext = useTitleContext()
 	const user = useOptionalUser()
 
 	// Use the context title if the title is not provided
-	const finalTitle = titleContext?.title ?? 'Mixdown'
-	const finalIcon = titleContext?.icon ?? null
+	// const finalTitle = titleContext?.title ?? 'Mixdown'
+	// const finalIcon = titleContext?.icon ?? null
+	const finalTitle = 'Mixdown!'
+	const finalIcon = 'mdi:home' //titleContext?.icon ?? null
 
 	return (
 		<header className="mx-auto h-8 w-full">
@@ -38,7 +40,6 @@ const Header = () => {
 						</Button>
 					)}
 				</div>
-				{/* <div className="block w-full sm:hidden">{searchBar}</div> */}
 			</nav>
 		</header>
 	)

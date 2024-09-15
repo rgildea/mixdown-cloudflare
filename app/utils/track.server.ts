@@ -179,7 +179,6 @@ export async function deleteTrackById(storageContext: StorageContext, trackId: s
 
 export async function updateTrackActiveVersion(storageContext: StorageContext, trackId: string, versionId: string) {
 	const { db } = storageContext
-	console.log('updateTrackActiveVersion', trackId, versionId)
 	try {
 		const updatedTrack = await db.track.update({
 			where: { id: trackId },

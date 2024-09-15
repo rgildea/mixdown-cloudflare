@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/role-supports-aria-props */
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import { TrackTile } from '#app/components/TrackTile'
+import { Button } from '#app/components/ui/button'
 import { usePlayerDispatchContext } from '#app/contexts/PlayerContext'
-import { useTitleDispatchContext } from '#app/contexts/TitleContext'
 import { requireUserId } from '#app/utils/auth.server'
 import { getUserImgSrc } from '#app/utils/misc'
 import { getTrackWithVersionsByTrackId, updateTrack, updateTrackActiveVersion } from '#app/utils/track.server'
@@ -12,24 +12,22 @@ import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunctionArgs, json, LoaderFunction, redirect } from '@remix-run/cloudflare'
 import { Link, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
 import { useEffect, useState } from 'react'
-import player from 'wavesurfer.js/dist/player.js'
 import { z } from 'zod'
 
 export type TrackFormAction = 'set-active-version' | 'edit-title'
 
 const schemas = {
 	'edit-title': z.object({
-		_action: z.literal('edit-title').or(z.literal('set-active-version')),
+		_action: z.literal('edit-title'),
 		title: z.string({ required_error: 'Title is required' }).max(80, 'Title is too long'),
 	}),
 	'set-active-version': z.object({
-		_action: z.literal('edit-title').or(z.literal('set-active-version')),
+		_action: z.literal('set-active-version'),
 		activeTrackVersionId: z.string({ required_error: 'Track version is required' }),
 	}),
 }
 
 export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
-	console.log('Action:', request.method, request.url)
 	const trackId = params.id
 	if (!trackId) {
 		throw new Response('Invalid track id', { status: 400 })
@@ -51,7 +49,8 @@ export const action = async ({ request, params, context: { storageContext } }: A
 		throw new Response('Unauthorized', { status: 401 })
 	}
 
-	const submission = parseWithZod(formData, { schema: schemas[_action] })
+	const schema = getSchema(_action)
+	const submission = parseWithZod(formData, { schema })
 	// Report the submission to client if it is not successful
 	if (submission.status !== 'success') {
 		return submission.reply()
@@ -73,17 +72,11 @@ export const action = async ({ request, params, context: { storageContext } }: A
 			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
 		}
 
+		// return new Response('OK', { status: 200 })
 		return redirect(`/tracks/${trackId}`)
 	}
 
 	if (_action === 'edit-title') {
-		const submission = parseWithZod(formData, { schema: schemas['edit-title'] })
-
-		// Report the submission to client if it is not successful
-		if (submission.status !== 'success') {
-			return submission.reply()
-		}
-
 		const trackId = track.id
 		if (!trackId) {
 			throw new Response('Not found', { status: 404 })
@@ -129,14 +122,13 @@ const TrackRoute: React.FC = () => {
 	const versions = track.trackVersions
 	const activeTrackVersionId = track.activeTrackVersion?.id
 	const lastResult = useActionData<typeof action>() as SubmissionResult // get the last action result
-	const [selectedVersionId, setSelectedVersionId] = useState('')
+	const [selectedTrackVersionId, setSelectedVersionId] = useState(null as unknown as string)
 	const playerDispatch = usePlayerDispatchContext() // get the player dispatch function
-	const titleDispatch = useTitleDispatchContext() // get the title dispatch function
 
 	// get the version from the search params, or the active track version, or the first version
-	const initialTrackVersionId = selectedVersionId || activeTrackVersionId || versions[0]?.id
+	const initialTrackVersionId = selectedTrackVersionId || activeTrackVersionId || versions[0]?.id
 	if (!initialTrackVersionId) {
-		throw new Error('There are no track versions. Weird...')
+		throw new Error('No track version found')
 	}
 
 	// Define a form to edit the track title and description
@@ -145,22 +137,16 @@ const TrackRoute: React.FC = () => {
 		constraint: getZodConstraint(schemas['edit-title']),
 		// Validate field once user leaves the field
 		shouldValidate: 'onBlur',
-		// Then, revalidate field as user types again
-		// shouldRevalidate: 'onInput',
 	})
 
 	// make the title editable if there is an error
 	const [isTitleEditable, setIsTitleEditable] = useState(lastResult?.error || form.errors ? true : false)
 
-	// console.info('Form:', form)
-	// console.info('Fields:', fields)
-	// console.info('Last Result:', lastResult)
-
-	// set the title and icon for the page
-	useEffect(() => {
-		titleDispatch({ type: 'SET_TITLE', title: 'Mixdown!', icon: 'mdi:home' })
-		return () => {}
-	})
+	// // set the title and icon for the page
+	// useEffect(() => {
+	// 	titleDispatch({ type: 'SET_TITLE', title: 'Mixdown!', icon: 'mdi:home' })
+	// 	return () => {}
+	// })
 
 	// load the playlist into the player context
 	useEffect(() => {
@@ -175,36 +161,37 @@ const TrackRoute: React.FC = () => {
 	}, [initialTrackVersionId, playerDispatch, track])
 
 	const fetcher = useFetcher()
+	const optimisticActiveTrackVersionId = fetcher.formData?.get('activeTrackVersionId') || activeTrackVersionId
 	const versionItems = track.trackVersions.map(v => {
-		const icon = `mdi:star${v.id === activeTrackVersionId ? '' : '-outline'}`
+		const isActive = v.id === optimisticActiveTrackVersionId
+		const icon = `mdi:star${isActive ? '' : '-outline'}`
 		return (
 			<div className="flex flex-row items-center gap-2" key={v.id}>
-				<fetcher.Form method="post">
-					<input type="hidden" name="_action" value="set-active" />
+				<fetcher.Form
+					onSubmit={() => {
+						console.log('Updating selected version while setting active: ', v.id)
+						setSelectedVersionId(v.id)
+					}}
+					id={form.id}
+					method="post"
+				>
+					<input type="hidden" name="_action" value="set-active-version" />
 					<input type="hidden" name="trackId" value={track.id} />
 					<input type="hidden" name="activeTrackVersionId" value={v.id} />
-					<input
-						type="button"
-						className="m-0 hidden size-5 appearance-none"
-						onClick={e => {
-							console.log('submitting form action "set-active" for track', track.id, v.id)
-							e.currentTarget.form?.submit()
-						}}
-					/>
-					<InlineIcon
-						className="duration-250 size-4 transition-all ease-in-out checked:bg-secondary hover:scale-[200%]"
-						icon={icon}
-					/>
+					<Button variant="playbutton-destructive" className="group text-secondary" type="submit">
+						<InlineIcon
+							className="duration-250 size-4 transition-all ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
+							icon={icon}
+						/>
+					</Button>
 				</fetcher.Form>
 				<button
-					className={`hover:bg-gray-300/60' mx-auto flex w-full flex-grow items-center gap-2 rounded-sm py-3 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
+					className={`group-hover:bg-gray-300/60' mx-auto flex w-full flex-grow items-center gap-2 rounded-sm py-3 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
 					type="submit"
 					key={v.id}
 					onClick={() => {
 						console.log('Updating selected Version ', v.id)
 						setSelectedVersionId(v.id)
-						player
-						// playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
 					}}
 				>
 					<span className="ml-2 hover:cursor-pointer">{v.title}</span>
@@ -294,10 +281,14 @@ const TrackRoute: React.FC = () => {
 					</div>
 				</div>
 			</div>
-			<MixdownPlayer key="player" embed={true} />
+			<MixdownPlayer key="player" embed={true} track={track} currentTrackVersionId={selectedTrackVersionId} />
 			<div className="flex flex-col">{versionItems}</div>
 		</>
 	)
 }
 
 export default TrackRoute
+
+function getSchema(_action: string): any {
+	return schemas[_action as keyof typeof schemas]
+}

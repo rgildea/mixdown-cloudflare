@@ -268,13 +268,14 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			return state
 	}
 }
+
 function getVersionToPlay(track?: TrackWithVersions, versionId?: string) {
 	if (!track) {
-		console.log('No track provided, cannot play version:', versionId)
+		console.warn('No track provided, cannot play version:', versionId)
 		return undefined
 	}
 	if (!versionId) {
-		console.log('No versionId provided, playing default version:', track.activeTrackVersion?.id)
+		console.log('No versionId provided, playing active version:', track.activeTrackVersion?.id)
 		return track.activeTrackVersion?.id
 	}
 	return track.trackVersions.find(v => v.id === versionId)?.id ?? track.activeTrackVersion?.id
