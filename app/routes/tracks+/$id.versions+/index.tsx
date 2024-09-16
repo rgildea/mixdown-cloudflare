@@ -2,12 +2,7 @@
 import { Button } from '#app/components/ui/button'
 import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { requireUserId } from '#app/utils/auth.server'
-import {
-	getTrackWithVersionsByTrackId,
-	TrackWithVersions,
-	updateTrack,
-	updateTrackActiveVersion,
-} from '#app/utils/track.server'
+import { getTrackWithVersionsByTrackId, TrackWithVersions, updateTrackActiveVersion } from '#app/utils/track.server'
 import { SubmissionResult, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
@@ -69,30 +64,6 @@ export const action = async ({ request, params, context: { storageContext } }: A
 
 		// return new Response('OK', { status: 200 })
 		return redirect(`/tracks/${trackId}/versions`)
-	}
-
-	if (_action === 'edit-title') {
-		const trackId = track.id
-		if (!trackId) {
-			throw new Response('Not found', { status: 404 })
-		}
-
-		if (!track) {
-			throw new Response('Not found', { status: 404 })
-		}
-
-		const { title } = submission.value
-		track.title = title
-
-		try {
-			const updated = await updateTrack(storageContext, trackId, title)
-			if (!updated) {
-				return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-			}
-		} catch (err) {
-			console.error(err)
-			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-		}
 	}
 
 	return submission.reply()
