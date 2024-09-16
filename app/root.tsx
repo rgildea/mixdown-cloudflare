@@ -204,6 +204,14 @@ function App() {
 	const [playerState, playerDispatch] = useReducer(PlayerContextReducer, null)
 	const [titleState, titleDispatch] = useReducer(TitleContextReducer, null)
 
+	// const navigation = useNavigation()
+	// const matches = useMatches()
+	// const location = useLocation()
+	// console.log(location.pathname)
+	// matches.forEach(m => {
+	// 	console.log(m)
+	// })
+	// console.log(navigation)
 	return (
 		<TitleContext.Provider value={titleState}>
 			<TitleDispatchContext.Provider value={titleDispatch}>
@@ -213,7 +221,7 @@ function App() {
 							<div className="flex grow flex-col items-center gap-2 overflow-y-scroll p-2 md:overflow-auto">
 								<Header />
 								<div className="mx-auto flex w-full flex-col ">
-									<Outlet />
+									<Outlet context="my-value-root" />
 								</div>
 								<Footer />
 							</div>

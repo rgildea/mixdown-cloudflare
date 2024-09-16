@@ -27,7 +27,7 @@ export default function Route() {
 
 	return (
 		<>
-			<Outlet />
+			<Outlet context="my-value-tracks-layout" />
 			{searchParams.get('new') === 'true' && (
 				<NewTrackModal
 					isModalOpen={true}

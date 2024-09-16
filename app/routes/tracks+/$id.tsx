@@ -1,16 +1,14 @@
 /* eslint-disable jsx-a11y/role-supports-aria-props */
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import { TrackTile } from '#app/components/TrackTile'
-import { Button } from '#app/components/ui/button'
-import { usePlayerDispatchContext } from '#app/contexts/PlayerContext'
+import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { requireUserId } from '#app/utils/auth.server'
 import { getUserImgSrc } from '#app/utils/misc'
 import { getTrackWithVersionsByTrackId, updateTrack, updateTrackActiveVersion } from '#app/utils/track.server'
 import { SubmissionResult, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunctionArgs, json, LoaderFunction, redirect } from '@remix-run/cloudflare'
-import { Link, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
+import { Link, Outlet, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 
@@ -73,7 +71,7 @@ export const action = async ({ request, params, context: { storageContext } }: A
 		}
 
 		// return new Response('OK', { status: 200 })
-		return redirect(`/tracks/${trackId}`)
+		return redirect(`/tracks/${trackId}/versions`)
 	}
 
 	if (_action === 'edit-title') {
@@ -122,11 +120,10 @@ const TrackRoute: React.FC = () => {
 	const versions = track.trackVersions
 	const activeTrackVersionId = track.activeTrackVersion?.id
 	const lastResult = useActionData<typeof action>() as SubmissionResult // get the last action result
-	const [selectedTrackVersionId, setSelectedVersionId] = useState(null as unknown as string)
 	const playerDispatch = usePlayerDispatchContext() // get the player dispatch function
-
+	const playerContext = usePlayerContext() // get the player context
 	// get the version from the search params, or the active track version, or the first version
-	const initialTrackVersionId = selectedTrackVersionId || activeTrackVersionId || versions[0]?.id
+	const initialTrackVersionId = playerContext?.currentTrackVersionId || activeTrackVersionId || versions[0]?.id
 	if (!initialTrackVersionId) {
 		throw new Error('No track version found')
 	}
@@ -142,12 +139,6 @@ const TrackRoute: React.FC = () => {
 	// make the title editable if there is an error
 	const [isTitleEditable, setIsTitleEditable] = useState(lastResult?.error || form.errors ? true : false)
 
-	// // set the title and icon for the page
-	// useEffect(() => {
-	// 	titleDispatch({ type: 'SET_TITLE', title: 'Mixdown!', icon: 'mdi:home' })
-	// 	return () => {}
-	// })
-
 	// load the playlist into the player context
 	useEffect(() => {
 		playerDispatch({ type: 'SET_PLAYLIST', tracks: [track] })
@@ -161,44 +152,6 @@ const TrackRoute: React.FC = () => {
 	}, [initialTrackVersionId, playerDispatch, track])
 
 	const fetcher = useFetcher()
-	const optimisticActiveTrackVersionId = fetcher.formData?.get('activeTrackVersionId') || activeTrackVersionId
-	const versionItems = track.trackVersions.map(v => {
-		const isActive = v.id === optimisticActiveTrackVersionId
-		const icon = `mdi:star${isActive ? '' : '-outline'}`
-		return (
-			<div className="flex flex-row items-center gap-2" key={v.id}>
-				<fetcher.Form
-					onSubmit={() => {
-						console.log('Updating selected version while setting active: ', v.id)
-						setSelectedVersionId(v.id)
-					}}
-					id={form.id}
-					method="post"
-				>
-					<input type="hidden" name="_action" value="set-active-version" />
-					<input type="hidden" name="trackId" value={track.id} />
-					<input type="hidden" name="activeTrackVersionId" value={v.id} />
-					<Button variant="playbutton-destructive" className="group text-secondary" type="submit">
-						<InlineIcon
-							className="duration-250 size-4 transition-all ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
-							icon={icon}
-						/>
-					</Button>
-				</fetcher.Form>
-				<button
-					className={`group-hover:bg-gray-300/60' mx-auto flex w-full flex-grow items-center gap-2 rounded-sm py-3 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
-					type="submit"
-					key={v.id}
-					onClick={() => {
-						console.log('Updating selected Version ', v.id)
-						setSelectedVersionId(v.id)
-					}}
-				>
-					<span className="ml-2 hover:cursor-pointer">{v.title}</span>
-				</button>
-			</div>
-		)
-	})
 
 	return (
 		<>
@@ -281,13 +234,21 @@ const TrackRoute: React.FC = () => {
 					</div>
 				</div>
 			</div>
-			<MixdownPlayer key="player" embed={true} track={track} currentTrackVersionId={selectedTrackVersionId} />
-			<div className="flex flex-col">{versionItems}</div>
+			<MixdownPlayer key="player" embed={true} track={track} currentTrackVersionId={initialTrackVersionId} />
+			<Outlet />
 		</>
 	)
 }
 
 export default TrackRoute
+
+export interface TrackOutletContext {
+	track: any
+	activeTrackVersionId: string
+	initialTrackVersionId: string
+	selectedTrackVersionId: string
+	setSelectedTrackVersionId: (id: string) => void
+}
 
 function getSchema(_action: string): any {
 	return schemas[_action as keyof typeof schemas]

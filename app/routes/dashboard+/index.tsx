@@ -35,13 +35,9 @@ export default function Route() {
 
 	return (
 		<div className="flex grow flex-col items-start gap-1 px-0">
-			<Button asChild>
-				<Link
-					className="leading font-sans text-body-sm font-medium hover:font-semibold hover:text-white"
-					to="?new=true"
-				>
-					<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
-					&nbsp; Add Track
+			<Button variant="playbutton" asChild>
+				<Link className="font-sans text-body-xs font-medium hover:font-semibold" to="?new=true">
+					<InlineIcon className="size-6" icon="mdi:plus-circle-outline" />
 				</Link>
 			</Button>
 			<MixdownPlayer key="player" embed={true} />

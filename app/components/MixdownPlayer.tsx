@@ -116,7 +116,7 @@ export default function MixdownPlayer({
 	const { isLoading = true, isSeeking = true, viewSize = 'LARGE' } = context || {}
 	const dispatch = usePlayerDispatchContext()
 	const playerRef = useRef<AudioPlayer>(null)
-	const currentTrack = track
+	const currentTrack = track ?? getCurrentTrack(context)
 	const loadCounter = useRef(0)
 
 	useEffect(() => {

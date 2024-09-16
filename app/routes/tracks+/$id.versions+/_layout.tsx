@@ -2,7 +2,7 @@ import NewTrackModal from '#app/components/NewTrackModal'
 import { requireUserId } from '#app/utils/auth.server'
 import { getUserTracksWithVersionInfo } from '#app/utils/track.server'
 import { ActionFunction, LoaderFunction, LoaderFunctionArgs, json } from '@remix-run/cloudflare'
-import { Outlet, useNavigate, useSearchParams } from '@remix-run/react'
+import { Outlet, useLocation, useNavigate, useSearchParams } from '@remix-run/react'
 
 export const loader: LoaderFunction = async ({ context, request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(context.storageContext, request)
@@ -23,9 +23,11 @@ export const action: ActionFunction = async () => {
 export default function Route() {
 	const [searchParams] = useSearchParams()
 	const navigate = useNavigate()
+	const location = useLocation()
+
 	return (
 		<>
-			<Outlet context="my-value-dashboard-layout" />
+			<Outlet />
 			{searchParams.get('new') === 'true' && (
 				<NewTrackModal
 					isModalOpen={true}

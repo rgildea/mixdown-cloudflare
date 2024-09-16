@@ -138,8 +138,27 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 				console.info('Track not found in playlist')
 				return state
 			}
+			if (state.isPlaying) {
+				console.log('Listening for track to load to resume playback:', versionToPlay)
+				audioElement?.addEventListener(
+					'canplay',
+					() => {
+						const promise = audioElement?.play()
+						if (promise) {
+							promise
+								.then(() => console.log('Playing Requested Track Version', versionToPlay))
+								.catch(err => console.error(err))
+						}
+					},
+					{ once: true },
+				)
+			}
 
-			return { ...state, lastPosition: audioElement?.currentTime, currentTrackVersionId: versionToPlay }
+			return {
+				...state,
+				lastPosition: audioElement?.currentTime,
+				currentTrackVersionId: versionToPlay,
+			}
 		case 'SET_PLAYER':
 			return { ...state, player: action.playerRef }
 		case 'SET_VIEW_STATE':
