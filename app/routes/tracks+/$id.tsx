@@ -2,104 +2,22 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import { TrackTile } from '#app/components/TrackTile'
 import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
-import { requireUserId } from '#app/utils/auth.server'
+import { action } from '#app/root'
 import { getUserImgSrc } from '#app/utils/misc'
-import { getTrackWithVersionsByTrackId, updateTrack, updateTrackActiveVersion } from '#app/utils/track.server'
+import { getTrackWithVersionsByTrackId } from '#app/utils/track.server'
 import { SubmissionResult, useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { ActionFunctionArgs, json, LoaderFunction, redirect } from '@remix-run/cloudflare'
+import { getZodConstraint } from '@conform-to/zod'
+import { json, LoaderFunction } from '@remix-run/cloudflare'
 import { Link, Outlet, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 
 export type TrackFormAction = 'set-active-version' | 'edit-title'
 
-const schemas = {
-	'edit-title': z.object({
-		_action: z.literal('edit-title'),
-		title: z.string({ required_error: 'Title is required' }).max(80, 'Title is too long'),
-	}),
-	'set-active-version': z.object({
-		_action: z.literal('set-active-version'),
-		activeTrackVersionId: z.string({ required_error: 'Track version is required' }),
-	}),
-}
-
-export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
-	const trackId = params.id
-	if (!trackId) {
-		throw new Response('Invalid track id', { status: 400 })
-	}
-
-	const track = await getTrackWithVersionsByTrackId(storageContext, trackId)
-	if (!track) {
-		throw new Response('Not found', { status: 404 })
-	}
-
-	const formData = await request.formData()
-	const _action = formData.get('_action') as TrackFormAction
-	if (!_action) {
-		throw new Response('Invalid action', { status: 400 })
-	}
-
-	const userId = await requireUserId(storageContext, request)
-	if (!userId || track.creator.id !== userId) {
-		throw new Response('Unauthorized', { status: 401 })
-	}
-
-	const schema = getSchema(_action)
-	const submission = parseWithZod(formData, { schema })
-	// Report the submission to client if it is not successful
-	if (submission.status !== 'success') {
-		return submission.reply()
-	}
-
-	if (_action === 'set-active-version') {
-		const activeTrackVersion = track.trackVersions.find(v => v.id === formData.get('activeTrackVersionId'))
-		if (!activeTrackVersion) {
-			return submission.reply({ formErrors: [`Invalid track version`] })
-		}
-
-		try {
-			const updated = await updateTrackActiveVersion(storageContext, trackId, activeTrackVersion.id)
-			if (!updated) {
-				return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-			}
-		} catch (err) {
-			console.error(err)
-			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-		}
-
-		// return new Response('OK', { status: 200 })
-		return redirect(`/tracks/${trackId}/versions`)
-	}
-
-	if (_action === 'edit-title') {
-		const trackId = track.id
-		if (!trackId) {
-			throw new Response('Not found', { status: 404 })
-		}
-
-		if (!track) {
-			throw new Response('Not found', { status: 404 })
-		}
-
-		const { title } = submission.value
-		track.title = title
-
-		try {
-			const updated = await updateTrack(storageContext, trackId, title)
-			if (!updated) {
-				return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-			}
-		} catch (err) {
-			console.error(err)
-			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-		}
-	}
-
-	return submission.reply()
-}
+const schema = z.object({
+	_action: z.literal('set-active-version'),
+	activeTrackVersionId: z.string({ required_error: 'Track version is required' }),
+})
 
 export const loader = (async ({ params, context }) => {
 	const trackId = params.id as string
@@ -131,7 +49,7 @@ const TrackRoute: React.FC = () => {
 	// Define a form to edit the track title and description
 	const [form, fields] = useForm({
 		lastResult,
-		constraint: getZodConstraint(schemas['edit-title']),
+		constraint: getZodConstraint(schema),
 		// Validate field once user leaves the field
 		shouldValidate: 'onBlur',
 	})
@@ -241,15 +159,3 @@ const TrackRoute: React.FC = () => {
 }
 
 export default TrackRoute
-
-export interface TrackOutletContext {
-	track: any
-	activeTrackVersionId: string
-	initialTrackVersionId: string
-	selectedTrackVersionId: string
-	setSelectedTrackVersionId: (id: string) => void
-}
-
-function getSchema(_action: string): any {
-	return schemas[_action as keyof typeof schemas]
-}
