@@ -183,6 +183,9 @@ export default function MixdownPlayer({
 		handleChangeCurrentTimeError: () => {
 			console.error('handleChangeCurrentTimeError')
 		},
+		handleListen: () => {
+			dispatch({ type: 'LISTEN' })
+		},
 	}
 
 	if (!currentTrack) return <></>

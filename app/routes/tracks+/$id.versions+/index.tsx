@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/role-supports-aria-props */
 import { Button } from '#app/components/ui/button'
 import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { requireUserId } from '#app/utils/auth.server'
@@ -62,10 +61,11 @@ export const action = async ({ request, params, context: { storageContext } }: A
 			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
 		}
 
-		// return new Response('OK', { status: 200 })
+		console.log('successfully updated active track version')
+		console.log('redirecting to ', `/tracks/${trackId}/versions`)
 		return redirect(`/tracks/${trackId}/versions`)
 	}
-
+	console.log('returning nothing apparently')
 	return submission.reply()
 }
 
@@ -87,6 +87,7 @@ const TrackVersionsRoute: React.FC = () => {
 
 	// Define a form to edit the track title and description
 	const [form] = useForm({
+		id: 'set-active-version',
 		lastResult,
 		constraint: getZodConstraint(schema),
 		// Validate field once user leaves the field
@@ -115,7 +116,6 @@ const TrackVersionsRoute: React.FC = () => {
 					method="post"
 				>
 					<input type="hidden" name="_action" value="set-active-version" />
-					<input type="hidden" name="trackId" value={track.id} />
 					<input type="hidden" name="activeTrackVersionId" value={v.id} />
 					<Button variant="playbutton-destructive" className="group text-secondary" type="submit">
 						<InlineIcon

@@ -56,6 +56,7 @@ export type PlayerContextActionType =
 	| 'SEEK'
 	| 'SEEKING'
 	| 'SEEKED'
+	| 'LISTEN'
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
@@ -146,7 +147,11 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 						const promise = audioElement?.play()
 						if (promise) {
 							promise
-								.then(() => console.log('Playing Requested Track Version', versionToPlay))
+								.then(() => {
+									console.log('Playing Requested Track Version', versionToPlay)
+									console.log('Setting Current Time to:', newTime)
+									audioElement.currentTime = state?.lastPosition || 0
+								})
 								.catch(err => console.error(err))
 						}
 					},
@@ -156,7 +161,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 
 			return {
 				...state,
-				lastPosition: audioElement?.currentTime,
+				lastPosition: state?.lastPosition || 0,
 				currentTrackVersionId: versionToPlay,
 			}
 		case 'SET_PLAYER':
@@ -283,6 +288,8 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			if (!audioElement) return state
 			audioElement.currentTime = Number(Math.min(audioElement.currentTime + 10, audioElement.duration))
 			return state
+		case 'LISTEN':
+			return { ...state, lastPosition: audioElement?.currentTime }
 		default:
 			return state
 	}
