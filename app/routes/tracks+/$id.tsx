@@ -179,7 +179,7 @@ const TrackRoute: React.FC = () => {
 							<div id="track-title" className="flex flex-col p-1 pb-0">
 								<AnimatePresence>
 									<motion.div layout variants={variants} className="flex w-full" key="input-title">
-										<div className="place-content-center-center">
+										<div className="place-content-center">
 											{/* Edit button */}
 											<div className={`flex ${isTitleEditable ? 'hidden' : 'visible'}`}>
 												<button
