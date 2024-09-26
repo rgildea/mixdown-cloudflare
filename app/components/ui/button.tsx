@@ -17,7 +17,7 @@ const buttonVariants = cva(
 				ghost: 'hover:bg-accent hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
 				mini: 'text-primary ',
-				playbutton: 'bg-transparent text-foreground hover:text-primary-foreground',
+				playbutton: 'bg-transparent text-foreground',
 				'playbutton-destructive': 'bg-transparent text-foreground hover:text-foreground-destructive',
 			},
 			size: {

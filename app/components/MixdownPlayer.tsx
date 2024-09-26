@@ -264,6 +264,7 @@ export default function MixdownPlayer({
 						customVolumeControls={[]}
 						customProgressBarSection={[<WaveFormWrapper key="wf" />]}
 						customControlsSection={controls}
+						listenInterval={100}
 					/>
 				</div>
 			</div>

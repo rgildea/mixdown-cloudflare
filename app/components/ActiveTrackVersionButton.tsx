@@ -21,7 +21,6 @@ export default function ActiveTrackVersionButton({ track, versionId }: ActiveTra
 				type="button"
 				className="m-0 hidden size-5 appearance-none"
 				onClick={e => {
-					console.log('submitting')
 					e.currentTarget.form?.submit()
 				}}
 			/>

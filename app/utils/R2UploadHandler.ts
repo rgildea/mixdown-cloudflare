@@ -68,6 +68,6 @@ export function createR2UploadHandler({ bucket, filter, onSuccess }: CreateUploa
 			onSuccess(r2Object)
 		}
 
-		return JSON.stringify({ key: r2Object.key, filename, contentType, size: r2Object.size })
+		return JSON.stringify({ trackId: 'foo', key: r2Object.key, filename, contentType, size: r2Object.size })
 	}) satisfies UploadHandler
 }

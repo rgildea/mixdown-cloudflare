@@ -8,7 +8,7 @@ import { getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.ser
 import { getFormProps, getInputProps, SubmissionResult, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { ActionFunctionArgs, json, LoaderFunction, redirect } from '@remix-run/cloudflare'
+import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/cloudflare'
 import { Link, Outlet, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
@@ -25,8 +25,6 @@ const schema = z.object({
 })
 
 export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
-	console.log('track id action route')
-
 	const trackId = params.id
 	if (!trackId) {
 		throw new Response('Invalid track id', { status: 400 })
@@ -38,9 +36,6 @@ export const action = async ({ request, params, context: { storageContext } }: A
 	}
 
 	const formData = await request.formData()
-	formData?.forEach((value, key) => {
-		console.log(key, value)
-	})
 
 	const _action = formData.get('_action') as TrackFormAction
 	if (!_action) {
@@ -54,8 +49,6 @@ export const action = async ({ request, params, context: { storageContext } }: A
 	}
 
 	const submission = parseWithZod(formData, { schema })
-	// Report the submission to client if it is not successful
-	console.log('submission status', submission.status)
 	if (submission.status !== 'success') {
 		return submission.reply()
 	}
@@ -83,8 +76,8 @@ export const action = async ({ request, params, context: { storageContext } }: A
 	return submission.reply()
 }
 
-export const loader = (async ({ params, context }) => {
-	console.log('track id loader route', params)
+export const loader = async ({ params, context }: LoaderFunctionArgs) => {
+	console.log('routes/tracks/$id loader', params)
 	const trackId = params.id as string
 	const notFoundResponse = new Response('Not found', { status: 404 })
 
@@ -96,7 +89,7 @@ export const loader = (async ({ params, context }) => {
 	}
 
 	return json({ track })
-}) satisfies LoaderFunction
+}
 
 const TrackRoute: React.FC = () => {
 	const { track } = useLoaderData<typeof loader>() // get the track from the loader data
@@ -177,13 +170,13 @@ const TrackRoute: React.FC = () => {
 								{form.errors}
 							</span>
 							<div id="track-title" className="flex flex-col p-1 pb-0">
-								<AnimatePresence>
+								<AnimatePresence mode="popLayout">
 									<motion.div layout variants={variants} className="flex w-full" key="input-title">
 										<div className="place-content-center">
 											{/* Edit button */}
-											<div className={`flex ${isTitleEditable ? 'hidden' : 'visible'}`}>
+											<div className={`flex p-1 ${isTitleEditable ? 'hidden' : 'visible'}`}>
 												<button
-													className={`group text-secondary`}
+													className={`group`}
 													onClick={e => {
 														e.preventDefault()
 														titleRef.current?.focus()
@@ -198,7 +191,7 @@ const TrackRoute: React.FC = () => {
 											</div>
 											{/* Cancel and Submit buttons */}
 											<div
-												className={`flex shrink-0 items-stretch gap-2 transition-all ease-in-out ${isTitleEditable ? 'visible' : 'hidden'}`}
+												className={`flex shrink-0 items-stretch gap-2 px-2 transition-all ease-in-out ${isTitleEditable ? 'visible' : 'hidden'}`}
 											>
 												<button
 													{...form.reset.getButtonProps()}
@@ -297,6 +290,7 @@ const TrackRoute: React.FC = () => {
 					</div>
 				</div>
 			</div>
+
 			<MixdownPlayer key="player" embed={true} track={track} currentTrackVersionId={initialTrackVersionId} />
 			<Outlet />
 		</>

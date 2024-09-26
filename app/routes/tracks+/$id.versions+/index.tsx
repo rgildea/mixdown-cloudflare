@@ -6,7 +6,7 @@ import { SubmissionResult, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { ActionFunctionArgs } from '@remix-run/cloudflare'
-import { redirect, useActionData, useFetcher, useMatches, useRouteLoaderData } from '@remix-run/react'
+import { Link, redirect, useActionData, useFetcher, useMatches, useRouteLoaderData } from '@remix-run/react'
 import { useEffect } from 'react'
 import { z } from 'zod'
 
@@ -72,15 +72,16 @@ export const action = async ({ request, params, context: { storageContext } }: A
 const TrackVersionsRoute: React.FC = () => {
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/tracks+/$id')
-	const data = useRouteLoaderData(match?.id ?? '') as { track: TrackWithVersions }
-	const track = data.track
-	const versions = track.trackVersions
-	const activeTrackVersionId = track.activeTrackVersion?.id
-	const lastResult = useActionData<typeof action>() as SubmissionResult // get the last action result
-	const playerContext = usePlayerContext() // get the player context
-	const playerDispatch = usePlayerDispatchContext() // get the player dispatch function
+	const data = useRouteLoaderData(match?.id ?? '') as { track?: TrackWithVersions }
+	const track = data?.track
+	const versions = track?.trackVersions
+	const activeTrackVersionId = track?.activeTrackVersion?.id
+	const lastResult = useActionData<typeof action>() as SubmissionResult
+	const playerContext = usePlayerContext()
+	const playerDispatch = usePlayerDispatchContext()
+
 	// get the version from the search params, or the active track version, or the first version
-	const initialTrackVersionId = playerContext?.currentTrackVersionId || activeTrackVersionId || versions[0]?.id
+	const initialTrackVersionId = playerContext?.currentTrackVersionId || activeTrackVersionId || versions?.[0]?.id
 	if (!initialTrackVersionId) {
 		throw new Error('No track version found')
 	}
@@ -102,7 +103,7 @@ const TrackVersionsRoute: React.FC = () => {
 
 	const fetcher = useFetcher()
 	const optimisticActiveTrackVersionId = fetcher.formData?.get('activeTrackVersionId') || activeTrackVersionId
-	const versionItems = track.trackVersions.map(v => {
+	const versionItems = track?.trackVersions.map(v => {
 		const isActive = v.id === optimisticActiveTrackVersionId
 		const icon = `mdi:star${isActive ? '' : '-outline'}`
 		return (
@@ -139,7 +140,20 @@ const TrackVersionsRoute: React.FC = () => {
 		)
 	})
 
-	return <div className="flex flex-col">{versionItems}</div>
+	return (
+		<div className="flex flex-col">
+			<Button className="group self-start" variant="playbutton" asChild>
+				<Link className="font-sans text-body-xs font-medium hover:font-semibold" to="?new=true">
+					<InlineIcon
+						className="duration-250 size-6 transition-transform ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
+						icon="mdi:plus-circle-outline"
+					/>
+				</Link>
+			</Button>
+
+			{versionItems}
+		</div>
+	)
 }
 
 export default TrackVersionsRoute

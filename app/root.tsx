@@ -204,14 +204,6 @@ function App() {
 	const [playerState, playerDispatch] = useReducer(PlayerContextReducer, null)
 	const [titleState, titleDispatch] = useReducer(TitleContextReducer, null)
 
-	// const navigation = useNavigation()
-	// const matches = useMatches()
-	// const location = useLocation()
-	// console.log(location.pathname)
-	// matches.forEach(m => {
-	// 	console.log(m)
-	// })
-	// console.log(navigation)
 	return (
 		<TitleContext.Provider value={titleState}>
 			<TitleDispatchContext.Provider value={titleDispatch}>

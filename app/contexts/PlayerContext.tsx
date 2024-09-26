@@ -121,7 +121,6 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 	const trackIndex = action.track ? getTrackIndex(state, action.track) : -1
 	const versionToPlay = action.track ? getVersionToPlay(track, action.versionId ?? undefined) : undefined
 	const newTime = Math.min(action.time || 0, audioElement?.duration || 0) ?? 0
-	// console.log('PlayerContextReducer:', action.type, action)
 	switch (action.type) {
 		case 'SET_PLAYLIST':
 			return { ...state, playlist, currentTrackIndex: 0, currentTrackVersionId: versionToPlay, isLoading: true }
@@ -289,6 +288,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			audioElement.currentTime = Number(Math.min(audioElement.currentTime + 10, audioElement.duration))
 			return state
 		case 'LISTEN':
+			console.log('Listening update', audioElement?.currentTime)
 			return { ...state, lastPosition: audioElement?.currentTime }
 		default:
 			return state
