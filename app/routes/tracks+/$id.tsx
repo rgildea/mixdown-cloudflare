@@ -56,6 +56,7 @@ export const action = async ({ request, params, context: { storageContext } }: A
 		async: true,
 	})
 
+	// Report the submission to client if it is not successful
 	if (submission.status !== 'success') {
 		console.error('Submission failed', submission)
 		console.error('Submission error', submission.error)

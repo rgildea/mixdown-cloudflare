@@ -222,9 +222,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 					'canplay',
 					() => {
 						console.log('Playing new track:', action.track)
-
 						audioElement?.play()
-						// audioElement?.removeEventListener('canplay', () => {})
 					},
 					{ once: true },
 				)

@@ -25,7 +25,6 @@ const Waveform = ({ className, audioElementRef, currentSrc }: WaveformProps) => 
 	const [duration, setDuration] = useState('0:00')
 	const [currentTime, setCurrentTime] = useState('0:00')
 	const playerDispatch = usePlayerDispatchContext()
-	// console.info('Waveform:', currentSrc)
 	useEffect(() => {
 		if (!currentSrc || !audioElementRef?.current || !containerRef?.current) return
 		const canvas = document.createElement('canvas')

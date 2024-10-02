@@ -203,6 +203,7 @@ export async function updateTrack(
 	storageContext: StorageContext,
 	trackId: string,
 	title: string,
+	activeTrackVersion?: TrackVersionWithAudioFile,
 	description?: string,
 ) {
 	const { db } = storageContext

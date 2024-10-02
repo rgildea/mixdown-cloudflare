@@ -52,7 +52,7 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 						</Form>
 					</>
 				)}
-			</div>
+      </div>
 		)
 	)
 }
