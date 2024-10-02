@@ -45,7 +45,9 @@ const EditTrackForm = ({ track, onCancelButtonClicked, onSubmitButtonClicked }: 
 			<div id={form.errorId} className="text-s h-2 font-semibold text-input-invalid">
 				{form.errors}
 			</div>
-			<div className="text-s h-2 font-semibold text-orange-500">{actionData?.status === 'success' && 'Success!'}</div>
+			<div className="text-s h-2 font-semibold text-orange-500">
+				{actionData?.result.status === 'success' && 'Success!'}
+			</div>
 
 			<Field
 				labelProps={{ htmlFor: fields.title.id, children: 'Title' }}

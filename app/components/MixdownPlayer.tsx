@@ -1,7 +1,7 @@
 import { getCurrentTrack, usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
-import { TrackVersionWithAudioFile, TrackWithVersions } from '#app/utils/track.server'
+import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { NavLink } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
@@ -47,6 +47,7 @@ export interface MixdownPlayerProps {
 	embed?: boolean
 	track?: TrackWithVersions
 	currentTrackVersionId?: string
+}
 
 const PlayerViewStateToggleButton = () => {
 	const context = usePlayerContext()
@@ -111,7 +112,6 @@ export default function MixdownPlayer({
 	track,
 	currentTrackVersionId,
 }: MixdownPlayerProps) {
-
 	const context = usePlayerContext()
 	const { isLoading = true, isSeeking = true, viewSize = 'LARGE' } = context || {}
 	const dispatch = usePlayerDispatchContext()

@@ -14,7 +14,6 @@ export const action: ActionFunction = async () => {
 }
 
 export default function Route() {
-	const playerState = usePlayerContext()
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
