@@ -1,7 +1,7 @@
 import { getCurrentTrack, usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import '#app/styles/player.css'
 import { cn } from '#app/utils/misc'
-import { TrackVersionWithAudioFile, TrackWithVersions } from '#app/utils/track.server'
+import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { NavLink } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
@@ -11,45 +11,42 @@ import { Button } from './ui/button'
 import { CardTitle } from './ui/card'
 import WaveForm from './WaveForm'
 
-const getLatestVersionUrl = (track: TrackWithVersions) => {
-	let version = track?.activeTrackVersion
-
-	if (!version) {
-		// version = track.trackVersions?.reduce((max, current) => {
-		// 	return current.version > max.version ? current : max
-		// }, track.trackVersions[0])
-		version = track.trackVersions[0]
+const getAudioUrlForVersion = (track: TrackWithVersions, versionId: string) => {
+	const versionToPlay = versionId ? track.trackVersions.find(v => v.id === versionId) : track?.activeTrackVersion
+	if (!versionToPlay) {
+		console.error('No version to play')
+		return undefined
 	}
-	console.log('getLatestVersionUrl:', version.audioFile?.url)
-	return version.audioFile?.url
+	return versionToPlay?.audioFile?.url
 }
 
 export interface PlayerController {
-	handleLoadStart?: (e: any) => void
-	handleLoadedData?: (e: any) => void
+	handleAborted?: (e: any) => void
 	handleCanPlay?: (e: any) => void
 	handleCanPlayThrough?: (e: any) => void
+	handleChangeCurrentTimeError?: () => void
+	handleEnded?: (e: any) => void
+	handleJumpBackward?: (e: any) => void
+	handleJumpForward?: (e: any) => void
+	handleListen?: (e: any) => void
+	handleLoadedData?: (e: any) => void
+	handleLoadStart?: (e: any) => void
+	handleNext?: (e: any) => void
+	handlePause?: (e: any) => void
 	handlePlay?: (e: any) => void
 	handlePlayError?: (e: any) => void
 	handlePlaying?: (e: any) => void
-	handlePause?: (e: any) => void
-	handleNext?: (e: any) => void
 	handlePrev?: (e: any) => void
-	handleAborted?: (e: any) => void
-	handleEnded?: (e: any) => void
-	handleSeeking?: (e: any) => void
 	handleSeeked?: (e: any) => void
-	handleJumpBackward?: (e: any) => void
-	handleJumpForward?: (e: any) => void
-	handleChangeCurrentTimeError?: () => void
+	handleSeeking?: (e: any) => void
 }
 
 export interface MixdownPlayerProps {
 	className?: string
 	url?: string
-	track?: TrackWithVersions
-	trackVersion?: TrackVersionWithAudioFile
 	embed?: boolean
+	track?: TrackWithVersions
+	currentTrackVersionId?: string
 }
 
 const PlayerViewStateToggleButton = () => {
@@ -109,7 +106,12 @@ const MiniPlayer = () => {
 	)
 }
 
-export default function MixdownPlayer({ track, embed = false, className = '' }: MixdownPlayerProps) {
+export default function MixdownPlayer({
+	embed = false,
+	className = '',
+	track,
+	currentTrackVersionId,
+}: MixdownPlayerProps) {
 	const context = usePlayerContext()
 	const { isLoading = true, isSeeking = true, viewSize = 'LARGE' } = context || {}
 	const dispatch = usePlayerDispatchContext()
@@ -124,8 +126,7 @@ export default function MixdownPlayer({ track, embed = false, className = '' }: 
 			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
 		loadCounter.current++
-		console.log('Player loadCounter:', loadCounter.current)
-
+		console.debug('Player loadCounter:', loadCounter.current)
 		return () => {}
 	}, [dispatch, playerRef, context?.player])
 
@@ -181,7 +182,15 @@ export default function MixdownPlayer({ track, embed = false, className = '' }: 
 		handleChangeCurrentTimeError: () => {
 			console.error('handleChangeCurrentTimeError')
 		},
+		handleListen: () => {
+			dispatch({ type: 'LISTEN' })
+		},
 	}
+
+	if (!currentTrack) return <></>
+	if (!currentTrack.activeTrackVersion) return <></>
+	// const currentTrackVersionToPlay = context?.currentTrackVersionId || currentTrack.activeTrackVersion.id
+	const currentTrackVersionToPlay = currentTrackVersionId || currentTrack.activeTrackVersion.id
 
 	const controls = embed
 		? []
@@ -236,6 +245,7 @@ export default function MixdownPlayer({ track, embed = false, className = '' }: 
 						onEnded={playerController.handleEnded}
 						onSeeking={playerController.handleSeeking}
 						onSeeked={playerController.handleSeeked}
+						onListen={playerController.handleListen}
 						onClickNext={playerController.handleNext}
 						onClickPrevious={playerController.handlePrev}
 						onChangeCurrentTimeError={playerController.handleChangeCurrentTimeError}
@@ -245,7 +255,7 @@ export default function MixdownPlayer({ track, embed = false, className = '' }: 
 						showJumpControls={false}
 						showFilledVolume={true}
 						showSkipControls={true}
-						src={currentTrack ? getLatestVersionUrl(currentTrack) : ''}
+						src={currentTrack ? getAudioUrlForVersion(currentTrack, currentTrackVersionToPlay) : ''}
 						ref={playerRef}
 						autoPlayAfterSrcChange={false}
 						autoPlay={false}
@@ -253,6 +263,7 @@ export default function MixdownPlayer({ track, embed = false, className = '' }: 
 						customVolumeControls={[]}
 						customProgressBarSection={[<WaveFormWrapper key="wf" />]}
 						customControlsSection={controls}
+						listenInterval={100}
 					/>
 				</div>
 			</div>

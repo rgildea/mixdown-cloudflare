@@ -33,7 +33,7 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { Theme, ThemeFormSchema, getTheme, setTheme, useTheme } from './utils/theme'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server'
-import { UserSelect } from './utils/user.server.ts'
+import { userSelect } from './utils/user.server.ts'
 
 export const links: LinksFunction = () => {
 	return [
@@ -92,7 +92,7 @@ export async function loader({
 		? await time(
 				() =>
 					storageContext.db.user.findUniqueOrThrow({
-						select: UserSelect,
+						select: userSelect,
 						where: { id: userId },
 					}),
 				{ timings, type: 'find user', desc: 'find user in root' },
@@ -161,13 +161,14 @@ function Document({
 	children,
 	nonce,
 	theme = 'light',
+	data,
 }: {
 	children: React.ReactNode
 	nonce: string
 	theme?: Theme
+	data?: ReturnType<typeof useLoaderData<typeof loader>>
 	env?: Record<string, string>
 }) {
-	const data = useLoaderData<typeof loader>()
 	return (
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
 			<head>
@@ -208,17 +209,14 @@ function App() {
 			<TitleDispatchContext.Provider value={titleDispatch}>
 				<PlayerContext.Provider value={playerState}>
 					<PlayerDispatchContext.Provider value={playerDispatch}>
-						<Document nonce={nonce} theme={theme} env={{}}>
-							<div className="flex grow flex-col items-center gap-2 overflow-y-scroll p-2 md:overflow-auto">
+						<Document nonce={nonce} theme={theme} data={data} env={{}}>
+							<div className="flex h-[1000px] grow flex-col items-center gap-3 overflow-y-scroll md:overflow-auto">
 								<Header />
-								<div className="mx-auto flex w-full flex-col ">
-									<Outlet />
+								<div className="container mx-auto flex w-full columns-1 flex-col md:columns-2">
+									<Outlet context="my-value-root" />
 								</div>
 								<Footer />
 							</div>
-
-							{/* {shouldRenderPlayer && <MixdownPlayer className="fixed bottom-0 mt-auto shrink-0 grow-0" key="player" />} */}
-
 							<EpicToaster closeButton position="top-center" theme={theme} />
 							<EpicProgress />
 						</Document>

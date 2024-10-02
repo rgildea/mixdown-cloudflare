@@ -5,7 +5,7 @@ import Logo from './Logo'
 
 const Footer: React.FC = () => {
 	return (
-		<>
+		<div className="mt-16 items-center">
 			<Logo size="sm" className="visible text-foreground" />
 			<div className="mt-2 flex w-max items-center text-sm text-muted-foreground">
 				<Link to="https://www.ryangildea.com">© {new Date().getFullYear()} Ryan Gildea</Link>
@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
 					<InlineIcon className="size-3" icon="mdi:linkedin" />
 				</Link>
 			</div>
-		</>
+		</div>
 	)
 }
 

@@ -25,7 +25,7 @@ export default function Route() {
 	const navigate = useNavigate()
 	return (
 		<>
-			<Outlet />
+			<Outlet context="my-value-dashboard-layout" />
 			{searchParams.get('new') === 'true' && (
 				<NewTrackModal
 					isModalOpen={true}

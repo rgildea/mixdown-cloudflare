@@ -1,6 +1,7 @@
 import { type loader as rootLoader } from '#app/root.tsx'
 import { type SerializeFrom } from '@remix-run/cloudflare'
 import { useRouteLoaderData } from '@remix-run/react'
+import { TrackWithVersions } from './track.server'
 
 function isUser(user: any): user is SerializeFrom<typeof rootLoader>['user'] {
 	return user && typeof user === 'object' && typeof user.id === 'string'
@@ -55,4 +56,38 @@ export function userHasPermission(
 export function userHasRole(user: Pick<ReturnType<typeof useUser>, 'roles'> | null, role: string) {
 	if (!user) return false
 	return user.roles.some(r => r.name === role)
+}
+
+export function usePermission(permission: PermissionString) {
+	const user = useUser()
+	return userHasPermission(user, permission)
+}
+
+export function useRole(role: string) {
+	const user = useUser()
+	return userHasRole(user, role)
+}
+
+export function usePermissionGuard(permission: PermissionString) {
+	const hasPermission = usePermission(permission)
+	if (!hasPermission) {
+		throw new Error(`User does not have permission: ${permission}`)
+	}
+}
+
+export function useRoleGuard(role: string) {
+	const hasRole = useRole(role)
+	if (!hasRole) {
+		throw new Error(`User does not have role: ${role}`)
+	}
+}
+
+export function userOwnsTrack(
+	user: Pick<ReturnType<typeof useUser>, 'id' | 'name' | 'username' | 'name'> | null,
+	track: Pick<TrackWithVersions, 'creator'>,
+) {
+	// console.debug(
+	// 	`Does ${user?.name ?? user?.username} own ${track.creator.username}'s track? ${user && user.id === track.creator.id}`,
+	// )
+	return user && user.id === track.creator.id
 }

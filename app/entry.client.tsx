@@ -3,7 +3,7 @@ import { Buffer } from 'buffer-polyfill'
 import { startTransition } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 
-if (window.ENV.SENTRY_DSN) {
+if (window?.ENV?.SENTRY_DSN) {
 	import('./utils/monitoring.client.tsx').then(({ init }) => init({ env: ENV }))
 }
 

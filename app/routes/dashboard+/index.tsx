@@ -1,7 +1,7 @@
 import MixdownPlayer from '#app/components/MixdownPlayer'
 import TrackList from '#app/components/TrackList'
 import { Button } from '#app/components/ui/button'
-import { getCurrentTrack, PlayerDispatchContext, usePlayerContext } from '#app/contexts/PlayerContext'
+import { PlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
@@ -14,7 +14,6 @@ export const action: ActionFunction = async () => {
 }
 
 export default function Route() {
-	const playerState = usePlayerContext()
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
 	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
@@ -35,25 +34,16 @@ export default function Route() {
 	}, [playerDispatch, tracks])
 
 	return (
-		<div className="flex grow flex-col items-start gap-1 px-0">
-			<Button asChild>
-				<Link
-					className="leading font-sans text-body-sm font-medium hover:font-semibold hover:text-white"
-					to="?new=true"
-				>
-					<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
-					&nbsp; Add Track
-				</Link>
-			</Button>
-			{/* <Button className="bg-secondary text-button text-xs text-secondary-foreground" asChild size="icon">
-					<Link to="?new=true">
-					<InlineIcon className="size-4" icon="mdi:plus-circle-outline" />
-					&nbsp; Add Track
+		<div className="flex grow flex-col items-start gap-3">
+			<MixdownPlayer key="player" embed={true} />
+			<Button className="ml-4" variant="default" asChild>
+				<div>
+					<Link className="flex items-center font-sans text-body-xs font-medium" to="?new=true">
+						<InlineIcon className="size-6" icon="mdi:plus" />
+						<span className="hover:cursor-pointer">New Track</span>
 					</Link>
-					</Button> */}
-
-			<MixdownPlayer track={getCurrentTrack(playerState) ?? undefined} key="player" embed={true} />
-			{/* <MixdownPlayer embed className="fixed bottom-0 left-0 mt-auto shrink-0 grow-0" key="player" /> */}
+				</div>
+			</Button>
 			<TrackList tracks={tracks || []} />
 		</div>
 	)

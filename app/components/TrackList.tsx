@@ -78,7 +78,6 @@ function TrackList({ tracks }: TrackListProps) {
 			pointerOnHover
 			onRowClicked={row => {
 				navigate(`/tracks/${row.id}`)
-				// handlePlayButtonClicked(row, e)
 			}}
 			columns={cols}
 			data={tracks}

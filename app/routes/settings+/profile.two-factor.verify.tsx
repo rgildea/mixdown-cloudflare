@@ -62,7 +62,6 @@ export async function action({ context: { storageContext }, request }: ActionFun
 	const userId = await requireUserId(storageContext, request)
 	const formData = await request.formData()
 	const { db, toastSessionStorage } = storageContext
-
 	const submission = await parseWithZod(formData, {
 		schema: () =>
 			ActionSchema.superRefine(async (data, ctx) => {
@@ -129,7 +128,6 @@ export default function TwoFactorRoute() {
 		},
 	})
 	const lastSubmissionIntent = fields.intent.value
-
 	return (
 		<div>
 			<div className="flex flex-col items-center gap-4">

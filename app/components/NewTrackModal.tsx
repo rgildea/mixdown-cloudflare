@@ -2,7 +2,7 @@ import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
 import ModalDialog from '#app/components/ui/modal-dialog'
 import { useNavigate } from '@remix-run/react'
 import { AnimatePresence } from 'framer-motion'
-import { uploadEndpoint } from '../routes/tracks+/new'
+export const uploadEndpoint = '/storage/new'
 
 type NewTrackModalProps = {
 	isModalOpen: boolean

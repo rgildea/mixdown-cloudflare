@@ -4,7 +4,6 @@ import defaultTheme from 'tailwindcss/defaultTheme'
 export const extendedTheme = {
 	fontFamily: {
 		nourd: ['var(--font-nourd)', ...defaultTheme.fontFamily.sans],
-		// sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
 	},
 	fontWeight: {
 		black: '900',

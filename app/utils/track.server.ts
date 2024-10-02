@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { StorageContext } from './auth.server'
 import { userBasicSelect } from './user.server'
 
@@ -179,7 +179,6 @@ export async function deleteTrackById(storageContext: StorageContext, trackId: s
 
 export async function updateTrackActiveVersion(storageContext: StorageContext, trackId: string, versionId: string) {
 	const { db } = storageContext
-
 	try {
 		const updatedTrack = await db.track.update({
 			where: { id: trackId },
@@ -204,14 +203,13 @@ export async function updateTrack(
 	storageContext: StorageContext,
 	trackId: string,
 	title: string,
-	activeTrackVersion?: TrackVersionWithAudioFile,
 	description?: string,
 ) {
 	const { db } = storageContext
 	try {
 		const updatedTrack = await db.track.update({
 			where: { id: trackId },
-			data: { title, description, activeTrackVersion: { connect: { id: activeTrackVersion?.id } } },
+			data: { title, description },
 			select: trackWithVersionsSelect,
 		})
 
@@ -222,14 +220,15 @@ export async function updateTrack(
 	}
 }
 
-export const createAudioFileRecord = async (
-	db: PrismaClient,
+export const createTrackWithAudioFile = async (
+	storageContext: StorageContext,
 	userId: string,
 	key: string,
 	filename: string,
 	contentType: string,
 	fileSize: number,
 ) => {
+	const { db } = storageContext
 	try {
 		const result = await db.audioFile.create({
 			data: {
@@ -275,7 +274,100 @@ export const createAudioFileRecord = async (
 			},
 		})
 
-		const updateResult = await db.track.update({
+		if (!result.version?.track.id || !result.version?.id) {
+			throw new Error('Failed to create audio file record')
+		}
+
+		const updateResult = updateTrackActiveVersion(storageContext, result?.version?.track.id, result?.version?.id)
+
+		return updateResult
+	} catch (error) {
+		console.error(error)
+		throw new Error('Failed to create audio file record')
+	}
+}
+
+export const addTrackVersionWithAudioFile = async (
+	storageContext: StorageContext,
+	userId: string,
+	key: string,
+	filename: string,
+	contentType: string,
+	fileSize: number,
+	trackId: string,
+) => {
+	const { db } = storageContext
+
+	await db.track.findFirst({
+		select: {
+			_count: {
+				select: {
+					trackVersions: true,
+				},
+			},
+		},
+	})
+
+	const trackWithVersionsCountResult = await db.track.findFirst({
+		select: {
+			_count: {
+				select: { trackVersions: true },
+			},
+		},
+		where: {
+			id: trackId,
+			creatorId: userId,
+		},
+		orderBy: {
+			created_at: 'desc',
+		},
+	})
+
+	const trackWithVersionsCount = trackWithVersionsCountResult?._count?.trackVersions || 0
+	const nextVersion = trackWithVersionsCount + 1
+
+	try {
+		const result = await db.audioFile.create({
+			data: {
+				contentType,
+				fileKey: key,
+				fileName: filename,
+				fileSize,
+				url: `/storage/${key}`,
+				version: {
+					create: {
+						version: nextVersion,
+						title: `version ${nextVersion} of ${filename}`,
+						track: {
+							connect: {
+								id: trackId,
+								creatorId: userId,
+							},
+						},
+					},
+				},
+			},
+			select: {
+				id: true, // id of the audioFile
+				version: {
+					select: {
+						id: true, // id of the version
+						track: {
+							select: {
+								id: true, // id of the track
+								activeTrackVersion: {
+									select: {
+										id: true, // id of the active version
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+
+		await db.track.update({
 			where: {
 				id: result?.version?.track.id,
 			},
@@ -287,8 +379,6 @@ export const createAudioFileRecord = async (
 				},
 			},
 		})
-
-		console.log('Update Result', updateResult)
 
 		return result
 	} catch (error) {

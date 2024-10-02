@@ -1,9 +1,10 @@
-import { redirect } from '@remix-run/cloudflare'
+import { redirect, useLoaderData } from '@remix-run/react'
 
 export const loader = async () => {
-	return redirect('/')
+	return redirect('/dashboard')
 }
 
 export default function Route() {
-	return null
+	const loaderData = useLoaderData<typeof loader>()
+	return loaderData
 }
