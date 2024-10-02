@@ -1,5 +1,6 @@
 import { getCurrentTrack, PlayerContext } from '#app/contexts/PlayerContext'
 import { TrackWithVersions } from '#app/utils/track.server'
+import { useOptionalUser, userOwnsTrack } from '#app/utils/user'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { Form, NavLink } from '@remix-run/react'
 import { useContext } from 'react'
@@ -7,11 +8,11 @@ import PlayButton from './PlayButton'
 import { Button } from './ui/button'
 
 const TrackCell = ({ track }: { track: TrackWithVersions }) => {
-	const audioFile = track.trackVersions[0]?.audioFile
-	const trackUrl = `/storage/${audioFile?.fileKey}`
+	const audioFile = track.activeTrackVersion?.audioFile
+	const trackUrl = audioFile?.url
 	const playerState = useContext(PlayerContext)
 	const nowPlayingTrack = getCurrentTrack(playerState)
-
+	const user = useOptionalUser()
 	const isTrackLoaded = nowPlayingTrack?.id === track?.id
 
 	return (
@@ -27,26 +28,30 @@ const TrackCell = ({ track }: { track: TrackWithVersions }) => {
 				>
 					{track.title}
 				</div>
-				<Button className="invisible group-hover:visible" variant="playbutton" size={'trackrow'} asChild>
-					<NavLink to={`/tracks/${track.id}`}>
-						<InlineIcon className="size-4 sm:size-6" icon="mdi:pencil" />
-					</NavLink>
-				</Button>
-				<Form key={track.id} method="DELETE" action={trackUrl}>
-					<Button
-						className="invisible ml-auto p-0 text-button focus-visible:ring-0 group-hover:visible"
-						type="submit"
-						variant="playbutton-destructive"
-						onClick={e => {
-							e.stopPropagation()
-						}}
-						onSubmit={e => {
-							e.preventDefault()
-						}}
-					>
-						<InlineIcon className="invisible size-6 group-hover:visible sm:size-4" icon="mdi:delete" />
-					</Button>{' '}
-				</Form>
+				{user && userOwnsTrack(user, track) && (
+					<>
+						<Button className="invisible group-hover:visible" variant="playbutton" size={'trackrow'} asChild>
+							<NavLink to={`/tracks/${track.id}`}>
+								<InlineIcon className="size-4 sm:size-6" icon="mdi:pencil" />
+							</NavLink>
+						</Button>
+						<Form key={track.id} method="DELETE" action={trackUrl}>
+							<Button
+								className="invisible ml-auto p-0 text-button focus-visible:ring-0 group-hover:visible"
+								type="submit"
+								variant="playbutton-destructive"
+								onClick={e => {
+									e.stopPropagation()
+								}}
+								onSubmit={e => {
+									e.preventDefault()
+								}}
+							>
+								<InlineIcon className="invisible size-6 group-hover:visible sm:size-4" icon="mdi:delete" />
+							</Button>{' '}
+						</Form>
+					</>
+				)}
 			</div>
 		)
 	)

@@ -279,7 +279,6 @@ export const createTrackWithAudioFile = async (
 		}
 
 		const updateResult = updateTrackActiveVersion(storageContext, result?.version?.track.id, result?.version?.id)
-		console.log('Update Result', updateResult)
 
 		return updateResult
 	} catch (error) {
@@ -368,7 +367,7 @@ export const addTrackVersionWithAudioFile = async (
 			},
 		})
 
-		const updateResult = await db.track.update({
+		await db.track.update({
 			where: {
 				id: result?.version?.track.id,
 			},
@@ -380,8 +379,6 @@ export const addTrackVersionWithAudioFile = async (
 				},
 			},
 		})
-
-		console.log('Update Result', updateResult)
 
 		return result
 	} catch (error) {

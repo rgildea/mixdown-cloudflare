@@ -135,7 +135,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 		case 'SET_SELECTED_TRACK_VERSION':
 			if (!action.track) return state
 			if (trackIndex === -1) {
-				console.info('Track not found in playlist')
+				console.debug('Track not found in playlist')
 				return state
 			}
 			if (state.isPlaying) {
@@ -288,7 +288,7 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			audioElement.currentTime = Number(Math.min(audioElement.currentTime + 10, audioElement.duration))
 			return state
 		case 'LISTEN':
-			console.log('Listening update', audioElement?.currentTime)
+			console.debug('Listening update', audioElement?.currentTime)
 			return { ...state, lastPosition: audioElement?.currentTime }
 		default:
 			return state

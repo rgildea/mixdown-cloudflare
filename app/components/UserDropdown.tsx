@@ -1,4 +1,3 @@
-import { getUserImgSrc } from '#app/utils/misc'
 import { useUser } from '#app/utils/user'
 import { Form, Link, useSubmit } from '@remix-run/react'
 import { useRef } from 'react'
@@ -19,18 +18,19 @@ function UserDropdown() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button asChild variant="ghost">
+				<Button asChild variant="default">
 					<Link
 						to={`/users/${user.username}`}
 						// this is for progressive enhancement
 						onClick={e => e.preventDefault()}
 						className="flex items-center gap-2"
 					>
-						<img
-							className="h-8 w-8 rounded-full object-cover"
+						<Icon className="text-body-md" name="avatar" />
+						{/* <img
+							className="h-4 w-4 rounded-full object-cover"
 							alt={user.name ?? user.username}
 							src={getUserImgSrc(user.image?.id)}
-						/>
+						/> */}
 						{/* <span className="text-body-sm font-bold">{user.name ?? user.username}</span> */}
 					</Link>
 				</Button>

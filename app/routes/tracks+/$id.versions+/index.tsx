@@ -1,82 +1,23 @@
 import { Button } from '#app/components/ui/button'
 import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
-import { requireUserId } from '#app/utils/auth.server'
-import { getTrackWithVersionsByTrackId, TrackWithVersions, updateTrackActiveVersion } from '#app/utils/track.server'
+import { ActionSchema } from '#app/routes/tracks+/$id'
+import { TrackWithVersions } from '#app/utils/track.server'
+import { userOwnsTrack } from '#app/utils/user'
 import { SubmissionResult, useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { getZodConstraint } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { ActionFunctionArgs } from '@remix-run/cloudflare'
-import { Link, redirect, useActionData, useFetcher, useMatches, useRouteLoaderData } from '@remix-run/react'
+import { Link, NavLink, useFetcher, useMatches, useRouteLoaderData } from '@remix-run/react'
 import { useEffect } from 'react'
-import { z } from 'zod'
-
-export type TrackFormAction = 'set-active-version' | 'edit-title'
-
-const schema = z.object({
-	_action: z.literal('set-active-version'),
-	activeTrackVersionId: z.string({ required_error: 'Track version is required' }),
-})
-
-export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
-	const trackId = params.id
-	if (!trackId) {
-		throw new Response('Invalid track id', { status: 400 })
-	}
-
-	const track = await getTrackWithVersionsByTrackId(storageContext, trackId)
-	if (!track) {
-		throw new Response('Not found', { status: 404 })
-	}
-
-	const formData = await request.formData()
-	const _action = formData.get('_action') as TrackFormAction
-	if (!_action) {
-		throw new Response('Invalid action', { status: 400 })
-	}
-
-	const userId = await requireUserId(storageContext, request)
-	if (!userId || track.creator.id !== userId) {
-		throw new Response('Unauthorized', { status: 401 })
-	}
-
-	const submission = parseWithZod(formData, { schema })
-	// Report the submission to client if it is not successful
-	if (submission.status !== 'success') {
-		return submission.reply()
-	}
-
-	if (_action === 'set-active-version') {
-		const activeTrackVersion = track.trackVersions.find(v => v.id === formData.get('activeTrackVersionId'))
-		if (!activeTrackVersion) {
-			return submission.reply({ formErrors: [`Invalid track version`] })
-		}
-
-		try {
-			const updated = await updateTrackActiveVersion(storageContext, trackId, activeTrackVersion.id)
-			if (!updated) {
-				return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-			}
-		} catch (err) {
-			console.error(err)
-			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
-		}
-
-		console.log('successfully updated active track version')
-		console.log('redirecting to ', `/tracks/${trackId}/versions`)
-		return redirect(`/tracks/${trackId}/versions`)
-	}
-	console.log('returning nothing apparently')
-	return submission.reply()
-}
-
 const TrackVersionsRoute: React.FC = () => {
 	const matches = useMatches()
-	const match = matches.find(match => match.id == 'routes/tracks+/$id')
-	const data = useRouteLoaderData(match?.id ?? '') as { track?: TrackWithVersions }
-	const track = data?.track
+
+	const matchedRouteForTrack = matches.find(match => match.id === 'routes/tracks+/$id')
+	const { track } = useRouteLoaderData(matchedRouteForTrack?.id || '') as {
+		track: TrackWithVersions
+	}
 	const versions = track?.trackVersions
 	const activeTrackVersionId = track?.activeTrackVersion?.id
-	const lastResult = useActionData<typeof action>() as SubmissionResult
+	const lastResult = matchedRouteForTrack?.data as SubmissionResult
 	const playerContext = usePlayerContext()
 	const playerDispatch = usePlayerDispatchContext()
 
@@ -90,7 +31,7 @@ const TrackVersionsRoute: React.FC = () => {
 	const [form] = useForm({
 		id: 'set-active-version',
 		lastResult,
-		constraint: getZodConstraint(schema),
+		constraint: getZodConstraint(ActionSchema),
 		// Validate field once user leaves the field
 		shouldValidate: 'onBlur',
 	})
@@ -107,51 +48,96 @@ const TrackVersionsRoute: React.FC = () => {
 		const isActive = v.id === optimisticActiveTrackVersionId
 		const icon = `mdi:star${isActive ? '' : '-outline'}`
 		return (
-			<div className="flex flex-row items-center gap-2" key={v.id}>
-				<fetcher.Form
-					onSubmit={() => {
-						console.log('Updating selected version while setting active: ', v.id)
-						playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
-					}}
-					id={form.id}
-					method="post"
-				>
-					<input type="hidden" name="_action" value="set-active-version" />
-					<input type="hidden" name="activeTrackVersionId" value={v.id} />
-					<Button variant="playbutton-destructive" className="group text-secondary" type="submit">
-						<InlineIcon
-							className="duration-250 size-4 transition-all ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
-							icon={icon}
-						/>
-					</Button>
-				</fetcher.Form>
-				<button
-					className={`group-hover:bg-gray-300/60' mx-auto flex w-full flex-grow items-center gap-2 rounded-sm py-3 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
-					type="submit"
-					key={v.id}
-					onClick={() => {
-						console.log('Updating selected Version ', v.id)
-						playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
-					}}
-				>
-					<span className="ml-2 hover:cursor-pointer">{v.title}</span>
-				</button>
+			<div
+				className={`group mx-auto flex w-full flex-nowrap gap-2 rounded-sm py-1 text-body-xs hover:cursor-pointer hover:bg-gray-300/60 hover:text-foreground ${initialTrackVersionId === v.id ? 'text-foreground' : 'text-muted-foreground'}`}
+				key={v.id}
+			>
+				<div className="flex grow-0 items-center">
+					<fetcher.Form
+						onSubmit={() => {
+							console.debug('Updating selected version while setting active: ', v.id)
+							playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
+						}}
+						id={form.id}
+						method="post"
+						action={`/tracks/${track.id}`}
+					>
+						<input type="hidden" name="intent" value="set-active-version" />
+						<input type="hidden" name="activeTrackVersionId" value={v.id} />
+						<Button variant="playbutton-destructive" className="group text-secondary" type="submit">
+							<InlineIcon
+								className="duration-250 size-4 transition-all ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
+								icon={icon}
+							/>
+						</Button>
+					</fetcher.Form>
+				</div>
+
+				<div className="grow-1 flex w-full items-stretch">
+					<button
+						onClick={() => {
+							playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
+						}}
+					>
+						{v.title}
+					</button>
+				</div>
+
+				<div className="nowrap flex grow-0 items-center">
+					{userOwnsTrack(track.creator, track) && (
+						<>
+							<div>
+								<Button className="invisible group-hover:visible" variant="playbutton" size={'trackrow'} asChild>
+									<NavLink to={v.id}>
+										<InlineIcon className="size-6 sm:size-4" icon="mdi:pencil" />
+									</NavLink>
+								</Button>
+							</div>
+
+							<>
+								<fetcher.Form method="post" action={v.id} className="group">
+									<input type="hidden" name="intent" value="delete" />
+									<Button
+										className="invisible ml-auto p-1 text-button focus-visible:ring-0 group-hover:visible"
+										type="submit"
+										variant="playbutton-destructive"
+										onSubmit={e => {
+											e.preventDefault()
+											if (confirm('Are you sure you want to delete this track version?')) {
+												e.currentTarget?.form?.submit()
+											}
+										}}
+									>
+										<InlineIcon className="invisible size-6 group-hover:visible sm:size-4" icon="mdi:delete" />
+									</Button>
+								</fetcher.Form>
+							</>
+						</>
+					)}
+				</div>
 			</div>
 		)
 	})
 
 	return (
-		<div className="flex flex-col">
-			<Button className="group self-start" variant="playbutton" asChild>
+		<div className="mt-2 flex flex-col gap-2">
+			{/* <Button className="group self-start" variant="playbutton" asChild>
 				<Link className="font-sans text-body-xs font-medium hover:font-semibold" to="?new=true">
 					<InlineIcon
 						className="duration-250 size-6 transition-transform ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
 						icon="mdi:plus-circle-outline"
 					/>
 				</Link>
+			</Button> */}
+			<Button className="ml-4 w-min text-nowrap" variant="default" asChild>
+				<div>
+					<Link className="flex items-center font-sans text-body-xs font-medium" to="?new=true">
+						<InlineIcon className="size-6" icon="mdi:plus" />
+						<span className="hover:cursor-pointer">New Track</span>
+					</Link>
+				</div>
 			</Button>
-
-			{versionItems}
+			<div>{versionItems}</div>
 		</div>
 	)
 }

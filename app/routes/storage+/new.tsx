@@ -21,11 +21,6 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 		throw new Error('Error uploading file to R2 bucket')
 	}
 
-	console.log('Form Data:')
-	for (const [key, value] of formData.entries()) {
-		console.log(`${key}: ${value}`)
-	}
-
 	const resp = formData?.get('file')?.toString()
 	if (!resp || typeof resp !== 'string') {
 		throw new Error('Error uploading file to R2 bucket')

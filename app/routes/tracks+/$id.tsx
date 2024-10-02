@@ -4,80 +4,107 @@ import { TrackTile } from '#app/components/TrackTile'
 import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
 import { requireUserId } from '#app/utils/auth.server'
 import { getUserImgSrc } from '#app/utils/misc'
-import { getTrackWithVersionsByTrackId, updateTrack } from '#app/utils/track.server'
-import { getFormProps, getInputProps, SubmissionResult, useForm } from '@conform-to/react'
+import { getTrackWithVersionsByTrackId, updateTrack, updateTrackActiveVersion } from '#app/utils/track.server'
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/cloudflare'
+import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/cloudflare'
 import { Link, Outlet, useActionData, useFetcher, useLoaderData } from '@remix-run/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
-import { TrackFormAction } from './$id.versions+'
 
-const schema = z.object({
-	_action: z.literal('edit-title'),
-	title: z
-		.string({ required_error: 'Title is required' })
-		.min(5, 'Title is too short')
-		.max(80, 'Title is too long')
-		.transform(value => value.trim()),
+export type TrackFormAction = 'set-active-version' | 'edit-title'
+
+const EditTitleSchema = z.object({ intent: z.literal('edit-title'), title: z.string().min(5).max(80) })
+const SetActiveVersionSchema = z.object({
+	intent: z.literal('set-active-version'),
+	activeTrackVersionId: z.string().uuid(),
 })
+export const ActionSchema = z.discriminatedUnion('intent', [EditTitleSchema, SetActiveVersionSchema])
 
 export const action = async ({ request, params, context: { storageContext } }: ActionFunctionArgs) => {
+	const userId = await requireUserId(storageContext, request)
+	const formData = await request.formData()
 	const trackId = params.id
 	if (!trackId) {
 		throw new Response('Invalid track id', { status: 400 })
 	}
-
 	const track = await getTrackWithVersionsByTrackId(storageContext, trackId)
 	if (!track) {
 		throw new Response('Not found', { status: 404 })
 	}
-
-	const formData = await request.formData()
-
-	const _action = formData.get('_action') as TrackFormAction
-	if (!_action) {
-		throw new Response('Invalid action', { status: 400 })
+	const intent = formData.get('intent') as TrackFormAction
+	if (!intent) {
+		throw new Response('Invalid intent', { status: 400 })
 	}
-	console.log('_action', _action)
-
-	const userId = await requireUserId(storageContext, request)
 	if (!userId || track.creator.id !== userId) {
 		throw new Response('Unauthorized', { status: 401 })
 	}
 
-	const submission = parseWithZod(formData, { schema })
+	const submission = await parseWithZod(formData, {
+		schema: () =>
+			ActionSchema.superRefine(async data => {
+				if (data.intent === 'edit-title') {
+					return parseWithZod(formData, { schema: EditTitleSchema, async: true })
+				}
+				if (data.intent === 'set-active-version') {
+					return parseWithZod(formData, { schema: SetActiveVersionSchema, async: true })
+				}
+				throw new Error('Invalid intent')
+			}),
+		async: true,
+	})
+
 	if (submission.status !== 'success') {
-		return submission.reply()
+		console.error('Submission failed', submission)
+		console.error('Submission error', submission.error)
+		return { result: submission.reply(), status: submission.status === 'error' ? 400 : 200 }
 	}
 
-	if (_action === 'edit-title') {
-		const { title } = submission.value
-		console.log('updating track', trackId, title)
+	if (intent === 'edit-title') {
+		const title = formData.get('title') as string
+		if (!title) {
+			return {
+				result: submission.reply({ formErrors: ['Title is required, fool!'] }),
+			}
+		}
 
 		try {
 			const updated = await updateTrack(storageContext, trackId, title)
 			if (!updated) {
-				return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
+				return { result: submission.reply({ formErrors: [`Failed to update track ${trackId}`] }) }
 			}
 		} catch (err) {
 			console.error(err)
-			return submission.reply({ formErrors: [`Failed to update track ${trackId}`] })
+			return { result: submission.reply({ formErrors: [`Failed to update track ${trackId}`] }) }
 		}
 
-		console.log('successfully updated track', trackId)
-		console.log('redirecting to', `/tracks/${trackId}/versions`)
+		return redirect(`/tracks/${trackId}/versions`)
+	} else if (intent === 'set-active-version') {
+		const activeTrackVersion = track.trackVersions.find(v => v.id === formData.get('activeTrackVersionId'))
+		if (!activeTrackVersion) {
+			return { result: submission.reply({ formErrors: [`Invalid track version`] }) }
+		}
+
+		try {
+			const updated = await updateTrackActiveVersion(storageContext, trackId, activeTrackVersion.id)
+			if (!updated) {
+				return { result: submission.reply({ formErrors: [`Failed to update track ${trackId}`] }) }
+			}
+		} catch (err) {
+			console.error(err)
+			return { result: submission.reply({ formErrors: [`Failed to update track ${trackId}`] }) }
+		}
+
 		return redirect(`/tracks/${trackId}/versions`)
 	}
 
-	console.warn('Unknown action:', _action)
-	return submission.reply()
+	console.warn('Unknown action:', intent)
+	return { result: submission.reply() }
 }
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
-	console.log('routes/tracks/$id loader', params)
 	const trackId = params.id as string
 	const notFoundResponse = new Response('Not found', { status: 404 })
 
@@ -88,37 +115,36 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 		throw notFoundResponse
 	}
 
-	return json({ track })
+	return { track }
 }
 
 const TrackRoute: React.FC = () => {
 	const { track } = useLoaderData<typeof loader>() // get the track from the loader data
 	const versions = track.trackVersions
-	const activeTrackVersionId = track.activeTrackVersion?.id
-	const lastResult = useActionData<typeof action>() as SubmissionResult // get the last action result
+	const actionData = useActionData<typeof action>() // get the last action result
 	const playerDispatch = usePlayerDispatchContext() // get the player dispatch function
 	const playerContext = usePlayerContext() // get the player context
 	// get the version from the player context, or track's active version, or the first version.
-	const initialTrackVersionId = playerContext?.currentTrackVersionId || activeTrackVersionId || versions[0]?.id
+	const initialTrackVersionId =
+		playerContext?.currentTrackVersionId || // use the selected track version from the player context
+		track.activeTrackVersion?.id || // use the active track version from the track
+		track.trackVersions[0]?.id // use the first track version and hope for the best
 	if (!initialTrackVersionId) {
 		throw new Error('No track version found')
 	}
 
-	// Define a form to edit the track title and description
+	// Define a form to edit the track title
 	const [form, fields] = useForm({
-		id: 'edit-title-form',
+		id: 'edit-track-form',
 		defaultValue: {
-			_action: 'edit-title',
-			title: track.title,
+			intent: 'edit-title',
+			title: track.title ?? '',
 		},
-		lastResult,
-		constraint: getZodConstraint(schema),
+		lastResult: actionData?.result,
+		constraint: getZodConstraint(ActionSchema),
 		shouldValidate: 'onBlur',
-		shouldRevalidate: 'onBlur',
-		// Setup client validation
 		onValidate({ formData }) {
-			console.log('[onValidate] Validating form data', formData)
-			return parseWithZod(formData, { schema })
+			return parseWithZod(formData, { schema: ActionSchema })
 		},
 	})
 
@@ -147,24 +173,21 @@ const TrackRoute: React.FC = () => {
 	}
 
 	const resetForm = () => {
-		console.log('Resetting form')
 		setIsTitleEditable(false)
 		form?.reset()
 	}
 
-	// console.log('Form errors', form.errors)
-	// console.log('all errors:', form.allErrors)
-	// fields.title.errors?.every(error => {
-	// 	console.log('title error:', error)
-	// })
+	fields.title.errors?.forEach(error => {
+		console.error('title error:', error)
+	})
 
 	return (
 		<>
 			<div className="flex">
 				<TrackTile className="grow-0" showPlaybutton={false} track={track} size="sm" />
 				<div className="flex flex-grow flex-col justify-start">
-					<fetcher.Form {...getFormProps(form)} id={form.id} method="post">
-						<input {...getInputProps(fields._action, { type: 'hidden' })} />
+					<fetcher.Form {...getFormProps(form)} id={'edit-track-form'} method="post">
+						<input {...getInputProps(fields.intent, { type: 'hidden' })} />
 						<div className="flex flex-col">
 							<span id={form.errorId} className="h-min text-xs font-normal tracking-wide text-destructive">
 								{form.errors}
@@ -196,7 +219,6 @@ const TrackRoute: React.FC = () => {
 												<button
 													{...form.reset.getButtonProps()}
 													onClick={() => {
-														console.log('[onClick] Cancel button clicked')
 														resetForm()
 													}}
 													className={`group text-secondary`}
@@ -208,7 +230,6 @@ const TrackRoute: React.FC = () => {
 												</button>
 												<button
 													onClick={() => {
-														console.log('Submit button clicked')
 														setIsTitleEditable(false)
 													}}
 													id="submit"
@@ -234,7 +255,6 @@ const TrackRoute: React.FC = () => {
 												}}
 												onKeyDown={e => {
 													if (e.key === 'Enter') {
-														console.log('Enter key pressed. Submitting form.')
 														e.preventDefault()
 														e.currentTarget.blur()
 														setIsTitleEditable(false)
@@ -243,7 +263,6 @@ const TrackRoute: React.FC = () => {
 														})
 													}
 													if (e.key === 'Escape') {
-														console.log('Escape key pressed.')
 														e.currentTarget.blur()
 														resetForm()
 													}

@@ -6,7 +6,6 @@ import { ActionFunction, ActionFunctionArgs, json, unstable_parseMultipartFormDa
 const acceptedContentTypes = ['audio/x-aiff', 'audio/aiff', 'audio/LPCM', 'audio/mpeg', 'audio/wav']
 
 export const action: ActionFunction = (async ({ context, params, request }: ActionFunctionArgs) => {
-	console.log('New audio file upload request')
 	const bucket = context.cloudflare.env.STORAGE_BUCKET
 	const storageContext = context.storageContext
 	const userId = await requireUserId(storageContext, request)

@@ -34,13 +34,16 @@ export default function Route() {
 	}, [playerDispatch, tracks])
 
 	return (
-		<div className="flex grow flex-col items-start gap-1 px-0">
-			<Button variant="playbutton" asChild>
-				<Link className="font-sans text-body-xs font-medium hover:font-semibold" to="?new=true">
-					<InlineIcon className="size-6" icon="mdi:plus-circle-outline" />
-				</Link>
-			</Button>
+		<div className="flex grow flex-col items-start gap-3">
 			<MixdownPlayer key="player" embed={true} />
+			<Button className="ml-4" variant="default" asChild>
+				<div>
+					<Link className="flex items-center font-sans text-body-xs font-medium" to="?new=true">
+						<InlineIcon className="size-6" icon="mdi:plus" />
+						<span className="hover:cursor-pointer">New Track</span>
+					</Link>
+				</div>
+			</Button>
 			<TrackList tracks={tracks || []} />
 		</div>
 	)

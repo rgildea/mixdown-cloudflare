@@ -126,7 +126,7 @@ export default function MixdownPlayer({
 			dispatch({ type: 'SET_PLAYER', playerRef: playerRef })
 		}
 		loadCounter.current++
-		console.log('Player loadCounter:', loadCounter.current)
+		console.debug('Player loadCounter:', loadCounter.current)
 
 		return () => {}
 	}, [dispatch, playerRef, context?.player])

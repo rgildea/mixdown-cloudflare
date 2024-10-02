@@ -6,7 +6,6 @@ export const loader: LoaderFunction = async () => {
 }
 
 export default function Route() {
-	// console.log('INDEX LAYOUT ROUTE')
 	return (
 		<div>
 			<Outlet />

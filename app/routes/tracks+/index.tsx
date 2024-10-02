@@ -1,7 +1,6 @@
 import { redirect, useLoaderData } from '@remix-run/react'
 
 export const loader = async () => {
-	console.log('tracks index route')
 	return redirect('/dashboard')
 }
 

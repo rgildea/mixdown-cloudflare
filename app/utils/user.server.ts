@@ -1,10 +1,15 @@
+import { Prisma } from '@prisma/client'
+
 export const userBasicSelect = {
 	id: true,
 	username: true,
+	name: true,
 	image: { select: { id: true } },
 }
 
-export const UserSelect = {
+export type BasicUser = Prisma.TrackGetPayload<{ select: typeof userBasicSelect }>
+
+export const userSelect = {
 	id: true,
 	name: true,
 	username: true,
@@ -20,8 +25,10 @@ export const UserSelect = {
 	},
 }
 
-export const UserWithRolesSelect = {
-	...UserSelect,
+export type basicUser = Prisma.TrackGetPayload<{ select: typeof userSelect }>
+
+export const userWithRolesSelect = {
+	...userSelect,
 	roles: {
 		select: {
 			name: true,
