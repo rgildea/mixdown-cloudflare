@@ -19,7 +19,6 @@ const Footer: React.FC = () => {
 				</Link>
 			</div>
 		</div>
-
 	)
 }
 

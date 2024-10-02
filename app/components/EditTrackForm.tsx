@@ -29,7 +29,6 @@ const EditTrackForm = ({ track, onCancelButtonClicked, onSubmitButtonClicked }: 
 		constraint: getZodConstraint(TrackSchema),
 		lastResult: actionData?.result,
 		defaultValue: track,
-
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: TrackSchema })
 		},
