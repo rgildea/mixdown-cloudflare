@@ -13,9 +13,8 @@ import { Link, Outlet, useActionData, useFetcher, useLoaderData } from '@remix-r
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
-
+const notFoundResponse = new Response('Not found', { status: 404 })
 export type TrackFormAction = 'set-active-version' | 'edit-title'
-
 const EditTitleSchema = z.object({ intent: z.literal('edit-title'), title: z.string().min(5).max(80) })
 const SetActiveVersionSchema = z.object({
 	intent: z.literal('set-active-version'),
@@ -106,7 +105,6 @@ export const action = async ({ request, params, context: { storageContext } }: A
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 	const trackId = params.id as string
-	const notFoundResponse = new Response('Not found', { status: 404 })
 
 	const track = await getTrackWithVersionsByTrackId(context.storageContext, trackId)
 
@@ -120,6 +118,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
 const TrackRoute: React.FC = () => {
 	const { track } = useLoaderData<typeof loader>() // get the track from the loader data
+
 	const versions = track.trackVersions
 	const actionData = useActionData<typeof action>() // get the last action result
 	const playerDispatch = usePlayerDispatchContext() // get the player dispatch function
@@ -138,7 +137,7 @@ const TrackRoute: React.FC = () => {
 		id: 'edit-track-form',
 		defaultValue: {
 			intent: 'edit-title',
-			title: track.title ?? '',
+			title: track?.title ?? '',
 		},
 		lastResult: actionData?.result,
 		constraint: getZodConstraint(ActionSchema),
@@ -160,7 +159,7 @@ const TrackRoute: React.FC = () => {
 
 	useEffect(() => {
 		if (initialTrackVersionId) {
-			playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: initialTrackVersionId })
+			playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track, versionId: initialTrackVersionId })
 		}
 	}, [initialTrackVersionId, playerDispatch, track])
 

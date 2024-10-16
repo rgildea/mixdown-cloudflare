@@ -1,6 +1,7 @@
 import { vitePlugin as remix, cloudflareDevProxyVitePlugin as remixCloudflareDevProxy } from '@remix-run/dev'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { glob } from 'glob'
+import { remixDevTools } from 'remix-development-tools'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { getLoadContext } from './load-context'
@@ -12,6 +13,7 @@ export default defineConfig({
 			getLoadContext,
 			persist: { path: './tmp/data' },
 		}),
+		remixDevTools(),
 		remix(remixConfig),
 		tsconfigPaths(),
 		sentryVitePlugin({

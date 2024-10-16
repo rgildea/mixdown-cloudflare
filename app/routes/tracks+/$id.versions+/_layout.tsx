@@ -1,7 +1,7 @@
 import NewVersionModal from '#app/components/NewVersionModal.tsx'
+import { loader } from '#app/routes/tracks+/$id'
 import { ActionFunction, json } from '@remix-run/cloudflare'
 import { Outlet, useLocation, useNavigate, useRouteLoaderData, useSearchParams } from '@remix-run/react'
-import { loader } from '../$id.tsx'
 
 export const action: ActionFunction = async () => {
 	return json({}, { status: 200 })
@@ -12,7 +12,6 @@ export default function Route() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const data = useRouteLoaderData<typeof loader>('routes/tracks+/$id')
-
 	return (
 		<>
 			<Outlet />

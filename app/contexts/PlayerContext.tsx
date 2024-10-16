@@ -60,7 +60,7 @@ export type PlayerContextActionType =
 
 export interface PlayerContextAction {
 	type: PlayerContextActionType
-	tracks?: TrackWithVersions[]
+	tracks?: TrackWithVersions[] | null
 	track?: TrackWithVersions | null
 	versionId?: string
 	playerRef?: React.RefObject<AudioPlayer> | null
@@ -88,11 +88,7 @@ export const getCurrentTrack = (state: PlayerContextData): TrackWithVersions | n
 }
 
 export const getTrackIndex = (state: PlayerContextData, track: TrackWithVersions): number => {
-	if (!state?.playlist) {
-		return -1
-	}
-	const foundIndex = state.playlist.findIndex(t => t.id === track.id)
-	return foundIndex
+	return state?.playlist?.findIndex(t => t.id === track.id) ?? -1
 }
 
 export const getCurrentTrackVersionId = (state: PlayerContextData): string | undefined => {
@@ -286,7 +282,6 @@ export const PlayerContextReducer = (state: PlayerContextData, action: PlayerCon
 			audioElement.currentTime = Number(Math.min(audioElement.currentTime + 10, audioElement.duration))
 			return state
 		case 'LISTEN':
-			console.debug('Listening update', audioElement?.currentTime)
 			return { ...state, lastPosition: audioElement?.currentTime }
 		default:
 			return state

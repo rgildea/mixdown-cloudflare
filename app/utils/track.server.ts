@@ -29,6 +29,8 @@ const trackWithVersionsSelect = {
 		select: trackVersionWithAudioFileSelect,
 		orderBy: { created_at: 'desc' },
 	},
+	// created_at: true,
+	// updated_at: true,
 } satisfies Prisma.TrackSelect
 
 export type TrackWithVersions = Prisma.TrackGetPayload<{ select: typeof trackWithVersionsSelect }>
@@ -131,6 +133,7 @@ export async function getTrackByAudioFile(storageContext: StorageContext, audioF
 
 	return track
 }
+
 export class TrackNotFoundError extends Error {
 	constructor(message: string) {
 		super(message)

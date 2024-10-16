@@ -1,20 +1,20 @@
 import { Button } from '#app/components/ui/button'
 import { usePlayerContext, usePlayerDispatchContext } from '#app/contexts/PlayerContext'
-import { ActionSchema } from '#app/routes/tracks+/$id'
-import { TrackWithVersions } from '#app/utils/track.server'
+import { ActionSchema, loader as trackIndexLoader } from '#app/routes/tracks+/$id'
 import { userOwnsTrack } from '#app/utils/user'
 import { SubmissionResult, useForm } from '@conform-to/react'
 import { getZodConstraint } from '@conform-to/zod'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
 import { Link, NavLink, useFetcher, useMatches, useRouteLoaderData } from '@remix-run/react'
 import { useEffect } from 'react'
-const TrackVersionsRoute: React.FC = () => {
+
+const TRACK_ROUTE_ID = 'routes/tracks+/$id'
+const TrackVersionsRoute = () => {
 	const matches = useMatches()
 
-	const matchedRouteForTrack = matches.find(match => match.id === 'routes/tracks+/$id')
-	const { track } = useRouteLoaderData(matchedRouteForTrack?.id || '') as {
-		track: TrackWithVersions
-	}
+	const matchedRouteForTrack = matches.find(match => match.id === TRACK_ROUTE_ID)
+	const trackData = useRouteLoaderData<typeof trackIndexLoader>(TRACK_ROUTE_ID)
+	const track = trackData?.track
 	const versions = track?.trackVersions
 	const activeTrackVersionId = track?.activeTrackVersion?.id
 	const lastResult = matchedRouteForTrack?.data as SubmissionResult
@@ -38,7 +38,7 @@ const TrackVersionsRoute: React.FC = () => {
 
 	useEffect(() => {
 		if (initialTrackVersionId) {
-			playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: initialTrackVersionId })
+			playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track, versionId: initialTrackVersionId })
 		}
 	}, [initialTrackVersionId, playerDispatch, track])
 
@@ -60,7 +60,7 @@ const TrackVersionsRoute: React.FC = () => {
 						}}
 						id={form.id}
 						method="post"
-						action={`/tracks/${track.id}`}
+						action={`/tracks/${track?.id}`}
 					>
 						<input type="hidden" name="intent" value="set-active-version" />
 						<input type="hidden" name="activeTrackVersionId" value={v.id} />
@@ -76,7 +76,7 @@ const TrackVersionsRoute: React.FC = () => {
 				<div className="grow-1 flex w-full items-stretch">
 					<button
 						onClick={() => {
-							playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track: track, versionId: v.id })
+							playerDispatch({ type: 'SET_SELECTED_TRACK_VERSION', track, versionId: v.id })
 						}}
 					>
 						{v.title}
@@ -121,19 +121,11 @@ const TrackVersionsRoute: React.FC = () => {
 
 	return (
 		<div className="mt-2 flex flex-col gap-2">
-			{/* <Button className="group self-start" variant="playbutton" asChild>
-				<Link className="font-sans text-body-xs font-medium hover:font-semibold" to="?new=true">
-					<InlineIcon
-						className="duration-250 size-6 transition-transform ease-in-out group-hover:scale-[150%] group-hover:cursor-pointer"
-						icon="mdi:plus-circle-outline"
-					/>
-				</Link>
-			</Button> */}
 			<Button className="ml-4 w-min text-nowrap" variant="default" asChild>
 				<div>
 					<Link className="flex items-center font-sans text-body-xs font-medium" to="?new=true">
 						<InlineIcon className="size-6" icon="mdi:plus" />
-						<span className="hover:cursor-pointer">New Track</span>
+						<span className="hover:cursor-pointer">New Version</span>
 					</Link>
 				</div>
 			</Button>
