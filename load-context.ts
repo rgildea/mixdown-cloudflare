@@ -1,3 +1,4 @@
+import { type KVNamespace, type R2Bucket } from '@cloudflare/workers-types'
 import { type AppLoadContext } from 'react-router'
 import { type PlatformProxy } from 'wrangler'
 import { StorageContext } from './app/utils/auth.server'
