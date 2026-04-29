@@ -23,26 +23,34 @@ export async function parseMultipartFormData(
 
 	for (const [name, value] of rawFormData.entries()) {
 		if (value instanceof File) {
-			// Convert File to AsyncIterable<Uint8Array> for our handler
-			const arrayBuffer = await value.arrayBuffer()
-			const uint8 = new Uint8Array(arrayBuffer)
-
-			async function* toAsyncIterable(): AsyncIterable<Uint8Array> {
-				yield uint8
+			// Use File.stream() to avoid buffering the entire file into memory as an ArrayBuffer.
+			async function* streamToAsyncIterable(): AsyncIterable<Uint8Array> {
+				const reader = value.stream().getReader()
+				try {
+					while (true) {
+						const { done, value: chunk } = await reader.read()
+						if (done) break
+						if (chunk) yield chunk
+					}
+				} finally {
+					reader.releaseLock()
+				}
 			}
 
 			const handlerResult = await uploadHandler({
 				name,
 				filename: value.name,
 				contentType: value.type,
-				data: toAsyncIterable(),
+				data: streamToAsyncIterable(),
 			})
 
 			if (handlerResult != null) {
-				resultFormData.set(name, handlerResult instanceof File ? handlerResult : String(handlerResult))
+				// Use append instead of set to preserve multi-value fields
+				resultFormData.append(name, handlerResult instanceof File ? handlerResult : String(handlerResult))
 			}
 		} else {
-			resultFormData.set(name, value)
+			// Use append instead of set to preserve multi-value fields
+			resultFormData.append(name, value)
 		}
 	}
 
@@ -72,17 +80,17 @@ export async function uploadToR2(
 	filename: string,
 	contentType: string,
 ) {
-	const dataArray = []
-	for await (const chunk of data) {
-		dataArray.push(chunk)
-	}
+	// Stream chunks directly to R2 via a ReadableStream to avoid accumulating the
+	// entire file in memory before uploading.
+	const stream = new ReadableStream<Uint8Array>({
+		async start(controller) {
+			for await (const chunk of data) {
+				controller.enqueue(chunk)
+			}
+			controller.close()
+		},
+	})
 
-	const accumulatedData = new Uint8Array(dataArray.reduce((acc, chunk) => acc + chunk.length, 0))
-	let offset = 0
-	for (const chunk of dataArray) {
-		accumulatedData.set(chunk, offset)
-		offset += chunk.length
-	}
 	const key = uuidv4()
 
 	const options: R2PutOptions = {
@@ -94,7 +102,7 @@ export async function uploadToR2(
 		},
 	}
 
-	const r2Object = await r2Bucket.put(key, accumulatedData.buffer, options)
+	const r2Object = await r2Bucket.put(key, stream, options)
 
 	if (r2Object == null || r2Object.key === undefined) {
 		throw new Error(`Failed to upload file ${key}`)

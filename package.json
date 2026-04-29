@@ -9,7 +9,7 @@
   "scripts": {
     "build": "run-s build:*",
     "build:icons": "tsx ./other/build-icons.ts",
-    "build:remix": "remix vite:build",
+    "build:remix": "react-router build",
     "cm": "git add . && cz",
     "database": "node ./other/prisma.js",
     "db:browser": "npm run database studio",
@@ -21,7 +21,7 @@
     "db:seed": "npm run database db seed",
     "db:setup": "npm run database migrate reset --force",
     "deploy": "wrangler pages deploy ./build/client",
-    "dev": "remix vite:dev",
+    "dev": "react-router dev",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "wrangler pages dev ./build/client",

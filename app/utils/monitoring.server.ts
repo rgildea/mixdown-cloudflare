@@ -1,4 +1,4 @@
-import { AppLoadContext } from 'react-router'
+import { type AppLoadContext } from 'react-router'
 import * as Sentry from '@sentry/remix'
 
 export function init({
