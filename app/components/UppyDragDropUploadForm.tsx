@@ -28,14 +28,19 @@ export default function UppyDragDropUploadForm({
 	return (
 		<div className={cn(className, 'flex w-full flex-col items-center')}>
 			<StatusBar uppy={uppy} hideAfterFinish={false} showProgressDetails={true} />
-			{/* locale prop incompatibility in @uppy/react - cast to any to bypass */}
-			{(DragDrop as any)({ uppy, locale: {
-				strings: {
-					browse: 'Choose a file',
-					dropHereOr: '%{browse} or drag it here',
-				},
-				pluralize: (n: number) => (n === 1 ? 0 : 1),
-			} })}
+			{/* locale prop incompatibility in @uppy/react - cast only the prop to any */}
+			<DragDrop
+				uppy={uppy}
+				locale={
+					{
+						strings: {
+							browse: 'Choose a file',
+							dropHereOr: '%{browse} or drag it here',
+						},
+						pluralize: (n: number) => (n === 1 ? 0 : 1),
+					} as any
+				}
+			/>
 		</div>
 	)
 }
