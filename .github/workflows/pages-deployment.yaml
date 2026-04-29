@@ -28,7 +28,7 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@rgildea'
           cache: 'npm'
@@ -49,7 +49,7 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@rgildea'
           cache: 'npm'
@@ -69,7 +69,7 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@rgildea'
           cache: 'npm'
@@ -92,7 +92,7 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@rgildea'
           cache: 'npm'
