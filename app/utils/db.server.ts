@@ -4,6 +4,10 @@ import { PrismaClient } from '@prisma/client'
 import chalk from 'chalk'
 import ws from 'ws'
 
+function shouldUseDirectDatasource(connectionString: string) {
+	return /@(?:localhost|127\.0\.0\.1|postgres):\d+\//.test(connectionString)
+}
+
 export const prisma = (connectionString: string) => {
 	// NOTE: if you change anything in this function you'll need to restart
 	// the dev server to see your changes.
@@ -11,26 +15,23 @@ export const prisma = (connectionString: string) => {
 	// Feel free to change this log threshold to something that makes sense for you
 	const logThreshold = 500 // ms
 
-	neonConfig.webSocketConstructor = ws
-	const pool = new Pool({ connectionString })
-	const adapter = new PrismaNeon(pool)
-	const client = new PrismaClient({
-		adapter,
-		log: [
-			{ level: 'query', emit: 'event' },
-			{ level: 'error', emit: 'stdout' },
-			{ level: 'warn', emit: 'stdout' },
-		],
-	})
+	const log = [
+		{ level: 'query', emit: 'event' as const },
+		{ level: 'error', emit: 'stdout' as const },
+		{ level: 'warn', emit: 'stdout' as const },
+	]
 
-	// const client = new PrismaClient({
-	// 	datasources: { db: { url: databaseUrl } },
-	// 	log: [
-	// 		{ level: 'query', emit: 'event' },
-	// 		{ level: 'error', emit: 'stdout' },
-	// 		{ level: 'warn', emit: 'stdout' },
-	// 	],
-	// })
+	const client = shouldUseDirectDatasource(connectionString)
+		? new PrismaClient({
+				datasources: { db: { url: connectionString } },
+				log,
+			})
+		: (() => {
+				neonConfig.webSocketConstructor = ws
+				const pool = new Pool({ connectionString })
+				const adapter = new PrismaNeon(pool)
+				return new PrismaClient({ adapter, log })
+			})()
 	client.$on('query', async e => {
 		if (e.duration < logThreshold) return
 		const color =
