@@ -16,23 +16,23 @@ export const prisma = (connectionString: string) => {
 	const logThreshold = 500 // ms
 
 	const log = [
-		{ level: 'query', emit: 'event' as const },
-		{ level: 'error', emit: 'stdout' as const },
-		{ level: 'warn', emit: 'stdout' as const },
-	]
+		{ level: 'query' as const, emit: 'event' as const },
+		{ level: 'error' as const, emit: 'stdout' as const },
+		{ level: 'warn' as const, emit: 'stdout' as const },
+	] satisfies Array<{ level: string; emit: 'event' | 'stdout' }>
 
 	const client = shouldUseDirectDatasource(connectionString)
 		? new PrismaClient({
 				datasources: { db: { url: connectionString } },
-				log,
+				log: log as any,
 			})
 		: (() => {
 				neonConfig.webSocketConstructor = ws
 				const pool = new Pool({ connectionString })
 				const adapter = new PrismaNeon(pool)
-				return new PrismaClient({ adapter, log })
+				return new PrismaClient({ adapter, log: log as any })
 			})()
-	client.$on('query', async e => {
+	client.$on('query', (e: any) => {
 		if (e.duration < logThreshold) return
 		const color =
 			e.duration < logThreshold * 1.1
