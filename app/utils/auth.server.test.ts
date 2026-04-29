@@ -15,6 +15,14 @@ beforeAll(() => {
 	db = new PrismaClient()
 })
 
+beforeAll(async () => {
+	await db.role.upsert({
+		where: { name: 'user' },
+		update: {},
+		create: { name: 'user' },
+	})
+})
+
 afterAll(async () => {
 	await db.$disconnect()
 })
