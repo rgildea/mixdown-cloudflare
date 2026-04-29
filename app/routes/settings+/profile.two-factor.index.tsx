@@ -4,8 +4,8 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { generateTOTP } from '#app/utils/totp.server.ts'
 import { twoFAVerificationType, twoFAVerifyVerificationType } from '#app/utils/verification.server.ts'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { Link, useFetcher, useLoaderData } from '@remix-run/react'
+import { data as jsonResponse, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { Link, useFetcher, useLoaderData } from 'react-router'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
@@ -17,7 +17,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		where: { target_type: { type: twoFAVerificationType, target: userId } },
 		select: { id: true },
 	})
-	return json({ is2FAEnabled: Boolean(verification) })
+	return jsonResponse({ is2FAEnabled: Boolean(verification) })
 }
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {

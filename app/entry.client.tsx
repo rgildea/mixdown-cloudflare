@@ -1,4 +1,4 @@
-import { RemixBrowser } from '@remix-run/react'
+import { HydratedRouter } from 'react-router/dom'
 import { Buffer } from 'buffer-polyfill'
 import { startTransition } from 'react'
 import { hydrateRoot } from 'react-dom/client'
@@ -10,15 +10,5 @@ if (window?.ENV?.SENTRY_DSN) {
 globalThis.Buffer = Buffer as unknown as BufferConstructor
 
 startTransition(() => {
-	const rootElement = document // Ensure this ID matches your root element
-	if (rootElement) {
-		startTransition(() => {
-			hydrateRoot(
-				rootElement,
-				// <StrictMode>
-				<RemixBrowser />,
-				// </StrictMode>,
-			)
-		})
-	}
+	hydrateRoot(document, <HydratedRouter />)
 })

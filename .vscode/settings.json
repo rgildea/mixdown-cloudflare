@@ -13,13 +13,7 @@
     "console",
     "node:console"
   ],
-  "workbench.editorAssociations": {
-    "*.db": "sqlite-viewer.view"
-  },
-  "files.associations": {
-    "*.css": "tailwindcss"
-  },
-  "editor.quickSuggestions": {
-    "strings": "on"
-  }
+  "workbench.editorAssociations": { "*.db": "sqlite-viewer.view" },
+  "files.associations": { "*.css": "tailwindcss" },
+  "editor.quickSuggestions": { "strings": "on" }
 }

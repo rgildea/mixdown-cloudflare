@@ -8,13 +8,13 @@ import { VerificationSessionKeys } from '#app/utils/verification.server'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import {
-	json,
+	data as jsonResponse,
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
-} from '@remix-run/cloudflare'
-import { Form, useActionData, useLoaderData } from '@remix-run/react'
+} from 'react-router'
+import { Form, useActionData, useLoaderData } from 'react-router'
 
 const ResetPasswordSchema = PasswordAndConfirmPasswordSchema
 
@@ -30,7 +30,7 @@ async function requireResetPasswordEmail(storageContext: StorageContext, request
 
 export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
 	const resetPasswordEmail = await requireResetPasswordEmail(storageContext, request)
-	return json({ resetPasswordUsername: resetPasswordEmail })
+	return jsonResponse({ resetPasswordUsername: resetPasswordEmail })
 }
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
@@ -40,7 +40,7 @@ export async function action({ context: { storageContext }, request }: ActionFun
 		schema: ResetPasswordSchema,
 	})
 	if (submission.status !== 'success') {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 	const { password } = submission.value
 	await resetUserPassword({ db: storageContext.db, email: resetPasswordEmail, password })

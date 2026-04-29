@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { describe, test, expect, beforeAll, afterAll, afterEach } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import {
 	getPasswordHash,
 	login,
@@ -13,6 +13,14 @@ let db: PrismaClient
 
 beforeAll(() => {
 	db = new PrismaClient()
+})
+
+beforeAll(async () => {
+	await db.role.upsert({
+		where: { name: 'user' },
+		update: {},
+		create: { name: 'user' },
+	})
 })
 
 afterAll(async () => {

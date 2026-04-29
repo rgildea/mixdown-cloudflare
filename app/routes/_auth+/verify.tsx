@@ -6,8 +6,8 @@ import { StorageContext } from '#app/utils/auth.server'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { Submission, getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { type ActionFunctionArgs } from '@remix-run/cloudflare'
-import { Form, json, useActionData, useSearchParams } from '@remix-run/react'
+import { type ActionFunctionArgs } from 'react-router'
+import { Form, data as jsonResponse, useActionData, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 
 import { checkHoneypot } from '#app/utils/honeypot.server'
@@ -89,7 +89,7 @@ async function validateRequest(
 	})
 
 	if (submission.status !== 'success') {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 
 	const { value: submissionValue } = submission

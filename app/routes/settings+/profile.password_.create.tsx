@@ -9,8 +9,8 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { PrismaClient } from '@prisma/client'
-import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { Form, Link, useActionData } from '@remix-run/react'
+import { data as jsonResponse, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { Form, Link, useActionData } from 'react-router'
 import { type BreadcrumbHandle } from './profile.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
@@ -33,7 +33,7 @@ async function requireNoPassword(db: PrismaClient, userId: string) {
 export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(storageContext, request)
 	await requireNoPassword(storageContext.db, userId)
-	return json({})
+	return jsonResponse({})
 }
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
@@ -45,7 +45,7 @@ export async function action({ context: { storageContext }, request }: ActionFun
 		schema: CreatePasswordForm,
 	})
 	if (submission.status !== 'success') {
-		return json(
+		return jsonResponse(
 			{
 				result: submission.reply({
 					hideFields: ['password', 'confirmPassword'],

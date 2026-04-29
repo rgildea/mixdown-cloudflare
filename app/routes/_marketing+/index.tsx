@@ -1,8 +1,8 @@
 import { Button } from '#app/components/ui/button'
 import { getUserId } from '#app/utils/auth.server'
-import { LoaderFunctionArgs, json, redirect } from '@remix-run/cloudflare'
-import { type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData } from '@remix-run/react'
+import { LoaderFunctionArgs, data as jsonResponse, redirect } from 'react-router'
+import { type MetaFunction } from 'react-router'
+import { Link, useLoaderData } from 'react-router'
 
 export const meta: MetaFunction = () => [{ title: 'MixDown' }]
 
@@ -12,7 +12,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		throw redirect('dashboard')
 	}
 
-	return json({})
+	return jsonResponse({})
 }
 
 export default function Index() {

@@ -1,14 +1,24 @@
-import { type loader as rootLoader } from '#app/root.tsx'
-import { type SerializeFrom } from '@remix-run/cloudflare'
-import { useRouteLoaderData } from '@remix-run/react'
+import { useRouteLoaderData } from 'react-router'
 import { TrackWithVersions } from './track.server'
 
-function isUser(user: any): user is SerializeFrom<typeof rootLoader>['user'] {
+type UserWithRoles = {
+	id: string
+	name: string | null
+	username: string
+	email: string
+	image: { id: string } | null
+	roles: Array<{
+		name: string
+		permissions: Array<{ entity: string; action: string; access: string }>
+	}>
+}
+
+function isUser(user: any): user is UserWithRoles {
 	return user && typeof user === 'object' && typeof user.id === 'string'
 }
 
 export function useOptionalUser() {
-	const data = useRouteLoaderData<typeof rootLoader>('root')
+	const data = useRouteLoaderData<{ user: UserWithRoles | null }>('root')
 	if (!data || !isUser(data.user)) {
 		return undefined
 	}
@@ -40,7 +50,7 @@ export function parsePermissionString(permissionString: PermissionString) {
 }
 
 export function userHasPermission(
-	user: Pick<ReturnType<typeof useUser>, 'roles'> | null | undefined,
+	user: Pick<UserWithRoles, 'roles'> | null | undefined,
 	permission: PermissionString,
 ) {
 	if (!user) return false
@@ -53,7 +63,7 @@ export function userHasPermission(
 	)
 }
 
-export function userHasRole(user: Pick<ReturnType<typeof useUser>, 'roles'> | null, role: string) {
+export function userHasRole(user: Pick<UserWithRoles, 'roles'> | null, role: string) {
 	if (!user) return false
 	return user.roles.some(r => r.name === role)
 }
@@ -83,7 +93,7 @@ export function useRoleGuard(role: string) {
 }
 
 export function userOwnsTrack(
-	user: Pick<ReturnType<typeof useUser>, 'id' | 'name' | 'username' | 'name'> | null,
+	user: Pick<UserWithRoles, 'id' | 'name' | 'username'> | null,
 	track: Pick<TrackWithVersions, 'creator'>,
 ) {
 	// console.debug(

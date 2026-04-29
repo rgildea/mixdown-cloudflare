@@ -1,6 +1,6 @@
 // Footer.tsx
 import { InlineIcon } from '@iconify/react' // Import the InlineIcon component
-import { Link } from '@remix-run/react'
+import { Link } from 'react-router'
 import Logo from './Logo'
 
 const Footer: React.FC = () => {

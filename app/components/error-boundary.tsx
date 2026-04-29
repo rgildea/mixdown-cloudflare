@@ -1,5 +1,5 @@
 import { getErrorMessage } from '#app/utils/misc.tsx'
-import { type ErrorResponse, isRouteErrorResponse, MetaFunction, useParams, useRouteError } from '@remix-run/react'
+import { type ErrorResponse, isRouteErrorResponse, MetaFunction, useParams, useRouteError } from 'react-router'
 import { captureRemixErrorBoundaryError } from '@sentry/remix'
 
 type StatusHandler = (info: { error: ErrorResponse; params: Record<string, string | undefined> }) => JSX.Element | null

@@ -2,8 +2,8 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from '@remix-run/cloudflare'
-import { Link, useFetcher, useLoaderData } from '@remix-run/react'
+import { data as jsonResponse, type LoaderFunctionArgs, type ActionFunctionArgs } from 'react-router'
+import { Link, useFetcher, useLoaderData } from 'react-router'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 import { Button } from '#app/components/ui/button.tsx'
@@ -54,7 +54,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		where: { userId },
 	})
 
-	return json({
+	return jsonResponse({
 		user,
 		hasPassword: Boolean(password),
 		isTwoFactorEnabled: Boolean(twoFactorVerification),
@@ -160,7 +160,7 @@ async function profileUpdateAction({ storageContext: { db }, userId, formData }:
 		schema: ProfileFormSchema,
 	})
 	if (submission.status !== 'success') {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 
 	const data = submission.value
@@ -173,7 +173,7 @@ async function profileUpdateAction({ storageContext: { db }, userId, formData }:
 		},
 	})
 
-	return json({
+	return jsonResponse({
 		result: submission.reply(),
 	})
 }
@@ -237,7 +237,7 @@ async function signOutOfSessionsAction({
 			id: { not: sessionId },
 		},
 	})
-	return json({ status: 'success' } as const)
+	return jsonResponse({ status: 'success' } as const)
 }
 
 function SignOutOfSessions() {

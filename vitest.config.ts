@@ -16,6 +16,8 @@ export default defineConfig({
 		include: ['./app/**/*.test.{ts,tsx}'],
 		setupFiles: ['./tests/setup/setup-test-env.ts'],
 		globalSetup: ['./tests/setup/global-setup.ts'],
+		fileParallelism: false,
+		maxWorkers: 1,
 		restoreMocks: true,
 		coverage: {
 			include: ['app/**/*.{ts,tsx}'],

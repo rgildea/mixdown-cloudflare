@@ -1,7 +1,7 @@
 import UppyDragDropUploadForm from '#app/components/UppyDragDropUploadForm'
 import ModalDialog from '#app/components/ui/modal-dialog'
 import { TrackWithVersions } from '#app/utils/track.server'
-import { useNavigate } from '@remix-run/react'
+import { useNavigate } from 'react-router'
 import { AnimatePresence } from 'framer-motion'
 
 type NewVersionModalProps = {

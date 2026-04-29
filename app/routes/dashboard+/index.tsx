@@ -6,17 +6,17 @@ import { TitleDispatchContext } from '#app/contexts/TitleContext'
 import { loader } from '#app/routes/dashboard+/_layout'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { ActionFunction, json } from '@remix-run/cloudflare'
-import { Link, useMatches, useRouteLoaderData } from '@remix-run/react'
+import { ActionFunction, data as jsonResponse } from 'react-router'
+import { Link, useMatches, useRouteLoaderData } from 'react-router'
 import { useContext, useEffect } from 'react'
 export const action: ActionFunction = async () => {
-	return json({}, { status: 200 })
+	return jsonResponse({}, { status: 200 })
 }
 
 export default function Route() {
 	const matches = useMatches()
 	const match = matches.find(match => match.id == 'routes/dashboard+/_layout')
-	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as { tracks: TrackWithVersions[] }
+	const loaderData = useRouteLoaderData<typeof loader>(match?.id ?? '') as unknown as { tracks: TrackWithVersions[] }
 	const playerDispatch = useContext(PlayerDispatchContext)
 	const titleDispatch = useContext(TitleDispatchContext)
 	const { tracks } = loaderData

@@ -13,8 +13,8 @@ import { Html } from '@react-email/html'
 import { Container } from '@react-email/container'
 import { Text } from '@react-email/text'
 import { Link } from '@react-email/link'
-import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import { data as jsonResponse, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { Form, useActionData, useLoaderData } from 'react-router'
 import { z } from 'zod'
 import { type BreadcrumbHandle } from './profile.tsx'
 
@@ -40,7 +40,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		const params = new URLSearchParams({ redirectTo: request.url })
 		throw redirect(`/login?${params}`)
 	}
-	return json({ user })
+	return jsonResponse({ user })
 }
 
 export async function action({
@@ -71,7 +71,7 @@ export async function action({
 	})
 
 	if (submission.status !== 'success') {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 	const { otp, redirectTo, verifyUrl } = await prepareVerification({
 		storageContext,
@@ -96,7 +96,7 @@ export async function action({
 			},
 		})
 	} else {
-		return json(
+		return jsonResponse(
 			{
 				result: submission.reply({ formErrors: [response.error.message] }),
 			},

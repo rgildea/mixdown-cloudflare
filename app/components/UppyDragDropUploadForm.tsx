@@ -1,5 +1,5 @@
 import { cn } from '#app/utils/misc'
-import { Meta } from '@remix-run/react'
+import { Meta } from 'react-router'
 import { Uppy, UppyFile } from '@uppy/core'
 import '@uppy/core/dist/style.min.css'
 import '@uppy/drag-drop/dist/style.min.css'
@@ -24,11 +24,18 @@ export default function UppyDragDropUploadForm({
 	trackId,
 }: UppyDragDropUploadFormProps) {
 	const [uppy] = useState(() => makeUppy(endpoint, onSuccess, trackId))
+	const DragDropComponent = DragDrop as unknown as React.ComponentType<{
+		uppy: Uppy<Meta, Body>
+		locale?: {
+			strings: { browse: string; dropHereOr: string }
+			pluralize: (n: number) => number
+		}
+	}>
 
 	return (
 		<div className={cn(className, 'flex w-full flex-col items-center')}>
 			<StatusBar uppy={uppy} hideAfterFinish={false} showProgressDetails={true} />
-			<DragDrop
+			<DragDropComponent
 				uppy={uppy}
 				locale={{
 					strings: {
@@ -59,6 +66,7 @@ function makeUppy(
 		uppy
 			// .use(StatusBar<Meta, Body>, { target: '#status-bar', hideAfterFinish: false, showProgressDetails: true })
 			// .use(ProgressBar<Meta, Body>, { target: '#progress-bar', hideAfterFinish: false, fixed: true })
+			// @ts-expect-error - DropTarget type incompatibility across @uppy versions
 			.use(DropTarget<Meta, Body>, {
 				target: document?.body,
 			})

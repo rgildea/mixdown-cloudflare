@@ -1,8 +1,8 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { json, redirect, type LoaderFunctionArgs, type ActionFunctionArgs } from '@remix-run/cloudflare'
-import { Form, Link, useActionData } from '@remix-run/react'
+import { data as jsonResponse, redirect, type LoaderFunctionArgs, type ActionFunctionArgs } from 'react-router'
+import { Form, Link, useActionData } from 'react-router'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 import { Button } from '#app/components/ui/button.tsx'
@@ -48,7 +48,7 @@ async function requirePassword(db: PrismaClient, userId: string) {
 export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(storageContext, request)
 	await requirePassword(storageContext.db, userId)
-	return json({})
+	return jsonResponse({})
 }
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
@@ -72,7 +72,7 @@ export async function action({ context: { storageContext }, request }: ActionFun
 		}),
 	})
 	if (submission.status !== 'success') {
-		return json(
+		return jsonResponse(
 			{
 				result: submission.reply({
 					hideFields: ['currentPassword', 'newPassword', 'confirmNewPassword'],

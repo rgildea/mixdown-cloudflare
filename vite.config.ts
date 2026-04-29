@@ -1,20 +1,14 @@
-import { vitePlugin as remix, cloudflareDevProxyVitePlugin as remixCloudflareDevProxy } from '@remix-run/dev'
+import { cloudflare } from '@cloudflare/vite-plugin'
+import { reactRouter } from '@react-router/dev/vite'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { glob } from 'glob'
-import { remixDevTools } from 'remix-development-tools'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import { getLoadContext } from './load-context'
-import remixConfig from './remix.config'
 
 export default defineConfig({
 	plugins: [
-		remixCloudflareDevProxy({
-			getLoadContext,
-			persist: { path: './tmp/data' },
-		}),
-		remixDevTools(),
-		remix(remixConfig),
+		cloudflare({ viteEnvironment: { name: 'ssr' } }),
+		reactRouter(),
 		tsconfigPaths(),
 		sentryVitePlugin({
 			telemetry: false,

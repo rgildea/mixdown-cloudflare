@@ -9,8 +9,8 @@ import { isCodeValid, twoFAVerificationType, twoFAVerifyVerificationType } from 
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react'
+import { data as jsonResponse, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { Form, useActionData, useLoaderData, useNavigation } from 'react-router'
 import * as QRCode from 'qrcode'
 import { z } from 'zod'
 import { type BreadcrumbHandle } from './profile.tsx'
@@ -55,7 +55,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		issuer,
 	})
 	const qrCode = await QRCode.toDataURL(otpUri)
-	return json({ otpUri, qrCode })
+	return jsonResponse({ otpUri, qrCode })
 }
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {
@@ -85,7 +85,7 @@ export async function action({ context: { storageContext }, request }: ActionFun
 	})
 
 	if (submission.status !== 'success') {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 
 	switch (submission.value.intent) {

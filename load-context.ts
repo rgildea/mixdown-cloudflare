@@ -1,4 +1,5 @@
-import { AppLoadContext } from '@remix-run/cloudflare'
+import { type KVNamespace, type R2Bucket } from '@cloudflare/workers-types'
+import { type AppLoadContext } from 'react-router'
 import { type PlatformProxy } from 'wrangler'
 import { StorageContext } from './app/utils/auth.server'
 import { db } from './app/utils/db.server'
@@ -28,7 +29,7 @@ interface Env {
 
 type Cloudflare = Omit<PlatformProxy<Env>, 'dispose'>
 
-declare module '@remix-run/cloudflare' {
+declare module 'react-router' {
 	interface AppLoadContext {
 		cloudflare: Cloudflare
 		storageContext: StorageContext

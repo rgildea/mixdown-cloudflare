@@ -2,7 +2,7 @@ import DataTable from '#app/components/DataTableBase'
 import { useIsPending } from '#app/utils/misc'
 import { TrackWithVersions } from '#app/utils/track.server'
 import { InlineIcon } from '@iconify/react/dist/iconify.js'
-import { Link, useNavigate } from '@remix-run/react'
+import { Link, useNavigate } from 'react-router'
 import TrackCell from './TrackCell'
 import { Button } from './ui/button'
 

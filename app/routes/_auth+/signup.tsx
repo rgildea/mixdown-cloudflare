@@ -4,8 +4,8 @@ import { Html } from '@react-email/html'
 import { Container } from '@react-email/container'
 import { Text } from '@react-email/text'
 import { Link } from '@react-email/link'
-import { json, redirect, type ActionFunctionArgs, type MetaFunction } from '@remix-run/cloudflare'
-import { Form, useActionData, useSearchParams } from '@remix-run/react'
+import { data as jsonResponse, redirect, type ActionFunctionArgs, type MetaFunction } from 'react-router'
+import { Form, useActionData, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
@@ -53,7 +53,7 @@ export async function action({
 		async: true,
 	})
 	if (submission.status !== 'success') {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 	const { email } = submission.value
 	const { verifyUrl, redirectTo, otp } = await prepareVerification({
@@ -73,7 +73,7 @@ export async function action({
 	if (response.status === 'success') {
 		return redirect(redirectTo.toString())
 	} else {
-		return json(
+		return jsonResponse(
 			{
 				result: submission.reply({ formErrors: [response.error.message] }),
 			},
