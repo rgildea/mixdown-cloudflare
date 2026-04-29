@@ -2,12 +2,8 @@ import { AppLoadContext } from '@remix-run/cloudflare'
 import { type PlatformProxy } from 'wrangler'
 import { StorageContext } from './app/utils/auth.server'
 import { db } from './app/utils/db.server'
-import {
-	createAuthSessionStorage,
-	createConnectionSessionStorage,
-	createToastSessionStorage,
-	createVerificationSessionStorage,
-} from './app/utils/session.server'
+
+import { createStorageContext } from './app/utils/storage-context.server'
 
 // When using `wrangler.toml` to configure bindings,
 // `wrangler types` will generate types for those bindings
@@ -51,18 +47,7 @@ export const getLoadContext: GetLoadContext = ({ context }) => {
 	if (!MODE) throw new Error('MODE is not defined in the environment variables.')
 
 	const database = db(DATABASE_URL || '')
-
-	const authSessionStorage = createAuthSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
-	const verificationSessionStorage = createVerificationSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
-	const toastSessionStorage = createToastSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
-	const connectionSessionStorage = createConnectionSessionStorage(COOKIE_SECRET, MODE, SESSIONS)
-	const storageContext: StorageContext = {
-		db: database,
-		authSessionStorage,
-		verificationSessionStorage,
-		toastSessionStorage,
-		connectionSessionStorage,
-	}
+	const storageContext = createStorageContext(COOKIE_SECRET, MODE, SESSIONS, database)
 
 	return {
 		cloudflare: context.cloudflare,
