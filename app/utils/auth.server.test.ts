@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { describe, test, expect, beforeAll, afterAll, afterEach } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import {
 	getPasswordHash,
 	login,

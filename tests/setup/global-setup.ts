@@ -10,12 +10,6 @@ export async function setup() {
 
 	await execaCommand(
 		'prisma migrate reset --force --skip-seed --skip-generate --schema="node_modules/.prisma/client/schema.prisma"',
-		{
-			stdio: 'inherit',
-			env: {
-				...process.env,
-				DATABASE_URL: `file:${BASE_DATABASE_PATH}`,
-			},
-		},
+		{ stdio: 'inherit', env: { ...process.env, DATABASE_URL: `file:${BASE_DATABASE_PATH}` } },
 	)
 }
