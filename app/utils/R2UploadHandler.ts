@@ -8,6 +8,19 @@ export type UploadHandlerPart = {
 }
 export type UploadHandler = (part: UploadHandlerPart) => Promise<File | string | null | undefined>
 
+async function* fileStreamToAsyncIterable(file: File): AsyncIterable<Uint8Array> {
+	const reader = file.stream().getReader()
+	try {
+		while (true) {
+			const { done, value: chunk } = await reader.read()
+			if (done) break
+			if (chunk) yield chunk
+		}
+	} finally {
+		reader.releaseLock()
+	}
+}
+
 /**
  * Parse a multipart/form-data request using the UploadHandler pattern.
  * Replacement for the removed unstable_parseMultipartFormData from Remix.
@@ -23,25 +36,11 @@ export async function parseMultipartFormData(
 
 	for (const [name, value] of rawFormData.entries()) {
 		if (value instanceof File) {
-			// Use File.stream() to avoid buffering the entire file into memory as an ArrayBuffer.
-			async function* streamToAsyncIterable(): AsyncIterable<Uint8Array> {
-				const reader = value.stream().getReader()
-				try {
-					while (true) {
-						const { done, value: chunk } = await reader.read()
-						if (done) break
-						if (chunk) yield chunk
-					}
-				} finally {
-					reader.releaseLock()
-				}
-			}
-
 			const handlerResult = await uploadHandler({
 				name,
 				filename: value.name,
 				contentType: value.type,
-				data: streamToAsyncIterable(),
+				data: fileStreamToAsyncIterable(value),
 			})
 
 			if (handlerResult != null) {

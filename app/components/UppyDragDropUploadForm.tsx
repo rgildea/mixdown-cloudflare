@@ -24,22 +24,26 @@ export default function UppyDragDropUploadForm({
 	trackId,
 }: UppyDragDropUploadFormProps) {
 	const [uppy] = useState(() => makeUppy(endpoint, onSuccess, trackId))
+	const DragDropComponent = DragDrop as unknown as React.ComponentType<{
+		uppy: Uppy<Meta, Body>
+		locale?: {
+			strings: { browse: string; dropHereOr: string }
+			pluralize: (n: number) => number
+		}
+	}>
 
 	return (
 		<div className={cn(className, 'flex w-full flex-col items-center')}>
 			<StatusBar uppy={uppy} hideAfterFinish={false} showProgressDetails={true} />
-			{/* locale prop incompatibility in @uppy/react - cast only the prop to any */}
-			<DragDrop
+			<DragDropComponent
 				uppy={uppy}
-				locale={
-					{
-						strings: {
-							browse: 'Choose a file',
-							dropHereOr: '%{browse} or drag it here',
-						},
-						pluralize: (n: number) => (n === 1 ? 0 : 1),
-					} as any
-				}
+				locale={{
+					strings: {
+						browse: 'Choose a file',
+						dropHereOr: '%{browse} or drag it here',
+					},
+					pluralize: (n: number) => (n === 1 ? 0 : 1),
+				}}
 			/>
 		</div>
 	)
@@ -62,7 +66,7 @@ function makeUppy(
 		uppy
 			// .use(StatusBar<Meta, Body>, { target: '#status-bar', hideAfterFinish: false, showProgressDetails: true })
 			// .use(ProgressBar<Meta, Body>, { target: '#progress-bar', hideAfterFinish: false, fixed: true })
-			// @ts-ignore - DropTarget type incompatibility across @uppy versions
+			// @ts-expect-error - DropTarget type incompatibility across @uppy versions
 			.use(DropTarget<Meta, Body>, {
 				target: document?.body,
 			})

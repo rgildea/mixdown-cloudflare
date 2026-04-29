@@ -34,7 +34,9 @@ declare module 'react-router' {
 
 const requestHandler = createRequestHandler(
 	// @ts-expect-error - virtual module types don't match ServerBuild exactly at compile time
-	() => import('virtual:react-router/server-build'),
+	() =>
+		// eslint-disable-next-line import/no-unresolved
+		import('virtual:react-router/server-build'),
 	import.meta.env.MODE,
 )
 
