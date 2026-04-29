@@ -6,4 +6,6 @@ import { createPagesFunctionHandler } from '@remix-run/cloudflare-pages'
 import * as build from '../build/server'
 import { getLoadContext } from '../load-context'
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - getLoadContext type is compatible at runtime, Cloudflare cf types have optional cf property
 export const onRequest = createPagesFunctionHandler({ build, getLoadContext })

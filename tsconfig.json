@@ -8,7 +8,7 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "target": "ES2022",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "strict": true,
     "noImplicitAny": true,
