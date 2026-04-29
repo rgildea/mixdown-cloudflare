@@ -7,10 +7,11 @@ import {
 	LinksFunction,
 	LoaderFunctionArgs,
 	MetaFunction,
-	json,
-} from '@remix-run/cloudflare'
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react'
-import { withSentry } from '@sentry/remix'
+	data as jsonResponse,
+} from 'react-router'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from 'react-router'
+// TODO: migrate Sentry to @sentry/react-router
+// import { withSentry } from '@sentry/remix'
 import { useReducer } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
@@ -113,7 +114,7 @@ export async function loader({
 
 	const honeyProps = getHoneypot(HONEYPOT_SECRET).getInputProps()
 
-	return json(
+	return jsonResponse(
 		{
 			user,
 			requestInfo: {
@@ -154,7 +155,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	const responseInit = {
 		headers: { 'set-cookie': setTheme(theme) },
 	}
-	return json({ result: submission.reply() }, responseInit)
+	return jsonResponse({ result: submission.reply() }, responseInit)
 }
 
 function Document({
@@ -236,7 +237,7 @@ function AppWithProviders() {
 	)
 }
 
-export default withSentry(AppWithProviders)
+export default AppWithProviders
 
 export function ErrorBoundary() {
 	// the nonce doesn't rely on the loader so we can access that

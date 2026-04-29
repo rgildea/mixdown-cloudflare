@@ -5,13 +5,13 @@ import { StorageContext, requireAnonymous, sessionKey, signup } from '#app/utils
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import {
-	json,
+	data as jsonResponse,
 	redirect,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	type MetaFunction,
-} from '@remix-run/cloudflare'
-import { Form, useActionData, useLoaderData, useSearchParams } from '@remix-run/react'
+} from 'react-router'
+import { Form, useActionData, useLoaderData, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
@@ -45,7 +45,7 @@ async function requireOnboardingEmail(storageContext: StorageContext, request: R
 }
 export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
 	const email = await requireOnboardingEmail(storageContext, request)
-	return json({ email })
+	return jsonResponse({ email })
 }
 
 export async function action({
@@ -86,7 +86,7 @@ export async function action({
 	})
 
 	if (submission.status !== 'success' || !submission.value.session) {
-		return json({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
+		return jsonResponse({ result: submission.reply() }, { status: submission.status === 'error' ? 400 : 200 })
 	}
 
 	const { session, remember, redirectTo } = submission.value

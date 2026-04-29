@@ -1,4 +1,4 @@
-import { redirect, useLoaderData } from '@remix-run/react'
+import { redirect, useLoaderData } from 'react-router'
 
 export const loader = async () => {
 	return redirect('/dashboard')

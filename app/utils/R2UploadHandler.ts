@@ -1,4 +1,54 @@
-import { type UploadHandler, type UploadHandlerPart } from '@remix-run/cloudflare'
+// UploadHandler types removed from @remix-run packages in React Router v7
+// Defining locally for our R2 upload handler
+export type UploadHandlerPart = {
+	name: string
+	filename?: string
+	contentType: string
+	data: AsyncIterable<Uint8Array>
+}
+export type UploadHandler = (part: UploadHandlerPart) => Promise<File | string | null | undefined>
+
+/**
+ * Parse a multipart/form-data request using the UploadHandler pattern.
+ * Replacement for the removed unstable_parseMultipartFormData from Remix.
+ * Uses Web API formData() which is supported in Cloudflare Workers.
+ */
+export async function parseMultipartFormData(
+	request: Request,
+	uploadHandler: UploadHandler,
+): Promise<FormData> {
+	// Use the native formData() to parse parts
+	const rawFormData = await request.formData()
+	const resultFormData = new FormData()
+
+	for (const [name, value] of rawFormData.entries()) {
+		if (value instanceof File) {
+			// Convert File to AsyncIterable<Uint8Array> for our handler
+			const arrayBuffer = await value.arrayBuffer()
+			const uint8 = new Uint8Array(arrayBuffer)
+
+			async function* toAsyncIterable(): AsyncIterable<Uint8Array> {
+				yield uint8
+			}
+
+			const handlerResult = await uploadHandler({
+				name,
+				filename: value.name,
+				contentType: value.type,
+				data: toAsyncIterable(),
+			})
+
+			if (handlerResult != null) {
+				resultFormData.set(name, handlerResult instanceof File ? handlerResult : String(handlerResult))
+			}
+		} else {
+			resultFormData.set(name, value)
+		}
+	}
+
+	return resultFormData
+}
+
 import { v4 as uuidv4 } from 'uuid'
 
 export type R2Input = Parameters<R2Bucket['put']>[1]

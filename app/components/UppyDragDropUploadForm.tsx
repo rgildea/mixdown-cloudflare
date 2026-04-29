@@ -1,5 +1,5 @@
 import { cn } from '#app/utils/misc'
-import { Meta } from '@remix-run/react'
+import { Meta } from 'react-router'
 import { Uppy, UppyFile } from '@uppy/core'
 import '@uppy/core/dist/style.min.css'
 import '@uppy/drag-drop/dist/style.min.css'
@@ -28,16 +28,14 @@ export default function UppyDragDropUploadForm({
 	return (
 		<div className={cn(className, 'flex w-full flex-col items-center')}>
 			<StatusBar uppy={uppy} hideAfterFinish={false} showProgressDetails={true} />
-			<DragDrop
-				uppy={uppy}
-				locale={{
-					strings: {
-						browse: 'Choose a file',
-						dropHereOr: '%{browse} or drag it here',
-					},
-					pluralize: (n: number) => (n === 1 ? 0 : 1),
-				}}
-			/>
+			{/* locale prop incompatibility in @uppy/react - cast to any to bypass */}
+			{(DragDrop as any)({ uppy, locale: {
+				strings: {
+					browse: 'Choose a file',
+					dropHereOr: '%{browse} or drag it here',
+				},
+				pluralize: (n: number) => (n === 1 ? 0 : 1),
+			} })}
 		</div>
 	)
 }
@@ -59,6 +57,7 @@ function makeUppy(
 		uppy
 			// .use(StatusBar<Meta, Body>, { target: '#status-bar', hideAfterFinish: false, showProgressDetails: true })
 			// .use(ProgressBar<Meta, Body>, { target: '#progress-bar', hideAfterFinish: false, fixed: true })
+			// @ts-ignore - DropTarget type incompatibility across @uppy versions
 			.use(DropTarget<Meta, Body>, {
 				target: document?.body,
 			})

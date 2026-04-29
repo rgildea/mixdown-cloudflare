@@ -1,5 +1,5 @@
 import { Connection, Password, Prisma, PrismaClient, User } from '@prisma/client'
-import { redirect } from '@remix-run/cloudflare'
+import { redirect } from 'react-router'
 import bcrypt from 'bcryptjs'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { combineHeaders } from './misc'

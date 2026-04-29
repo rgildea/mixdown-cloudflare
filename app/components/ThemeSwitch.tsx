@@ -1,7 +1,7 @@
 import { action } from '#app/root'
 import { Theme, useOptimisticThemeMode } from '#app/utils/theme'
 import { getFormProps, useForm } from '@conform-to/react'
-import { useFetcher } from '@remix-run/react'
+import { useFetcher } from 'react-router'
 import { useRef } from 'react'
 import { Icon } from './ui/icon'
 

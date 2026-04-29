@@ -7,8 +7,8 @@ import { handleNewSession } from '#app/utils/session.server'
 import { EmailSchema, PasswordSchema } from '#app/utils/user-validation'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { ActionFunctionArgs, json } from '@remix-run/cloudflare'
-import { Form, Link, useActionData, useSearchParams } from '@remix-run/react'
+import { ActionFunctionArgs, data as jsonResponse } from 'react-router'
+import { Form, Link, useActionData, useSearchParams } from 'react-router'
 import { z } from 'zod'
 
 const LoginFormSchema = z.object(
@@ -43,7 +43,7 @@ export async function action({ context: { storageContext }, request }: ActionFun
 	})
 
 	if (submission.status !== 'success' || !submission.value.session) {
-		return json(
+		return jsonResponse(
 			{ result: submission.reply({ hideFields: ['password'] }) },
 			{ status: submission.status === 'error' ? 400 : 200 },
 		)

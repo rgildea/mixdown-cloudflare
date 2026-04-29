@@ -1,7 +1,7 @@
 import { requireUserId } from '#app/utils/auth.server'
-import { createR2UploadHandler } from '#app/utils/R2UploadHandler'
+import { createR2UploadHandler, parseMultipartFormData } from '#app/utils/R2UploadHandler'
 import { createTrackWithAudioFile } from '#app/utils/track.server'
-import { ActionFunction, ActionFunctionArgs, json, unstable_parseMultipartFormData } from '@remix-run/cloudflare'
+import { data as jsonResponse, type ActionFunction, type ActionFunctionArgs } from 'react-router'
 import * as z from 'zod'
 
 const acceptedContentTypes = ['audio/x-aiff', 'audio/aiff', 'audio/LPCM', 'audio/mpeg', 'audio/wav']
@@ -23,7 +23,7 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 		filter: ({ contentType }) => acceptedContentTypes.includes(contentType),
 	})
 
-	const formData = await unstable_parseMultipartFormData(request, r2UploadHandler)
+	const formData = await parseMultipartFormData(request, r2UploadHandler)
 
 	if (!formData || !formData.get('file')) {
 		throw new Error('Error uploading file to R2 bucket')
@@ -56,5 +56,5 @@ export const action: ActionFunction = (async ({ context, request }: ActionFuncti
 	)
 
 	console.info('Audio file record created successfully')
-	return json({ result, ids: result }, { status: 200 })
+	return jsonResponse({ result, ids: result }, { status: 200 })
 }) satisfies ActionFunction

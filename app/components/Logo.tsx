@@ -1,5 +1,5 @@
 import { cn } from '#app/utils/misc.tsx'
-import { Link } from '@remix-run/react'
+import { Link } from 'react-router'
 
 const sizeClassName = {
 	font: 'w-[1em] h-[1em]',

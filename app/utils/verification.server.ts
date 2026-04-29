@@ -13,7 +13,7 @@ import { rememberKey, unverifiedSessionIdKey } from './session.server'
 import { redirectWithToast } from './toast.server'
 import { onboardingEmailSessionKey } from '#app/routes/_auth+/onboarding'
 import { invariant } from '@epic-web/invariant'
-import { json, redirect } from '@remix-run/cloudflare'
+import { data as jsonResponse, redirect } from 'react-router'
 import { sendEmail } from './email.server'
 import { EmailChangeNoticeEmail } from '#app/routes/settings+/profile.change-email'
 import React from 'react'
@@ -43,7 +43,7 @@ export async function handleResetPasswordVerification({ storageContext, submissi
 	// we don't want to say the user is not found if the email is not found
 	// because that would allow an attacker to check if an email is registered
 	if (!user) {
-		return json(
+		return jsonResponse(
 			{
 				result: submission.reply({ fieldErrors: { code: ['Invalid code'] } }),
 			},
@@ -78,7 +78,7 @@ export async function handleChangeEmailVerification({
 	const verifySession = await storageContext.verificationSessionStorage.getSession(request.headers.get('cookie'))
 	const newEmail = verifySession.get(VerificationSessionKeys['change-email'])
 	if (!newEmail) {
-		return json(
+		return jsonResponse(
 			{
 				result: submission.reply({
 					formErrors: ['You must submit the code on the same device that requested the email change.'],

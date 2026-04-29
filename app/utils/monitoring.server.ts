@@ -1,4 +1,4 @@
-import { AppLoadContext } from '@remix-run/cloudflare'
+import { AppLoadContext } from 'react-router'
 import * as Sentry from '@sentry/remix'
 
 export function init({

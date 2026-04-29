@@ -1,5 +1,5 @@
-import { LoaderFunction } from '@remix-run/cloudflare'
-import { Outlet } from '@remix-run/react'
+import { LoaderFunction } from 'react-router'
+import { Outlet } from 'react-router'
 
 export const loader: LoaderFunction = async () => {
 	return { message: 'This is a message from the loader.' }

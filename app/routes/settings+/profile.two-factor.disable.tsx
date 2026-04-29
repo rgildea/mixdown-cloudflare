@@ -5,8 +5,8 @@ import { useDoubleCheck } from '#app/utils/misc.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { requireRecentVerification, twoFAVerificationType } from '#app/utils/verification.server.ts'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { useFetcher } from '@remix-run/react'
+import { data as jsonResponse, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { useFetcher } from 'react-router'
 import { type BreadcrumbHandle } from './profile.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
@@ -16,7 +16,7 @@ export const handle: BreadcrumbHandle & SEOHandle = {
 
 export async function loader({ context: { storageContext }, request }: LoaderFunctionArgs) {
 	await requireRecentVerification(storageContext, request)
-	return json({})
+	return jsonResponse({})
 }
 
 export async function action({ context: { storageContext }, request }: ActionFunctionArgs) {

@@ -1,7 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { Link, Outlet, useMatches } from '@remix-run/react'
+import { data as jsonResponse, type LoaderFunctionArgs } from 'react-router'
+import { Link, Outlet, useMatches } from 'react-router'
 import { z } from 'zod'
 import { Spacer } from '#app/components/spacer.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
@@ -24,7 +24,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 		select: { email: true },
 	})
 	invariantResponse(user, 'User not found', { status: 404 })
-	return json({})
+	return jsonResponse({})
 }
 
 const BreadcrumbHandleMatch = z.object({

@@ -1,8 +1,9 @@
 {
   "include": ["./types/env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["load-context.ts", "functions/**", "node_modules"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["vite/client", "@remix-run/cloudflare", "@cloudflare/workers-types/2023-07-01"],
+    "types": ["vite/client", "@cloudflare/workers-types/2023-07-01"],
     "isolatedModules": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
