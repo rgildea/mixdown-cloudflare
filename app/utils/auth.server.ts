@@ -60,11 +60,9 @@ const tracksWithVersions = Prisma.validator<Prisma.TrackDefaultArgs>()({
 	},
 })
 
-const userWithTracks = Prisma.validator<Prisma.UserDefaultArgs>()({
-	select: { id: true, email: true, name: true, tracks: tracksWithVersions },
-})
-
-export type UserWithTracks = Prisma.UserGetPayload<typeof userWithTracks>
+export type UserWithTracks = Prisma.UserGetPayload<{
+	select: { id: true; email: true; name: true; tracks: typeof tracksWithVersions }
+}>
 
 export async function getUserWithTracks(storageContext: StorageContext, request: Request) {
 	const userId = await getUserId(storageContext, request)
@@ -94,7 +92,7 @@ export async function requireUserId(
 	const userId = await getUserId(storageContext, request)
 	if (!userId) {
 		const requestUrl = new URL(request.url)
-		redirectTo = redirectTo === null ? null : redirectTo ?? `${requestUrl.pathname}${requestUrl.search}`
+		redirectTo = redirectTo === null ? null : (redirectTo ?? `${requestUrl.pathname}${requestUrl.search}`)
 		if (redirectToLogin) {
 			const loginParams = redirectTo ? new URLSearchParams({ redirectTo }) : null
 			const loginRedirect = ['/login', loginParams?.toString()].filter(Boolean).join('?')
