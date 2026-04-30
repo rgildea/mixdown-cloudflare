@@ -34,4 +34,4 @@ export default defineConfig({
 			'#app': path.resolve(__dirname, 'app'),
 		},
 	},
-})
+} as any)
