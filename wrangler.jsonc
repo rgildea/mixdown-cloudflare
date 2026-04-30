@@ -1,0 +1,34 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "mixdown-player-manual-deploy",
+	"compatibility_date": "2026-04-30",
+	"main": "workers/app.ts",
+	"alias": {
+		"virtual:react-router/server-build": "./build/server/index.js",
+	},
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true,
+	},
+	"assets": {
+		"directory": "build/client",
+	},
+	"vars": {
+		"MODE": "development",
+		"COOKIE_SECRET": "C-IS-FOR-COOKIE",
+		"HONEYPOT_SECRET": "POOH-LIKES-HONEY",
+		"MOCKS": false,
+	},
+	"kv_namespaces": [
+		{
+			"binding": "SESSIONS",
+			"id": "ca33d362bc8c498db97e65a6c4d1c8a6",
+		},
+	],
+	"r2_buckets": [
+		{
+			"binding": "STORAGE_BUCKET",
+			"bucket_name": "mixdown-sources-dev",
+		},
+	],
+}
