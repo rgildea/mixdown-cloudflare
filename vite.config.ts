@@ -4,7 +4,7 @@ import { glob } from 'glob'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
-export default defineConfig(async ({ command }) => {
+export default defineConfig(async () => {
 	const plugins = [
 		reactRouter(),
 		tsconfigPaths(),
