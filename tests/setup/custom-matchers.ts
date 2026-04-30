@@ -143,7 +143,9 @@ interface CustomMatchers<R = unknown> {
 }
 
 declare module 'vitest' {
-	interface Assertion<T = any> extends CustomMatchers<T> {}
+	interface Assertion<T = any> extends CustomMatchers<T> {
+		__assertionBrand?: never
+	}
 	interface AsymmetricMatchersContaining extends CustomMatchers {
 		__customMatcherBrand?: never
 	}
