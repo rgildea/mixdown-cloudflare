@@ -2,6 +2,7 @@ import type { Config } from '@react-router/dev/config'
 
 export default {
 	// React Router v7 config for Cloudflare Workers
-	// buildDirectory must match @cloudflare/vite-plugin's default client output directory
-	buildDirectory: 'dist',
+	// Keep the build output under `build` so SSR entrypoints that import `build/server`
+	// continue to resolve correctly on Cloudflare Pages.
+	buildDirectory: 'build',
 } satisfies Config
