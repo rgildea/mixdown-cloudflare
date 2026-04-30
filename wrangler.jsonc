@@ -3,9 +3,6 @@
 	"name": "mixdown-player-manual-deploy",
 	"compatibility_date": "2026-04-30",
 	"main": "workers/app.ts",
-	"alias": {
-		"virtual:react-router/server-build": "./build/server/index.js",
-	},
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
 		"enabled": true,
