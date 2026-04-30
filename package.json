@@ -20,7 +20,7 @@
     "db:migrate:status": "npm run database migrate status",
     "db:seed": "npm run database db seed",
     "db:setup": "npm run database migrate reset --force",
-    "deploy": "wrangler deploy",
+    "deploy": "npm run build && wrangler deploy",
     "dev": "react-router dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
