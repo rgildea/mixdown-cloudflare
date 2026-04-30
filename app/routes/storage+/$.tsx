@@ -28,7 +28,6 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 	headers.set('Content-Range', `bytes 0-${object.size - 1}/${object.size}`)
 	headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream')
 	headers.set('Cache-Control', 'public, max-age=31536000') // 1 year
-	headers
 	const response = new Response(object.body, { headers, status: 200, statusText: 'OK' })
 
 	return response

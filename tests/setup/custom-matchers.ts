@@ -144,7 +144,9 @@ interface CustomMatchers<R = unknown> {
 
 declare module 'vitest' {
 	interface Assertion<T = any> extends CustomMatchers<T> {}
-	interface AsymmetricMatchersContaining extends CustomMatchers {}
+	interface AsymmetricMatchersContaining extends CustomMatchers {
+		__customMatcherBrand?: never
+	}
 }
 
 function getSetCookie(headers: Headers) {

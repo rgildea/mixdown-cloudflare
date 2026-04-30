@@ -16,8 +16,7 @@ export async function loader({ context: { storageContext }, request }: LoaderFun
 }
 
 export default function Index() {
-	const data = useLoaderData()
-	data
+	useLoaderData()
 	return (
 		<main className="font-poppins grid h-full place-items-center">
 			<div className="grid place-items-center justify-end px-4 py-16 xl:gap-24">

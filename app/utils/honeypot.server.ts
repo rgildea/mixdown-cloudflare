@@ -11,7 +11,9 @@ export function createHoneypot(HONEYPOT_SECRET: string): Honeypot {
 }
 
 export function getHoneypot(HONEYPOT_SECRET: string): Honeypot {
-	honeypot !== undefined ? honeypot : createHoneypot(HONEYPOT_SECRET)
+	if (honeypot === undefined) {
+		createHoneypot(HONEYPOT_SECRET)
+	}
 	return honeypot
 }
 
