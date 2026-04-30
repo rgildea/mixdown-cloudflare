@@ -1,13 +1,11 @@
-import { cloudflare } from '@cloudflare/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { glob } from 'glob'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
-export default defineConfig({
-	plugins: [
-		cloudflare({ viteEnvironment: { name: 'ssr' } }),
+export default defineConfig(async ({ command }) => {
+	const plugins = [
 		reactRouter(),
 		tsconfigPaths(),
 		sentryVitePlugin({
@@ -25,18 +23,22 @@ export default defineConfig({
 				filesToDeleteAfterUpload: await glob(['./build/**/*.map', '.server-build/**/*.map']),
 			},
 		}),
-	],
+	]
 
-	ssr: { noExternal: 'react-h5-audio-player' },
+	return {
+		plugins,
 
-	server: {
-		port: 8080,
-		fs: {
-			allow: ['app', 'node_modules'],
+		ssr: { noExternal: 'react-h5-audio-player' },
+
+		server: {
+			port: 8080,
+			fs: {
+				allow: ['app', 'node_modules'],
+			},
 		},
-	},
 
-	build: {
-		sourcemap: true,
-	},
+		build: {
+			sourcemap: true,
+		},
+	}
 })
