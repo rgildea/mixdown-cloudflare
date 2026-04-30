@@ -1,7 +1,7 @@
 name = "mixdown-player-manual-deploy"
 main = "workers/app.ts"
 compatibility_flags = [ "nodejs_compat" ]
-assets = { directory = "build/client" }
+assets = { directory = "dist/client" }
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
