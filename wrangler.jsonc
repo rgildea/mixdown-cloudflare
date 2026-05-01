@@ -1,0 +1,35 @@
+{
+  "name": "mixdown-player-manual-deploy",
+  "main": "workers/app.ts",
+  "compatibility_date": "2026-04-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "build/client" },
+
+  // Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
+  // Note: Use secrets to store sensitive data.
+  // Docs: https://developers.cloudflare.com/workers/platform/environment-variables
+  "vars": {
+    "MODE": "development",
+    "COOKIE_SECRET": "C-IS-FOR-COOKIE",
+    "HONEYPOT_SECRET": "POOH-LIKES-HONEY",
+    "MOCKS": false
+  },
+
+  // Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
+  // Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "ca33d362bc8c498db97e65a6c4d1c8a6"
+    }
+  ],
+
+  // Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
+  // Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
+  "r2_buckets": [
+    {
+      "binding": "STORAGE_BUCKET",
+      "bucket_name": "mixdown-sources-dev"
+    }
+  ]
+}
