@@ -1,5 +1,6 @@
 name = "mixdown-player-manual-deploy"
 main = "workers/app.ts"
+compatibility_date = "2026-04-30"
 compatibility_flags = [ "nodejs_compat" ]
 assets = { directory = "build/client" }
 
